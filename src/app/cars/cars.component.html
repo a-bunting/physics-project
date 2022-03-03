@@ -3,6 +3,8 @@
   <!-- what does intyeracting witht he canvas do? -->
   <div class="cars__actions">
     <div class="cars__actions--button" [class.cars__actions--selected]="currentDrawMode === 0" (click)="drawRoadMode()">Create Track</div>
+    <div class="cars__actions--button" (click)="clearNetwork()">Delete Roads</div>
+    <div class="cars__actions--button" (click)="clearLastRoad()">Delete Last Road</div>
   </div>
   <!-- what type of thing are you going to make? -->
   <!-- <div class="cars__actions">

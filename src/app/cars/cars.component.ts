@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { distance } from 'mathjs';
 import { generate } from 'rxjs';
 
 interface Network {
@@ -9,6 +10,7 @@ interface Network {
 interface Road {
   id: string;
   name: string; // optional, if not given given a random name - not used mostly
+  length: number;
   segments: RoadSegment[];
 }
 
@@ -46,10 +48,14 @@ export class CarsComponent implements OnInit {
   // road points...
   network: Network = { roads: [] };
 
+  // empoty objects
+  emptyRoadSegment: RoadSegment = { id: '', position: { x: 99999, y: 99999 }, connections: [], properties: [], roadStyle: { direction: 1, fLanes: 1, rLanes: 1 } };
+  emptyRoad: Road = { id: '', name: '', length: 0, segments: []};
+
   // temporary road variables
   temporaryRoadConstruction: boolean = false;
-  temporaryRoad: Road = { id: '', name: '', segments: []};
-  temporaryLastRoadSegPosition: RoadSegment = { id: '', position: { x: 99999, y: 99999 }, connections: [], properties: [], roadStyle: { direction: 1, fLanes: 1, rLanes: 1 } };
+  temporaryRoad: Road = { ...this.emptyRoad };
+  temporaryLastRoadSegPosition: RoadSegment = { ...this.emptyRoadSegment };
 
   constructor() { }
 
@@ -75,48 +81,68 @@ export class CarsComponent implements OnInit {
   drawRoads(): void {
     // function that draws botht he temporary and the network roads onto the canvas
     // first collect the values to be used by many of the functions...
-    const highlightIndex: string = this.checkForCoordinateHighlight();
+    const highlightIndex: RoadSegment = this.checkForCoordinateHighlight();
     this.drawRoad(highlightIndex, [this.temporaryRoad], 'green');
     this.drawRoad(highlightIndex, [...this.network.roads]);
   }
 
-  drawRoad(highlightIndex: string, road: Road[], fillColor: string = 'red'): void {
+  drawRoad(highlightSegment: RoadSegment, road: Road[], fillColor: string = 'black'): void {
     // get the screen dimensions for pixel conversion
     const screenWidth: number = this.canvas.nativeElement.offsetWidth;
     const screenHeight: number = this.canvas.nativeElement.offsetHeight;
+    // highlight connections
+    const highlightConnectionIds: string[] = highlightSegment.id !== '' ? highlightSegment.connections : [];
     // draw in all road segments...
     for(let o = 0 ; o < road.length ; o++) {
       // the road to be drawn
       const roadPoints: RoadSegment[] = road[o].segments;
-      console.log(roadPoints.length);
 
       for(let i = 0 ; i < roadPoints.length ; i++) {
         const roadSeg = { x: (roadPoints[i].position.x / 100) * screenWidth, y: (roadPoints[i].position.y / 100) * screenHeight };
 
         // draw the point
         this.ctx.beginPath();
-        this.ctx.fillStyle = highlightIndex === roadPoints[i].id ? 'yellow' : fillColor;
+
+        // doesnt work for connection
+        this.ctx.fillStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
         this.ctx.arc(roadSeg.x, roadSeg.y, 5, 0, 2*Math.PI);
         this.ctx.fill();
 
-        if(highlightIndex === roadPoints[i].id) {
-          this.ctx.beginPath();
-          this.ctx.strokeRect(roadSeg.x - 15, roadSeg.y - 15, 30, 30);
-          this.ctx.stroke();
-        }
+        this.ctx.lineWidth = 10;
 
         for(let o = 0 ; o < roadPoints[i].connections.length ; o++) {
           // dra w aline between this position using roadSeg coordinates as the start point, to all other connections
+          const segFound: RoadSegment = this.roadSegmentLocator(roadPoints[i].connections[o], '', [...this.network.roads, this.temporaryRoad]);
+
+          if(segFound.id !== '') {
+            // and draw the line (temporary until graphics...)
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
+            this.ctx.moveTo(roadSeg.x, roadSeg.y);
+            this.ctx.lineTo((segFound.position.x / 100) * screenWidth, (segFound.position.y / 100) * screenHeight);
+            this.ctx.stroke();
+          }
+        }
+
+        this.ctx.lineWidth = 3;
+
+        // highlight any hoevred items
+        if(highlightSegment.id === roadPoints[i].id) {
+          // this.ctx.beginPath();
+          // this.ctx.strokeRect(roadSeg.x - 15, roadSeg.y - 15, 30, 30);
+          // this.ctx.stroke();
+          this.ctx.fillText(`ID: ` + roadPoints[i].id, roadSeg.x + 20, roadSeg.y, 50);
+          this.ctx.fillText(`Connected to: `+ roadPoints[i].connections.join(' - '), roadSeg.x + 20, roadSeg.y + 11, 200);
         }
       }
     }
   }
 
-  hoverPointId: string = '';
+  hoverPointSegment: RoadSegment;
   /**
    * Checks to see if a point is being hovered over
    */
-  checkForCoordinateHighlight(): string {
+  checkForCoordinateHighlight(): RoadSegment {
     // screen width and height...
     const screenWidth: number = this.canvas.nativeElement.offsetWidth;
     const screenHeight: number = this.canvas.nativeElement.offsetHeight;
@@ -132,15 +158,15 @@ export class CarsComponent implements OnInit {
         // check if the mouse position is over the seg piece...
         if(this.mousePosition.x < (coordinates[0] + 5) && this.mousePosition.x > (coordinates[0] - 5)) {
           if(this.mousePosition.y < (coordinates[1] + 5) && this.mousePosition.y > (coordinates[1] - 5)) {
-            this.hoverPointId = seg.id;
-            return seg.id;
+            this.hoverPointSegment = seg;
+            return seg;
           }
         }
       }
 
     }
-    this.hoverPointId = '';
-    return '';
+    this.hoverPointSegment = { ...this.emptyRoadSegment };
+    return this.hoverPointSegment;
   }
 
   /**
@@ -153,8 +179,15 @@ export class CarsComponent implements OnInit {
   };
 
   // EXTRAPOLATE POSITION
-  extrapolatePoints(road: Road, pointDifference: number): void {
+  extrapolatePoints(road: Road, points: number): void {
     // function which takes a road and adds points between the current points
+    // calculate the total distance of the road
+    const roadLength: number = road.length;
+    const distancePerPoint: number = roadLength / points;
+
+    for(let i = 0 ; i < road.segments.length ; i++) {
+      const segmentLength: number = this.getSegmentLengthInPixels(road.segments[i], road.segments[i+1]);
+    }
   }
 
   removePoints(road: Road, pointDifference: number): void {
@@ -168,18 +201,18 @@ export class CarsComponent implements OnInit {
    * @param mouseEvent
    */
    onMouseDown(mouseEvent: MouseEvent): void {
-    mouseEvent.preventDefault();
-    // get the mouse coordinates
-    const mouseCoordinates: number[] = this.getMousePercentageCoordinates(mouseEvent);
+     mouseEvent.stopImmediatePropagation();
+     // get the mouse coordinates
+     const mouseCoordinates: number[] = this.getMousePercentageCoordinates(mouseEvent);
 
-    switch(mouseEvent.button) {
-      case 0:
-        this.addTemporaryRoadSegment(mouseCoordinates);
-        break;
-      case 2:
-        this.removeSelectedRoadSegment();
-        break;
-    }
+     switch(mouseEvent.button) {
+       case 0:
+         this.addFirstTemporaryRoadSegment(mouseCoordinates);
+         break;
+        case 2:
+          this.removeSelectedRoadSegment(); // doesnt remove all appropriate connections yet
+          break;
+        }
 
   }
 
@@ -196,7 +229,7 @@ export class CarsComponent implements OnInit {
 
     if(this.temporaryRoadConstruction) {
       // a road is being built, draw apoint every...
-      const roadAccuracy: number = 2;
+      const roadAccuracy: number = 5;
       const distance: number = this.getDistanceSquared(this.temporaryLastRoadSegPosition.position.x, mouseCoordinates[0], this.temporaryLastRoadSegPosition.position.y, mouseCoordinates[1]);
 
       if(distance >= (roadAccuracy * roadAccuracy)) {
@@ -207,18 +240,23 @@ export class CarsComponent implements OnInit {
         // go back to the last segment added and add thi snew segment as a link if it exists...
         if(this.temporaryRoad.segments.length > 0) this.temporaryRoad.segments[this.temporaryRoad.segments.length - 1].connections.push(newId);
 
-        const newRoadSegPosition = {
-          id: newId,
-          position: { x: mouseCoordinates[0], y: mouseCoordinates[1] },
-          connections: [...lastPosition],
-          properties: [],
-          roadStyle: { direction: this.direction, fLanes: this.fLanes, rLanes: this.rLanes }
+        // if hoverpointid exists then add this as a connection to a previous node
+        if(this.hoverPointSegment.id !== '') {
+          // means we dont draw multiple nodes on the same point
+          this.hoverPointSegment.connections.push(newId);
+          this.temporaryLastRoadSegPosition = this.hoverPointSegment;
+        } else {
+          const newRoadSeg: RoadSegment = {
+            id: newId,
+            position: { x: mouseCoordinates[0], y: mouseCoordinates[1] },
+            connections: [...lastPosition],
+            properties: [],
+            roadStyle: { direction: this.direction, fLanes: this.fLanes, rLanes: this.rLanes }
+          }
+          this.temporaryLastRoadSegPosition = newRoadSeg;
+          // add this to the segments array.
+          this.temporaryRoad.segments.push(newRoadSeg);
         }
-
-        this.temporaryLastRoadSegPosition = newRoadSegPosition;
-
-        // add this to the segments array.
-        this.temporaryRoad.segments.push(newRoadSegPosition);
       }
     }
   }
@@ -228,38 +266,34 @@ export class CarsComponent implements OnInit {
    * @param mouseEvent
    */
    onMouseUp(mouseEvent: MouseEvent): void {
-    // get mouse coordinates
-    const mouseCoordinates: number[] = this.getMousePercentageCoordinates(mouseEvent);
-
+    mouseEvent.stopImmediatePropagation();
     // check if we are bulding a road...
     if(this.temporaryRoadConstruction) {
-      // get temporary road structure
-      let newRoad: Road = {...this.temporaryRoad};
-      // set the final piece of road
-      const finalRoadSegment: RoadSegment = {
-        id: this.generateRandomString(6),
-        position: { x: mouseCoordinates[0], y: mouseCoordinates[1] },
-        connections: [newRoad.segments[newRoad.segments.length - 1].id],
-        properties: [],
-        roadStyle: { direction: this.direction, fLanes: this.fLanes, rLanes: this.rLanes }
+      // check to see if we release on a segment
+      if(this.hoverPointSegment.id !== '') {
+        // we release on a segment, so add a connection between the released point and the last piece
+        this.hoverPointSegment.connections.push(this.temporaryLastRoadSegPosition.id);
+        this.temporaryLastRoadSegPosition.connections.push(this.hoverPointSegment.id);
       }
-      // add it to the new road...
-      newRoad.segments.push(finalRoadSegment);
+      // create the new road structure
+      let newRoad: Road = {...this.temporaryRoad, length: this.getRoadLengthInPixels(this.temporaryRoad)};
+      // deactive temporary road mode...
       this.temporaryRoadConstruction = false;
       // <<TODO>> should the road be put through extrapolate points to end with?
+
       // push the road ontot he network
       this.network.roads.push(newRoad);
     }
     // remove the temporary road from memory
-    this.temporaryLastRoadSegPosition = { id: '', position: { x: 99999, y: 99999 }, connections: [], properties: [], roadStyle: { direction: 1, fLanes: 1, rLanes: 1 } };
-    this.temporaryRoad = { id: '', name: '', segments: []};
+    this.temporaryLastRoadSegPosition = { ...this.emptyRoadSegment };
+    this.temporaryRoad = { ...this.emptyRoad };
   }
 
   /**
    * Adds a segment to the temporary road
    * @param mouseCoordinates
    */
-  addTemporaryRoadSegment(mouseCoordinates: number[]): void {
+  addFirstTemporaryRoadSegment(mouseCoordinates: number[]): void {
     // get road construction to true
     this.temporaryRoadConstruction = true;
 
@@ -267,23 +301,32 @@ export class CarsComponent implements OnInit {
     // <<TODO>> STILL TO DO
 
     // create a new road, using the brtitish ABC## system
+    let firstSegment: RoadSegment;
     // place the first segment.
-    let firstSegment: RoadSegment = {
-      id: this.generateRandomString(6),
-      position: { x: mouseCoordinates[0], y: mouseCoordinates[1] },
-      connections: [],
-      properties: [],
-      roadStyle: { direction: this.direction, fLanes: this.fLanes, rLanes: this.rLanes }
+    if(this.hoverPointSegment.id !== '') {
+      firstSegment = this.hoverPointSegment;
+      // store in the temporary variable to be picked back up byt he upclick
+      this.temporaryLastRoadSegPosition = this.hoverPointSegment;
+    } else {
+      // new segment forms the start of the road...
+      firstSegment = {
+        id: this.generateRandomString(6),
+        position: { x: mouseCoordinates[0], y: mouseCoordinates[1] },
+        connections: [],
+        properties: [],
+        roadStyle: { direction: this.direction, fLanes: this.fLanes, rLanes: this.rLanes }
+      }
+      // store in the temporary variable to be picked back up byt he upclick
+      this.temporaryLastRoadSegPosition = firstSegment;
     }
 
     let newRoad: Road = {
       id: this.generateRandomString(6),
       name: this.generateRandomString(1, "ABC") + this.generateRandomString(3, "1234567890"),
+      length: 0,
       segments: [firstSegment]
     }
 
-    // store in the temporary variable to be picked back up byt he upclick
-    this.temporaryLastRoadSegPosition = firstSegment;
     this.temporaryRoad = newRoad;
   }
 
@@ -293,16 +336,16 @@ export class CarsComponent implements OnInit {
    */
   removeSelectedRoadSegment(): void {
     // if something is selected...
-    if(this.hoverPointId) {
+    if(this.hoverPointSegment) {
       // find in the the network
       for(let o = 0 ; o < this.network.roads.length ; o++) {
         // iterate over the road segments...
         let roadSegs: Road = this.network.roads[o];
         for(let i = 0 ; i < roadSegs.segments.length ; i++) {
           // filter out the connections to the segment
-          roadSegs.segments[i].connections.filter((seg: string) => seg !== this.hoverPointId);
+          roadSegs.segments[i].connections.filter((seg: string) => seg !== this.hoverPointSegment.id);
           // if the segment has the ID splice it out
-          if(roadSegs.segments[i].id === this.hoverPointId) {
+          if(roadSegs.segments[i].id === this.hoverPointSegment.id) {
             // then finally remove the segment you need to get rid of.
             roadSegs.segments.splice(i, 1);
           }
@@ -331,8 +374,9 @@ export class CarsComponent implements OnInit {
   drawRoadMode(): void { this.currentDrawMode = 0; }
 
 
-
-
+  clearNetwork(): void { this.network.roads = []; this.clearLastSegment(); }
+  clearLastRoad(): void { this.network.roads.pop(); this.clearLastSegment(); }
+  clearLastSegment(): void { this.temporaryLastRoadSegPosition = this.emptyRoadSegment; }
 
   // functions
   // things that do things that we can usually forget about once they are set
@@ -385,7 +429,40 @@ export class CarsComponent implements OnInit {
    * @returns
    */
   getDistanceSquared(x1: number, x2: number, y1: number, y2: number): number {
-    return Math.abs(x2 - x1)^2 + Math.abs(y2 - y1)^2;
+    return Math.pow(Math.abs(x2 - x1), 2) + Math.pow(Math.abs(y2 - y1), 2);
+  }
+
+  /**
+   * Returns the length of the road in pixels.
+   * @param road
+   * @returns
+   */
+  getRoadLengthInPixels(road: Road): number {
+    const canvasWidth: number = this.canvas.nativeElement.width;
+    const canvasHeight: number = this.canvas.nativeElement.height;
+    let length = 0;
+    // iterate over the segments...
+    for(let i = 0 ; i < road.segments.length - 1; i++) {
+      const seg1: RoadSegment = road.segments[i];
+      const seg2: RoadSegment = road.segments[i+1];
+      const distanceSquared: number = this.getDistanceSquared(canvasWidth * (seg1.position.x / 100), canvasWidth * (seg2.position.x / 100), canvasHeight * (seg1.position.y / 100), canvasHeight * (seg2.position.y / 100));
+      length += Math.sqrt(distanceSquared);
+    }
+    // return the swuare route which should give the length of the road in pixels.
+    return length;
+  }
+
+  /**
+   * Gets the lengths of a road segment in pixels.
+   * @param seg1
+   * @param seg2
+   * @returns
+   */
+  getSegmentLengthInPixels(seg1: RoadSegment, seg2: RoadSegment): number {
+    const canvasWidth: number = this.canvas.nativeElement.width;
+    const canvasHeight: number = this.canvas.nativeElement.height;
+    const distanceSquared: number = this.getDistanceSquared(canvasWidth * (seg1.position.x / 100), canvasWidth * (seg2.position.x / 100), canvasHeight * (seg1.position.y / 100), canvasHeight * (seg2.position.y / 100));
+    return Math.sqrt(distanceSquared);
   }
 
   /**
@@ -393,7 +470,17 @@ export class CarsComponent implements OnInit {
    * @param startIndex
    * @param road
    */
-  roadSegmentLocator(startIndex: number, road: Road): number {
-    return 1;
+  roadSegmentLocator(segmentIdToFind: string, currentRoadId: string, roads: Road[]): RoadSegment {
+    // traverse the network, but first reorder so the road the segment is a part of goes first, as thats most likely to have the segment required....
+    roads.filter((temp:Road) => temp.segments.length > 0).sort((a: Road, b: Road) => a.id ? a.id === currentRoadId ? -1 : b.id === currentRoadId ? 1 : 0 : 0);
+
+    for(let i = 0 ; i < roads.length ; i++) {
+      // search the segments...
+      for(let o = 0 ; o < roads[i].segments.length ; o++) {
+        if(roads[i].segments[o].id === segmentIdToFind) return roads[i].segments[o];
+      }
+    }
+
+    return this.emptyRoadSegment;
   }
 }
