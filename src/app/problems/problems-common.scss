@@ -1,0 +1,200 @@
+.problems {
+
+    position: relative;
+    margin: 2rem;
+    font-size: 1.4rem;
+    letter-spacing: .15rem;
+
+    display: flex;
+
+    &__info-panel {
+        position: sticky;
+        align-self: flex-start;
+        top: 2rem;
+        padding: 1rem 2rem;
+        flex-basis: 35rem;
+        margin-right: 3rem;
+        max-width: 30rem;
+        background-color: yellow;
+        background-image: linear-gradient(to right, var(--color-main-dark), var(--color-main-light));
+        box-shadow: 0 .3rem .6rem rgba(black, .5);
+    }
+
+    &__solutions-panel {
+        flex: 1;
+    }
+
+    &__title {
+        font-size: 3rem;
+        text-align: right;
+        font-weight: bold;
+    }
+
+    &__lr-flex {
+        display: flex;
+        align-items: flex-start;
+        padding: 1rem 2rem;
+
+        &--lflex, &--rflex { flex: 1; margin: 1rem 2rem; }
+    }
+
+    &__solution {
+        margin: 2rem 0 2rem 1rem;
+        border-left: .2rem solid rgba(black, .6);
+        background-color: var(--color-main-light);
+        background-image: linear-gradient(to bottom right, var(--color-main-light), var(--color-main-dark));
+        padding: 1rem 2rem;
+        box-shadow: 0 .3rem .6rem rgba(black, .6);
+        border-radius: 1rem;
+    }
+    
+    &__qanda {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 .4rem .8rem rgba(black, .5);
+
+        background-color: var(--color-main-dark);
+        color: white;
+    }
+
+    &__question {
+        padding-right: 3rem;
+    }
+
+    &__equation {
+        &:not(:last-of-type) {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    &__equation-block {
+        background-color: var(--color-juxtapose-light);
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 0 1rem rgba(black, .8);
+        transition: all .3s;
+        
+        &:hover {
+            filter: brightness(1.05);
+            transform: translateY(-.2rem);
+        }
+    }
+
+    &__addendum {
+        text-align: right;
+        font-size: 1.2rem;
+        font-style: italic;
+    }
+
+    &__data-highlight {
+        font-weight: bold;
+        color: var(--color-juxtapose-light);
+    }
+
+    p, li {
+        line-height: 3rem;
+    }
+
+    img {
+        position: relative;
+        margin: auto auto;
+        width: 100%;
+        max-width: 45rem;
+        
+    }
+
+    p, img {
+        margin: 1rem 0;
+    }
+
+    &__input {
+        padding: .8rem 1.6rem;
+        border-radius: 1rem;
+        box-shadow: 0 .4rem .8rem rgba(black, .3);
+        transition: all .2s;
+        letter-spacing: .15rem;
+        font-size: 1.4rem;
+
+        &:hover {
+            box-shadow: 0 .6em .8rem rgba(black, .5);
+        }
+
+        &:disabled {
+            color: white;
+        }
+    }
+
+    &__controls {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 1rem;
+    }
+
+
+    &__note {
+        padding: .5rem 1rem;
+        font-size: 1.3rem;
+        font-style: italic;
+        background-color: var(--color-main-light);
+        border-radius: 1rem;
+        box-shadow: 0 .2rem .4rem rgba(black, .4);
+        margin-bottom: 1rem;
+    }
+
+    &__button {
+        padding: 1rem 2rem;
+        border-radius: 1rem;
+        font-size: 1.4rem;
+        background-color: white;
+        height: 5rem;
+        box-shadow: 0 .3rem .6rem rgba(black, .5);
+        transition: all .2s;
+
+        &:hover {
+            cursor: pointer;
+            background-color: brown;
+            box-shadow: 0 .5rem 1rem rgba(black, .8);
+            color: white;
+            filter: brightness(1.2);
+        }
+
+        &:not(:last-child) {
+            margin-bottom: 1rem;
+        }
+    }
+
+    &__correct-answer {
+        border: .4rem solid rgba(green, .6);
+        animation: answerCorrect .5s ease-in-out 0s;
+    }
+    
+    &__incorrect-answer {
+        border: .4rem solid rgba(red, .6);
+    }
+
+}
+
+@keyframes answerCorrect {
+    0% {transform: scale(1); }
+    50% {transform: scale(1.15); }
+    100% {transform: scale(1); }
+}
+
+.fadeIn {
+    max-height: 10000rem;
+    opacity: 1;
+    transition: max-height .3s, opacity .2s .35s;
+}
+
+.fadeOut {
+    max-height: 0rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: max-height .2s .35s, opacity .2s, visibility 0s .3s;
+    overflow: hidden;
+    margin-top: -2rem;
+}

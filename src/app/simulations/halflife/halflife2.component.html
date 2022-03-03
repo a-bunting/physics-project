@@ -1,0 +1,108 @@
+<div class="simulation-container">
+
+    <div *ngIf="!loaded | async">Loading...</div>
+
+    <!-- where do the presets go? -->
+    <div id="simulation" class="simulation">
+        <canvas (mousemove)="updateMousePosition($event)" #ImageCanvas></canvas>
+
+        <div class="isotopic-abundance">
+
+            <h3>Current Isotopic Abundance (<a href="/assets/database/NuclearDataFinal.csv">Data</a>)</h3>
+                            
+                <div class="isotopic-abundance__element isotopic-abundance__element--header">
+                    <div class="isotopic-abundance__element--generation">Gen</div>
+                    <div class="isotopic-abundance__element--symbol">Sym</div>
+                    <div class="isotopic-abundance__element--z">Z</div>
+                    <div class="isotopic-abundance__element--a">A</div>
+                    <div class="isotopic-abundance__element--perc">Percentage</div>
+                </div>
+                
+                <div class="isotopic-abundance__element isotopic-abundance__element--row isotopic-abundance__generation--{{eleAbundance.generation}}" [class.isotopic-abundance__current-generation]="eleAbundance.generation === currentGeneration" [class.isotopic-abundance__stable-isotope]="eleAbundance.element.halflife === -1" *ngFor="let eleAbundance of sample">
+                    <div class="isotopic-abundance__element--generation">{{ eleAbundance.generation + 1 }}</div>
+                    <div class="isotopic-abundance__element--symbol">{{ eleAbundance.element.symbol }}</div>
+                    <div class="isotopic-abundance__element--z">{{ eleAbundance.element.z }}</div>
+                    <div class="isotopic-abundance__element--a">{{ eleAbundance.element.a }}</div>
+                    <div class="isotopic-abundance__element--perc">{{ (eleAbundance.totalQuantityAtoms / totalAtoms) * 100 | number:'1.4-4' }} %</div>
+                </div>    
+        </div>
+
+    </div>
+
+    <div class="controls" *ngIf="loaded | async">
+        <div class="controls__simulation">
+            <button class="controls__button" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
+            <button class="controls__button" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
+            <button class="controls__button" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart</button>
+            <button class="controls__button" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button>
+        </div>
+        <div class="controls__specific">
+            <button class="controls__button" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()">{{ !setupMode ? 'Setup Mode' : 'Close Setup Mode' }}</button>
+        </div>
+    </div>
+
+
+    <div class="independent-variables" *ngIf="loaded | async">
+        <!-- classnames incomplete -->
+        <form [formGroup]="simulationControls">
+            <div class="independent-variables__iv" *ngFor="let control of getDisplayedIndependentProperties; let i = index" [class.hidden-control]='!parametersDisplayed[control.id]' [class.simulation-iv]='variablesIV===control.id&&dataCollectionMode' [class.simulation-dv]='variablesDV===control.id&&dataCollectionMode'>
+                
+                <!-- the top row - never hidden -->
+                <div class="independent-variables__label">
+                    <div class="independent-variables__hide" style="transform: rotate(90deg)" (click)="toggleIVVisibility(control.id)">&#xbb;</div>
+                    <div class="independent-variables__name">{{ control.name }}</div>
+                    
+                    <!-- check this isnt in the ts before changing -->
+                    <div *ngIf="dataCollectionMode && control.dataCollectionAppropriate">
+                        (<span class="variable-select-button" (click)="setIDVariable(control.id)">IV</span>)
+                    </div>
+                </div>
+                
+                <!-- this might  be in the ts and will need modifying -->
+                <div class="independent-variables__value">{{ control.displayModifier * control.get() | number:'1.'+control.dp+'-'+control.dp }} {{ control.unit }}</div>
+
+                <div class="independent-variables__control" *ngIf="(!dataCollectionMode || (variablesIV === control.id || variablesDV === control.id)) && control.visible">                        
+                    <input 
+                        *ngIf="control.controlType==='range'" 
+                        formControlName="{{ control.id }}range" 
+                        type="range" 
+                        class="independent-variables__slider" 
+                        min="{{ control.min * control.displayModifier > control.max * control.displayModifier ? control.max * control.displayModifier : control.min*control.displayModifier }}" 
+                        max="{{ control.max * control.displayModifier < control.min * control.displayModifier ? control.min * control.displayModifier : control.max * control.displayModifier }}" 
+                        step="{{ control.divisions }}" 
+                        value="{{ control.displayModifier * control.get() }}">
+                    <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finel" type="button" class="independent-variables__fine-button" (click)="simulationControlsParameterModification(control.id, -control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
+                    <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finer" type="button" class="independent-variables__fine-button" (click)="simulationControlsParameterModification(control.id, control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
+                
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="dependent-variables" *ngIf="loaded | async">
+
+        <select class="simulation-variables-selector" (change)="visibilityVariable($event.target.value)">
+            <option selected disabled hidden>Dependent Variables Select</option>
+            <option *ngFor="let dv of getDisplayedDependentProperties; let i = index" value="{{ dv.id }}">{{ dv.name }}</option>
+        </select>
+
+        <!-- classnames incomplete -->
+        <span *ngFor="let dv of getVisibleDependentProperties; let i = index">
+            <!-- <div class="dependent-variables__view" *ngIf="parametersDisplayed[dv.id]" [class.dependent-variables__dv]="variablesDV===dv.id"> -->
+            <div class="dependent-variables__dv" *ngIf="parametersDisplayed[dv.id]">
+                <div class="dependent-variables__label">
+                    <div class="dependent-variables__hide" (click)="unVisibilityVariable(dv.id)">&#xd7;</div> 
+                    <div class="dependent-variables__name">{{ dv.name }}</div>
+                    <div class="dependent-variables__select-button" *ngIf="dataCollectionMode" (click)="setIDVariable(dv.id)"> [DV] </div> 
+                </div>
+                
+                <div class="dependent-variables__value">{{ isNumber(dv.get()) ? (dv.get() | number:'1.0-'+dv.dp) : (dv.get()) }} {{ dv.unit }}</div>
+            </div>
+        </span>
+    </div>
+
+    <div class="labs" *ngIf="loaded | async">
+        <app-sim-labs></app-sim-labs>
+    </div>
+</div>

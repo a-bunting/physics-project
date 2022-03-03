@@ -1,0 +1,16 @@
+.question-select .question-gravityvalues {
+   border: 1px solid black;
+}
+
+.question-changespeedscale-projectiles {
+   display: grid;
+   grid-template: auto / auto 1fr auto auto;
+   justify-content: center;
+   align-content: center;
+   margin: -10px 0px 0px -15px;
+   border: 0px;
+}
+
+.question-gravityvalues {
+   padding: 10px 0px 0px 0px;
+}

@@ -1,0 +1,197 @@
+@import '../../styles/variables';
+
+.search-words {
+    font-size: 3rem;
+    padding: 2rem 5rem;
+    margin: 0 3rem;
+    border-bottom: .2rem solid rgba(black, .4);
+}
+
+.search-results {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin: 2rem 3rem;
+    gap: 2rem 1.5rem;
+}
+
+@keyframes fadeIn {
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.search {
+
+    opacity: 0;
+    transform: scale(0);
+    animation: fadeIn 1s forwards;
+
+    position: relative;
+
+    flex: 0 1 38rem;
+    font-size: 1.6rem; 
+
+    overflow: hidden;
+    border-radius: 20px 5px;
+    filter: drop-shadow(1rem 1rem .9rem rgba(0, 0, 0, 0.30));
+
+    &__container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 1rem 2rem;
+        z-index: 2;
+
+    }
+
+   &__background {
+        opacity: .7;
+        
+        &--gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background-image: linear-gradient(to right, transparent, white 50%, white);
+            background-size: cover;
+        }
+    }
+
+    &__video {
+        object-fit: cover;
+        width: 50%;
+        height: 100%;
+        z-index: -1;
+    }
+
+   &__name {
+       font-size: 2.4rem;
+       font-weight: 700;
+       transition: all .5s;
+   }
+
+   &__tags {
+    
+        transition: all .5s;
+
+        :not(:last-child) {
+            margin-right: .3rem;
+        }
+
+        &--tag {
+            display: inline-block;
+            margin-top: .5rem;
+            padding: .3rem;
+            font-size: 1.1rem;
+            text-align: center;
+            border-radius: 3px;
+            box-shadow: .1rem .3rem .4rem rgba($color-black, .5);
+            border: 1px solid black;
+            transition: all .2s;
+        }
+   }
+
+    &__detail {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 30rem;
+        height: 100%;
+        padding: .5rem 1rem;
+        transition: all .5s;
+        background-color: rgba($color-gray-dark, .7);
+        clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+        direction: rtl;
+        z-index: 2;
+    }
+
+    &:hover {
+        transform: scale(1.5);
+    }
+
+    &:hover &__detail {
+        left: 0;
+    }
+
+    &:hover &__tags {
+        z-index: 1;
+        opacity: 0;
+    }
+
+    &:hover &__name {
+        opacity: 0;
+    }
+
+    &:hover &__links {
+        opacity: 1;
+    }
+
+
+   &__links {
+        margin: .5rem .2rem;
+        padding: .2rem 0;
+        opacity: 0;
+        
+        &--link {
+            
+            transition: all .4s;
+            
+            &:link, &:visited {
+                text-decoration: none;
+                color: $color-main-dark;
+                background-color: rgba($color-gray-lightest, .7);
+                padding: .6rem 1.2rem;
+                border-radius: .3rem;
+
+                &:last-child {
+                    margin-right: -.5rem;
+                }
+            }
+
+            &:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 1rem 2rem rgba($color-black, .4);
+                letter-spacing: .1rem;
+            }
+            
+            &:active {
+                transform: translateY(-1px);
+                box-shadow: 0 .5rem 1rem rgba($color-black, .6);
+            }
+        } 
+   }
+
+   &__title {
+        direction: ltr;
+        font-size: 1.2rem;
+        padding-bottom: .5rem;
+        margin-bottom: .5rem;
+        border-bottom: 1px solid rgba(black, .5);
+        display: flex;
+        justify-content: space-between;
+
+        &--name {
+            font-weight: 700;
+        }
+   }
+
+   &__description {
+       font-size: 1.4rem;
+       color: rgba(white, .7);
+       padding-right: 2rem;
+       hyphens: auto;
+       direction: ltr;
+       shape-outside: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+   }
+
+}
+

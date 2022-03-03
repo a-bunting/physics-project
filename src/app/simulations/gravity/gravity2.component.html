@@ -1,0 +1,130 @@
+<div class="simulation-container">
+    <!-- where do the presets go? -->
+    <div id="simulation" class="simulation">
+        <canvas (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)" #ImageCanvas></canvas>
+    </div>
+    <div class="controls">
+        <div class="controls__simulation">
+            <button class="controls__button" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
+            <button class="controls__button" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
+            <button class="controls__button" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart</button>
+            <button class="controls__button" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button>
+        </div>
+        <div class="controls__specific">
+            <select class="system-selector" (change)="changeSystemDisplayed($event.target.value)">
+                <option selected disabled hidden>Preset Systems</option>
+                <option *ngFor="let system of gravitationalSystems; let i = index" value="{{ system.id }}">{{ system.name }}</option>
+            </select>
+
+            <button class="controls__button" (click)="togglePaths()">{{ !paths ? 'Enable Paths' : 'Disable Paths' }}</button>
+            <button class="controls__button" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()">{{ !setupMode ? 'Setup Mode' : 'Close Setup Mode' }}</button>
+        </div>
+    </div>
+
+
+    <div class="independent-variables">
+        <!-- classnames incomplete -->
+        <form [formGroup]="simulationControls">
+            <div class="independent-variables__iv" *ngFor="let control of getDisplayedIndependentProperties; let i = index" [class.hidden-control]='!parametersDisplayed[control.id]' [class.simulation-iv]='variablesIV===control.id&&dataCollectionMode' [class.simulation-dv]='variablesDV===control.id&&dataCollectionMode'>
+                
+                <!-- the top row - never hidden -->
+                <div class="independent-variables__label">
+                    <div class="independent-variables__hide" style="transform: rotate(90deg)" (click)="toggleIVVisibility(control.id)">&#xbb;</div>
+                    <div class="independent-variables__name">{{ control.name }}</div>
+                    
+                    <!-- check this isnt in the ts before changing -->
+                    <div *ngIf="dataCollectionMode && control.dataCollectionAppropriate">
+                        (<span class="variable-select-button" (click)="setIDVariable(control.id)">IV</span>)
+                    </div>
+                </div>
+                
+                <!-- this might  be in the ts and will need modifying -->
+                <div class="independent-variables__value">{{ control.displayModifier * control.get() | number:'1.'+control.dp+'-'+control.dp }} {{ control.unit }}</div>
+
+                <div class="independent-variables__control" *ngIf="(!dataCollectionMode || (variablesIV === control.id || variablesDV === control.id)) && control.visible">                        
+                    <input 
+                        *ngIf="control.controlType==='range'" 
+                        formControlName="{{ control.id }}range" 
+                        type="range" 
+                        class="independent-variables__slider" 
+                        min="{{ control.min * control.displayModifier > control.max * control.displayModifier ? control.max * control.displayModifier : control.min*control.displayModifier }}" 
+                        max="{{ control.max * control.displayModifier < control.min * control.displayModifier ? control.min * control.displayModifier : control.max * control.displayModifier }}" 
+                        step="{{ control.divisions }}" 
+                        value="{{ control.displayModifier * control.get() }}">
+                    <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finel" type="button" class="independent-variables__fine-button" (click)="simulationControlsParameterModification(control.id, -control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
+                    <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finer" type="button" class="independent-variables__fine-button" (click)="simulationControlsParameterModification(control.id, control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
+                
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="dependent-variables">
+
+        <select class="simulation-variables-selector" (change)="visibilityVariable($event.target.value)">
+            <option selected disabled hidden>Dependent Variables Select</option>
+            <option *ngFor="let dv of getDisplayedDependentProperties; let i = index" value="{{ dv.id }}">{{ dv.name }}</option>
+        </select>
+
+        <!-- classnames incomplete -->
+        <span *ngFor="let dv of getVisibleDependentProperties; let i = index">
+            <!-- <div class="dependent-variables__view" *ngIf="parametersDisplayed[dv.id]" [class.dependent-variables__dv]="variablesDV===dv.id"> -->
+            <div class="dependent-variables__dv" *ngIf="parametersDisplayed[dv.id]">
+                <div class="dependent-variables__label">
+                    <div class="dependent-variables__hide" (click)="unVisibilityVariable(dv.id)">&#xd7;</div> 
+                    <div class="dependent-variables__name">{{ dv.name }}</div>
+                    <div class="dependent-variables__select-button" *ngIf="dataCollectionMode" (click)="setIDVariable(dv.id)"> [DV] </div> 
+                </div>
+                
+                <div class="dependent-variables__value">{{ isNumber(dv.get()) ? (dv.get() | number:'1.0-'+dv.dp) : (dv.get()) }} {{ dv.unit }}</div>
+            </div>
+        </span>
+    </div>
+    <div class="labs">
+        <div *ngIf="projectiles.length > 0">
+            <h3 class="bodies__header-text">Bodies</h3>
+
+            <div class="simulation-body simulation-body__header">
+                <div class="simulation-body__name simulation-body__header-cell" (mousedown)="sortProjectiles('name')">Name</div> 
+                <div class="simulation-body__mass simulation-body__header-cell" (mousedown)="sortProjectiles('mass')">Mass (M<sub>earth</sub>)</div> 
+                <div class="simulation-body__radius simulation-body__header-cell" (mousedown)="sortProjectiles('radius')">Radius (r<sub>earth</sub>)</div> 
+                <div class="simulation-body__distance simulation-body__header-cell" (mousedown)="sortProjectiles('distance')">Distance (Mm)</div> 
+                <div class="simulation-body__destroy simulation-body__header-cell"></div> 
+                <div class="simulation-body__follow simulation-body__header-cell"></div> 
+            </div>
+
+            <div class="simulation-body simulation-body__item" *ngFor="let body of projectiles; let i = index" (mouseup)="selectPlanet(i)">
+                <div class="simulation-body__name simulation-body__cell" contenteditable="true" (blur)="projectiles[i].name=$event.target.textContent">{{ body.name }}</div> 
+                <div class="simulation-body__mass simulation-body__cell" contenteditable="true" (blur)="projectiles[i].mass=$event.target.textContent">{{ body.mass | number:'1.0-5' }}</div> 
+                <div class="simulation-body__radius simulation-body__cell" contenteditable="true" (blur)="projectiles[i].radius=$event.target.textContent">{{ body.radius | number:'1.0-5' }}</div> 
+                <div class="simulation-body__distance simulation-body__cell">{{ (body.distance / 1000000) | number:'1.0-0' }}</div> 
+                <div class="simulation-body__destroy simulation-body__cell" (mouseup)="removeProjectile(i)">&#10006;</div> 
+                <div class="simulation-body__follow simulation-body__cell" (mouseup)="followProjectile(i)">&#10162;</div> 
+            </div>
+        </div>
+
+        
+        <div *ngIf="deletedProjectiles.length > 0">
+            <h3 class="bodies__header-text">Removed Bodies</h3>
+
+            <div class="simulation-body__removed simulation-body__header">
+                <div class="simulation-body__name simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('name')">Name</div> 
+                <div class="simulation-body__mass simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('mass')">Mass (M<sub>earth</sub>)</div> 
+                <div class="simulation-body__radius simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('radius')">Radius (r<sub>earth</sub>)</div> 
+                <div class="simulation-body__add simulation-body__header-cell"></div> 
+                <div class="simulation-body__destroy simulation-body__header-cell"></div> 
+            </div>
+
+            <div class="simulation-body__removed simulation-body__item" *ngFor="let body of deletedProjectiles; let i = index">
+                <div class="simulation-body__name simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].name=$event.target.textContent">{{ body.name }}</div> 
+                <div class="simulation-body__mass simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].mass=$event.target.textContent">{{ body.mass | number:'1.0-5' }}</div> 
+                <div class="simulation-body__radius simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].radius=$event.target.textContent">{{ body.radius | number:'1.0-5' }}</div> 
+                <div class="simulation-body__add simulation-body__cell" (mouseup)="replaceProjectile(i)">&#10004;</div> 
+                <div class="simulation-body__destroy simulation-body__cell" (mouseup)="deleteProjectile(i)">&#10006;</div> 
+            </div>
+        </div>
+
+        <app-sim-labs></app-sim-labs>
+    </div>
+</div>

@@ -1,0 +1,230 @@
+<div class="problems">
+
+    <div class="problems__info-panel">
+
+        <div class="problems__title">Meteor!</div>   
+        
+        <p>A <span class="problems__data-highlight">{{ mass }} kg</span> meteor from space enters the atmosphere and crashes into earth. Just before it touches down, it is traveling at a horizontal velocity <span class="problems__data-highlight">{{ initialVelocity}}m/s</span>. When it crashes into the ground, it does so at an angle that it slides a distance (assume the ground is flat).</p>
+        <img src="../../../assets/problems/friction-and-motion/asteroid.PNG" alt="An Asteroid Oh No!!">
+
+        <div class="problems__controls">
+            <!-- <button class="problems__button problems__button--solutions" (click)="toggleSolutions()" *ngIf="tempDefault">{{ showSolution ? "Hide" : "Show" }} Solutions</button> -->
+            <!-- <button class="problems__button problems__button--practice" (click)="togglePractice()" *ngIf="tempDefault">{{ showPractice ? "Remove Answer Boxes" : "Answer the question" }}</button> -->
+            <!-- <button class="problems__button problems__button--practice" (click)="makeNewValues()">Generate New Values...</button> -->
+            <button class="problems__button problems__button--practice" (click)="makeNewValues()">Try a new problem...</button>
+            <button class="problems__button problems__button--practice" (click)="tempDefaultValues()" *ngIf="!tempDefault">Go back to the solved problem...</button>
+        </div>
+
+        <div class="problems__note">Note: If you cant do one question, use the number 1 as an answer to continue as if that was the answer! The program does error carried forward :)</div>
+
+    </div>
+
+    <div class="problems__solutions-panel fadeOut-panel">
+
+        <div class="problems__solution">
+            The best way to start these problems is always with a free body diagram so we have all the info we need in one place.
+        </div>
+
+        <div class="problems__lr-flex">
+            <img src="../../../assets/problems/friction-and-motion/asteroid-fbd.png" alt="An asteroid FBD!">
+            <div class="problems__note problems__lr-flex--rflex">
+                Note for this free body diagram a few important points:
+
+                <ol>
+                    <li>All the arrows are labelled with the type of force (shorthand in this case).</li>
+                    <li>All the arrows are physically touching the object to show they act on the object</li>
+                    <li>The velocity arrow is separate to the object, but shows it is moving, and the direction it is moving</li>
+                </ol>
+            </div>
+        </div>
+    
+        
+        <div class="problems__qanda">
+            <div class="problems__question">If the kinetic friction coefficient μ = {{ kineticFriction }}, calculate the friction on the meteor as it slides across the ground.</div>
+            <div class="problems__answerbox">
+                <input 
+                    type="number" 
+                    placeholder="Answer..." 
+                    class="problems__input" 
+                    name="frictionOnGround" 
+                    id="frictionOnGround" 
+                    [(ngModel)]="userCalculatedFriction" 
+                    [class.problems__incorrect-answer]="!checkCorrect(userCalculatedFriction, calculateKineticFriction())" 
+                    [class.problems__correct-answer]="checkCorrect(userCalculatedFriction, calculateKineticFriction())"
+                    [disabled]="checkCorrect(userCalculatedFriction, calculateKineticFriction())"
+                >
+            </div>
+        </div>
+    
+        <div class="problems__solution">
+            <p>To start with we need to determine what equation we will solve...</p>
+
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$Weight = mass * gravitational acceleration$$</div>
+                <div class="problems__equation" [mathjax]>$$Normal Force = Weight Force$$</div>
+            </div>
+
+            <p class="problem__addendum">Assuming the object stays on the ground and doesnt either dig in or fly off!</p>
+
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$Force of Friction = Coefficient of Kinetic Friction * Normal Force$$</div>
+            </div>
+
+            <p class="problem__addendum">Kinetic friction as it is moving with respect to the ground</p>
+    
+            <p>Thus for this problem we have...</p>
+
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$Weight = {{ mass }} * {{ gravity }} = {{ calculateWeight() }} N$$</div>
+                <div class="problems__equation" [mathjax]>$$Normal = Weight = {{ calculateNormal() }} N$$</div>
+            </div>
+
+            <p>Therefore...</p>
+    
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$F_friction = {{ kineticFriction }} * {{ calculateNormal() }} = {{ calculateKineticFriction() }} N$$</div>
+            </div>
+        </div>
+    
+
+        
+        <div class="problems__qanda">
+            <div class="problems__question">Calculate the acceleration on the meteor from the ground.</div>
+            <div class="problems__answerbox">
+                <input 
+                    type="number" 
+                    placeholder="Answer..." 
+                    class="problems__input" 
+                    name="accelerationHorizontal" 
+                    id="accelerationHorizontal" 
+                    [(ngModel)]="userCalculatedAcceleration" 
+                    [class.problems__incorrect-answer]="!checkCorrect(userCalculatedAcceleration, calculateUserGeneratedAcceleration())" 
+                    [class.problems__correct-answer]="checkCorrect(userCalculatedAcceleration, calculateUserGeneratedAcceleration())"
+                    [disabled]="checkCorrect(userCalculatedAcceleration, calculateUserGeneratedAcceleration())"
+                >
+            </div>
+        </div>
+
+        <div class="problems__solution ">
+            <p>Whenever we calculate acceleration we will do so from one of a few possible equations:</p>
+    
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$Acceleration = \frac{{'{'}}change in velocity{{'}'}}{{'{'}}time{{'}'}}$$</div>
+                <div class="problems__equation" [mathjax]>$$Acceleration = \frac{{'{'}}F_{{'{'}}NET{{'}'}}{{'}'}}{{'{'}}mass{{'}'}}$$</div>
+            </div>  
+            
+            <p>In this case we know the force causing the meteor to stop, its friction. So what we can do is calculate the net force on the object, and from that calculate the acceleration...</p>
+        
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$F_{{'{'}}NET{{'}'}} = {{ netHorizontalForceString() }}$$</div>
+                <div class="problems__equation" [mathjax]>$$F_{{'{'}}NET{{'}'}} = {{ mass }} * {{ calculateHorizontalAcceleration() }}$$</div>
+            </div>
+
+            <p>Thus...</p>
+            
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$${{ calculateNetHorizontalForce() }} = {{ mass }} * acceleration$$</div>
+                <div class="problems__equation" [mathjax]>$$a = \frac{{'{'}} {{ calculateNetHorizontalForce() }} {{'}'}}{{'{'}}{{ mass }}{{'}'}}$$</div>
+                <div class="problems__equation" [mathjax]>$$a = {{ calculateHorizontalAcceleration() }}$$ m/s2</div>
+            </div>
+
+        </div>
+
+    
+
+        <div class="problems__qanda">
+            <div class="problems__question">How long (time) does it take for the meteor to come to a complete stop?</div>
+            <div class="problems__answerbox">
+                <input 
+                type="number" 
+                placeholder="Answer..." 
+                class="problems__input" 
+                name="timeToStop" 
+                id="timeToStop" 
+                [(ngModel)]="userCalculatedTime" 
+                [class.problems__incorrect-answer]="!checkCorrect(userCalculatedTime, calculateUserGeneratedTime())" 
+                [class.problems__correct-answer]="checkCorrect(userCalculatedTime, calculateUserGeneratedTime())"
+                [disabled]="checkCorrect(userCalculatedTime, calculateUserGeneratedTime())"
+            >
+
+            </div>
+        </div>
+    
+        <div class="problems__solution ">
+            <p>Now we start to get into some basic motion content. So we have to satisfy a basic equation here. We have:</p>
+    
+            <ul>
+                <li>Acceleration</li>
+                <li>Net Force</li>
+                <li>Mass</li>
+                <li>Normal and Weight Forces</li>
+                <li>Velocity</li>
+            </ul>
+    
+            <p>Given we know both acceleration and the initial velocity, as well as the final velocity (0 m/s) we can use:</p>
+    
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$ acceleration = \frac{{'{'}} change in velocity {{'}'}}{{'{'}} time {{'}'}}$$ s</div>
+            </div>
+
+            <p>Rearranging gives:</p>
+    
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$ time = \frac{{'{'}} change in velocity {{'}'}}{{'{'}} acceleration {{'}'}}$$ m/s2</div>
+                <div class="problems__equation" [mathjax]>$$ time = \frac{{'{'}} {{ calculateChangeInVelocity() }} {{'}'}}{{'{'}} {{ calculateHorizontalAcceleration() }} {{'}'}} = {{ calculateTimeToStop() }}$$ s</div>
+            </div>
+        </div>
+    
+
+
+        <div class="problems__qanda">
+            <div class="problems__question">How much distance did the meteor cover while sliding to a stop?</div>
+            <div class="problems__answerbox">
+                <input 
+                    type="number" 
+                    placeholder="Answer..." 
+                    class="problems__input" 
+                    name="distanceToStop" 
+                    id="distanceToStop" 
+                    [(ngModel)]="userCalculatedDistance" 
+                    [class.problems__incorrect-answer]="!checkCorrect(userCalculatedDistance, calculateUserGeneratedDistance())" 
+                    [class.problems__correct-answer]="checkCorrect(userCalculatedDistance, calculateUserGeneratedDistance())" 
+                    [disabled]="checkCorrect(userCalculatedDistance, calculateUserGeneratedDistance())"
+                >
+            </div>
+        </div>
+    
+        <div class="problems__solution ">
+            <p>Finally for this question we have to calculate the distance travelled, but we have everything we need!</p>
+    
+            <ul>
+                <li>Time the object travelled along the ground</li>
+                <li>The change in velocity</li>
+                <li>The fact that the acceleration on the object was constant</li>
+            </ul>
+    
+            <p>This last point is important because it means we can say that:</p>
+    
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$ V_{{'{'}}final{{'}'}} = V_{{'{'}}average{{'}'}} * 2$$ m/s</div>
+            </div>
+
+            <p>Thus if our velocity starts at {{ initialVelocity }} m/s and ends at {{ finalVelocity }} m/s we can see that:</p>
+            
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$ V_{{'{'}}average{{'}'}} = \frac{{'{'}} V_{{'{'}}final{{'}'}} {{'}'}}{{'{'}} 2 {{'}'}} = {{ calculateAverageVelocity() }}$$ m/s</div>
+            </div>
+
+            <p>And as we know the disdtance is just the product of time and average velocity:</p>
+        
+            <div class="problems__equation-block">
+                <div class="problems__equation" [mathjax]>$$ distance = average speed * time = {{ calculateAverageVelocity() }} * {{ calculateTimeToStop() }} = {{ calculateDistanceToStop() }}$$ meters</div>
+            </div>
+        </div>
+    
+
+
+    </div>
+
+    
+</div>

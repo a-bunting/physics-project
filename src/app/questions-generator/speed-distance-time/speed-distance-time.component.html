@@ -1,0 +1,75 @@
+<div class="simulation">
+
+    <div class="error-box" *ngIf="questionComplete">Done... New question coming in {{ countdown }}</div>
+    <div class="error-box" *ngIf="errorThrown">Error whilst submitting data - please try again.</div>
+    <div class="error-box" *ngIf="submissionQuantity > 0">Submitting scores, {{ submissionQuantity }} remaining...</div>
+
+    <div class="grid-container">
+
+        <div class="question-image-container">
+            <div class="question-image">
+                <canvas class="question-image" width="500" height="350" #ImageCanvas></canvas>
+            </div>
+            <div class="question-data">
+                <div class="question-image-data">
+                    <p *ngIf="display.time" class="question-timer"><b>Current Time</b>: {{ currentTime | number:'1.2-2' }} seconds</p>
+                    <p *ngIf="display.distance" class="question-timer"><b>Distance Moved</b>: {{ currentDistance | number:'1.2-2' }} meters</p>
+                    <p *ngIf="display.speed" class="question-timer"><b>Speed</b>: {{ valueSpeed | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.acceleration" class="question-timer"><b>Acceleration</b>: {{ valueAcceleration | number:'1.2-2' }} m/s<sup>2</sup></p>
+                    <p *ngIf="display.totalDistance" class="question-timer"><b>Final Distance</b>: {{ valueDistance | number:'1.2-2' }} m</p>
+                    <p *ngIf="display.totalTime" class="question-timer"><b>Final Time</b>: {{ valueTime | number:'1.2-2' }} s</p>
+                </div>
+                <div class="question-image-buttons">
+                    <button class="button-control" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
+                    <button class="button-control" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
+                    <button class="button-control" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart Simulation</button>
+                </div>
+            </div>
+
+            <div class="question-changespeedscale">
+               <div class="question-changespeedscale-button"><b>Speed</b></div>
+               <div class="question-changespeedscale-button"><input type="range" class="custom-speed-range" min="0" max="2" step="0.001" [(ngModel)]='speedscale'></div>
+               <div class="question-changespeedscale-button"><input type="text" class="custom-speed-input" [(ngModel)]='speedscale' alt="tip"></div>
+            </div>
+
+        </div>
+        
+        <div class="question-question-container">
+
+            <div class="question-buttons">
+                <button (click)="newQuestion()">New Question</button>
+                <button (click)="submitResults()" *ngIf="loggedIn && resultsToAdd" [disabled]="lastUpdatedRecently">{{ !lastUpdatedRecently ? 'Put Results in Database' : 'You cannot submit data more than once every two minutes' }}</button>
+            
+                <select (change)="loadNewQuestion($event.target.value)" class="question-select">
+                    <option *ngFor="let question of questionBank; let i = index" value="{{ i }}">[{{ question.difficulty }}] {{ question.questionName }}</option>
+                    <option selected disabled hidden>Choose a new question</option>
+                </select>
+            </div>
+
+            <div class="question-text">{{ questionString }}</div>
+
+            <form [formGroup]="formAnswers" (ngSubmit)="answersSubmitted()">
+
+                <div *ngIf="questionId !== null">
+                    <div class="question-container" [class.hot-streak]="question.onStreak" *ngFor="let question of questionBank[questionId].questions; let i = index">
+                        <div class="question-question">{{ question.question }}</div>
+                        <div class="question-input"><input type="text" formControlName="{{ question.id }}" [class.correct]="question.correct" [class.incorrect]="!question.correct" class="answer-input" maxlength="8"></div>
+                        <div class="question-grade"><span title="{{ question.percentCorrect | gradeconversion }}">{{ question.percentCorrect | gradeconversion:'short' }}</span></div>
+                        <div class="question-hint" *ngIf="showhint">
+                            {{ question.hint }}
+                            <hr>
+                            <div mathjax *ngFor="let equation of question.equations">{{ equation }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="question-buttons">
+                    <button type="submit" style="float: right;">Submit Answers</button>
+                    <button (click)="toggleHints()" style="float: left;">{{ showhint === true ? 'Hide' : 'Show' }} Hints</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

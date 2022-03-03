@@ -1,0 +1,28 @@
+<span *ngIf="labData !== undefined">
+
+    <hr>
+
+    <div class="lab-documents-table">
+        <div class="lab-document-grid" *ngFor="let lab of labData; let i = index">
+            <div class="lab-document-labname">
+                <div class="lab-document-labname-letter">L</div>
+                <div class="lab-document-labname-letter">A</div>
+                <div class="lab-document-labname-letter">B</div>
+            </div>
+            <div class="lab-document-name">{{ lab.name }}</div>
+            <div class="lab-document-tags">
+                <div class="lab-document-tags-tag {{ getCourseStyle(level.name) }}" *ngFor="let level of lab.levels">{{ level.name }}</div>
+            </div>
+            <div class="lab-document-desc">{{ lab.description }}</div>
+            <div class="lab-document-links">
+                <div class="lab-document-link">
+                    <a href="{{ lab.simulation }}{{ lab.arguments }}" target="_self">Simulation</a> <!-- modify for angular router -->
+                </div>
+                <div class="lab-document-link">
+                    <a href="{{ lab.path }}" target="_blank">Document</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</span>

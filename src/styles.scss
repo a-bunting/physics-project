@@ -1,0 +1,54 @@
+/* You can add global styles to this file, and also import other style files */
+@import './app/styles/variables';
+
+*, *::before, *::after {
+    margin: 0;
+    border: 0;
+    box-sizing: inherit;
+
+    --color-main: #348AE6;
+    --color-main-light: #54A7FF;
+    --color-main-dark: #145499;
+    --color-juxtapose-dark: #996305;
+    --color-juxtapose-light: #E6A535;
+}
+
+body {
+    box-sizing: border-box;
+    background-color: var(--color-main);
+    position: relative;
+}
+
+html {
+    font-family: 'Bitter', sans-serif;
+    font-size: 62.5%;
+
+    // this is as responsive as the site gets for now.
+    // poor but workable for most devices.
+    @media screen and (max-width: 1000px) {
+        font-size: 50%;
+    }
+    @media screen and (max-width: 800px) {
+        font-size: 37.5%;
+    }
+}
+
+.tag--ib {
+    background-color: $ib-color;
+}
+
+.tag--ap {
+    background-color: $ap-color;
+}
+
+.tag--hs {
+    background-color: $hs-color;
+}
+
+.tag--simulation {
+    background-color: $color-main;
+}
+
+.tag--default {
+    background-color: $color-juxtapose-light;
+}

@@ -1,0 +1,108 @@
+.data-gen {
+	padding: 2rem;
+	font-size: 1.4rem;
+
+	&__properties {
+	}
+
+	&__property {
+		display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .5rem;
+
+		&--text {
+      flex-basis: clamp(5rem, 8rem, 10rem);
+			font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+		}
+
+		&--input {
+			flex: 1;
+      align-items: baseline;
+		}
+	}
+
+	&__input {
+		padding: .4rem .8rem;
+		border-radius: .7rem;
+		box-shadow: 0 .2rem .4rem rgba(black, .5);
+    margin-right: .5rem;
+
+    &--small {
+      width: 5rem;
+    }
+	}
+
+	&__button {
+		padding: .4rem .8rem;
+		border-radius: .7rem;
+		box-shadow: 0 .2rem .4rem rgba(black, .5);
+    margin-left: 1rem;
+  }
+
+  &__label {
+
+    position: relative;
+    width: 4rem;
+    padding: .8rem 1.4rem;
+    border: .2rem solid rgba(black, .5);
+    box-shadow: 0 .3rem .6rem rgba(black, .5);
+    border-radius: .4rem;
+
+    &::after {
+      content: "";
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1rem;
+      color: white;
+      transition: all .2s;
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      background-color: red;
+    }
+
+    &:hover {
+      cursor: pointer;
+      box-shadow: 0 .6rem .9rem rgba(black, .7);
+    }
+  }
+
+
+  &__checkbox {
+    display: none;
+
+    &:checked ~ label::after {
+      content: "IV";
+      background-color: green;
+      left: 50%;
+    }
+  }
+
+  &__output {
+    display: flex;
+    flex-direction: column;
+
+    &--iv {
+      flex-basis: 10rem;
+      font-weight: bold;
+      padding: .5rem 1rem;
+    }
+
+    &--row {
+      display: flex;
+      margin-bottom: .5rem;
+    }
+
+    &--item {
+      flex: 1;
+      padding: .5rem 1rem;
+    }
+  }
+
+}

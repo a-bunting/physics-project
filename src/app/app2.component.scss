@@ -1,0 +1,337 @@
+@import 'styles/variables';
+
+#grid-container {
+    position: relative;
+    display: grid; 
+    grid-template-columns: 30rem 1fr;
+    grid-template-rows: 1fr 15rem;
+    min-height: 100vh;
+    transition: all .3s;
+}
+
+header {
+    background-color: black;
+    grid-row: 1 / span 1;
+    grid-column: 1 / 2;
+    filter: drop-shadow(0 .5rem 1rem white);
+    height: 100%;
+}
+
+// this isnt smooth, partiuclarly in chrome but it works to make the simulation
+// space as big as possible.
+// good enough for now but not for final production.
+#header__hide {
+    position: absolute;
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+    top: 1.3rem;
+    left: 30rem;
+    width: 4rem;
+    height: 4rem;
+    background-color: black;
+    color: white;
+    
+    cursor: pointer;
+    font-size: 3.6rem;
+    z-index: 10;
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    transition: left 1s, opacity 1s, visibility 1s;
+
+    &--checkbox {
+        display: none;
+    
+        &:checked ~ label {
+            left: 0;
+        }
+
+        &:checked ~ label > &--icon {
+            transform: rotateZ(180deg);
+            transform-origin: center;
+        }
+
+        &:checked ~ #grid-container {
+            grid-template-columns: 0rem 1fr;
+        
+            header {
+                transform: translateX(-30rem);
+                opacity: 0;
+                visibility: hidden;
+            }
+        
+            footer {
+                transform: translateX(-30rem);
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+    }
+}
+
+.header {
+
+    position: relative;
+    transition: all 1s;
+
+    &__logo {
+        color: white;
+        font-size: 2.4rem;
+        margin: 0 auto;
+        padding: 2rem 4rem;
+        border-bottom: 3px dashed black;
+        text-align: center;
+        
+        & > * {
+            display: inline-block;
+            position: relative;
+            transition: transform .2s;
+
+            &:hover { 
+                transform: scale(1.7); 
+            }
+        }
+
+        .header__logo--1 { animation: bulge 1s ease-in-out 0s; }
+        .header__logo--2 { animation: bulge 1s ease-in-out .15s; }
+        .header__logo--3 { animation: bulge 1s ease-in-out .3s; }
+        .header__logo--4 { animation: bulge 1s ease-in-out .45s; }
+        .header__logo--5 { animation: bulge 1s ease-in-out .6s; }
+        .header__logo--6 { animation: bulge 1s ease-in-out .75s; }
+        .header__logo--7 { animation: bulge 1s ease-in-out .90s; }
+        .header__logo--8 { animation: bulge 1s ease-in-out 1.05s; }
+        .header__logo--9 { animation: bulge 1s ease-in-out 1.20s; }
+        .header__logo--10 { animation: bulge 1s ease-in-out 1.35s; }
+        .header__logo--11 { animation: bulge 1s ease-in-out 1.50s; }
+    }
+
+    &__search {
+        border-top: 1px dashed rgba(white, .4);
+        border-bottom: 1px dashed rgba(white, .4);
+        margin: 1rem auto;
+        padding: 1rem;
+        text-align: center;
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &--text {
+            padding: 1rem 2rem;
+            padding-right: 4.5rem;
+            font-size: 1.4rem;
+            border-radius: 20px;
+            margin-left: -2rem;
+            letter-spacing: .2rem;
+            width: 22rem;
+            transition: all .2s;
+
+            &:hover {
+                width: 25rem;
+            }
+
+            &:focus {                
+                width: 25rem;
+                background-color: rgba($color-gray-lightest, .8);
+                outline: none;
+            }
+
+        }
+
+        &--button {
+            position: relative;
+            background-color: transparent;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            margin-left: -4rem;
+            margin-top: -.5rem;
+        }
+    }
+
+    &__history {
+        visibility: hidden;
+        opacity: 0;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+
+        &--item {
+            padding: 1rem 2rem;
+            background-color: white;
+        }
+    }
+
+    .icon-search {
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        stroke-width: 0;
+        stroke: var(--color-main);
+        fill: var(--color-main);
+    }
+
+    &__hidden {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateX(-100%);
+        transition: all 1s;
+    }
+    
+    &__rotate {
+        transition: transform .3s;
+        transform: rotateZ(180deg);
+    }
+
+    &__section {
+        &--radio {
+            display: none;
+        }
+    }
+
+    &__submenu {
+        &--label {
+            cursor: pointer;
+            font-size: 2.0rem;
+            padding: 1rem 2rem;
+            width: 100%;
+            color: white;
+            background-color: var(--color-main);
+        }
+
+        // all non active divs are coloured the same as the background
+        // this means any transitions are done invisibly without the need for
+        // changing the transition properly a copious amount
+        // this can make it look slightly glitchy if hovered fast but it looks
+        // good enough!
+        // when the menu is not hovered put all divs to the left
+        &--items:not(:hover) &--item div {
+            background-color: var(--color-juxtapose-light);
+            top: 0;
+            left: -99%;
+        }
+
+        &--items:hover &--item {
+            // all buttons start with the div highlight at the bottom
+            // the the current focused button gets the color
+            // then subsequent buttons have the div highlight at the top
+
+            // this puts all div highlights at the bottom
+            div {
+                top: 100%;
+                left: 0;
+                background-color: var(--color-juxtapose-light);
+            }
+        }
+
+        &--item {
+
+            // this overrides the functionality of what happens to the other divs
+            // the current hover gets the color
+            &:hover div {
+                transition: left .2s ease-in-out, top .2s ease-in-out, background-color 0s;
+                left: 0 !important;
+                top: 0 !important;
+                background-color: var(--color-juxtapose-dark) !important;
+            }
+
+            // any subsequent buttons have the div put at the top so it flows down
+            &:hover ~ & div {
+                top: -100%;
+                left: 0;
+                background-color: var(--color-juxtapose-light);
+            }
+
+            position: relative;
+            opacity: 0;
+            visibility: none;
+
+            font-size: 1.6rem;
+            padding: 1rem 2rem;
+            width: 100%;
+
+            overflow: hidden;
+
+            background-color: var(--color-juxtapose-light);
+
+            transform: scaleY(0) translateX(-100%);
+            transition: transform .5s .2s, 
+                        opacity .5s, 
+                        font-size .2s; 
+
+            div {
+                position: absolute;
+                display: block;
+                height: 100%;
+                width: 100%;
+                transition: left .2s ease-in-out, 
+                            top .2s ease-in-out, 
+                            background-color 0s .2s;
+            }
+            
+            &:hover {
+                cursor: pointer;
+            }
+
+            &:focus {
+                outline: none;
+            }
+            
+        }
+        
+        .header__section--radio:checked + & > &--items {           
+            max-height: 100rem;
+            transition: max-height .4s ease-in-out;
+
+            * {
+                opacity: 1;
+                visibility: visible;
+                transform: scaleY(1);
+            }
+        }
+
+        .header__section--radio:not(:checked)  + & > &--items {
+            transition: max-height .5s .3s ease-in-out;
+            max-height: 0;
+        }
+    }
+}
+
+main {
+    grid-row: 1 / span 2;
+    grid-column: 2 / 3;
+}
+
+footer {
+    position: relative;
+    grid-row: 2 / 3;
+    grid-column: 1 / 2;
+    background-color: var(--color-main);
+    transition: all 1s;
+    filter: drop-shadow(0 .5rem 1rem white);
+}
+
+.footer {
+    
+    font-size: 1.4rem;
+    color: rgba($color-gray-lightest, .9);
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+
+    width: 90%;
+
+    &__link {
+        text-decoration: none;
+    }
+}
+
+@keyframes bulge {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.7); }
+    100% { transform: scale(1); }
+}

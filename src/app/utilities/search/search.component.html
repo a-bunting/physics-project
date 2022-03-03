@@ -1,0 +1,54 @@
+<div class="search-results">
+
+   <div class="search" *ngFor="let result of searchResults.items">
+
+      <input type="checkbox" name="search__result" class="search__button" id="{{ result.name }}">
+      <label for="{{ result.name }}" class="search__button--label">
+          <span class="search__button--label--icon">
+              &nbsp;
+          </span>
+        </label>
+
+      <div class="search__side search__front">
+         <div class="search__text">
+            {{ result.name }}
+         </div>
+      </div>
+
+      <div class="search__side search__back">
+
+            <div class="search__background">
+                <video class="search__background--video" autoplay muted loop>
+                    <source src="../../../assets/simbackgrounds/kinematics-video.mp4" type="video/mp4">
+                </video>
+            </div>
+
+
+            <div class="search__info-left">
+                <div class="search__name">{{ result.name }}</div>
+                <div class="search__version">Version: {{ result.version }}</div>
+                <div class="search__links">
+                    <a href="#" class="search__links--link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" [routerLink]="[result.route]">Start!</a>
+                </div>
+
+                <div class="search__subsims" *ngIf="result.subItems.length > 1">
+                    <select name="subsims" id="subsims" (change)="openSubSim($event.target.value)">
+                        <option value="{{ result.route }}?{{ subItem.parameters }}" *ngFor="let subItem of result.subItems" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" [routerLink]="[result.route]" [queryParams]="parameterDecoder(subItem.parameters)">{{ subItem.name }}</option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div class="search__info-right">
+                <div class="search__description">{{ result.description }}</div>
+            </div>
+            <div class="search__tags">
+                <div class="search__tags--tag tag--{{ getTagClass(tag) }}" *ngFor="let tag of result.tags">
+                    {{ tag }}
+                </div>
+            </div>
+        </div>
+   </div>
+
+</div>

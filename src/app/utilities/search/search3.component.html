@@ -1,0 +1,38 @@
+<div class="search-words">
+    {{ searchTerms }}
+</div>
+
+<div class="search-results">
+    <div class="search" ng-style="{'animation-delay': o * 0.1 )}" *ngFor="let result of searchResults.items; let o = index">
+ 
+        <div class="search__background">
+            <div class="search__background--gradient"></div>
+
+            <video class="search__video" autoplay muted loop>
+                <source src="../../../assets/simbackgrounds/kinematics-video.mp4" type="video/mp4">
+            </video>
+        </div>
+        
+        <div class="search__container">
+            <div class="search__name">{{ result.name }}</div>
+    
+            <div class="search__links">
+                <a href="#" class="search__links--link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" [routerLink]="[result.route]">Start</a>
+            </div>
+    
+            <div class="search__tags">
+                <div class="search__tags--tag tag--{{ getTagClass(tag) }}" *ngFor="let tag of result.tags">
+                    {{ tag }}
+                </div>
+            </div>
+        </div>
+
+        <div class="search__detail">
+            <div class="search__title">
+                <div class="search__title--name">{{ result.name }}</div> 
+                <div class="search__title--version">{{ result.version }}</div>
+            </div>
+            <div class="search__description">{{ result.description }}</div>
+        </div>
+    </div>
+</div>

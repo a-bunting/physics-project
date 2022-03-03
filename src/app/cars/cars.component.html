@@ -1,0 +1,13 @@
+<div id="cars" class="cars">
+  <canvas class="cars__canvas" (mousemove)="onMouseMove($event)" (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" #ImageCanvas></canvas>
+  <!-- what does intyeracting witht he canvas do? -->
+  <div class="cars__actions">
+    <div class="cars__actions--button" [class.cars__actions--selected]="currentDrawMode === 0" (click)="drawRoadMode()">Create Track</div>
+  </div>
+  <!-- what type of thing are you going to make? -->
+  <!-- <div class="cars__actions">
+    <div class="cars__actions--button" [class.cars__actions--selected]="currentDrawMode === 0">One Way</div>
+    <div class="cars__actions--button" [class.cars__actions--selected]="currentDrawMode === 0">Bidirectional</div>
+  </div> -->
+
+</div>

@@ -1,0 +1,40 @@
+Search For Student: 
+<input type="text" name="searchStudent" id="searchStudent">
+
+<hr>
+
+<div class="userFeedbackGivenRow titleRow">
+    <div class="userName">Username</div>
+    <div class="userFb userFbVideo">Video Notes</div>
+    <div class="userFb userFbPhet">Phet Sims</div>
+    <div class="userFb userFbExp">Experiments</div>
+    <div class="userFb userFbWorking">Working</div>
+</div>
+
+<div class="userFeedbackGivenRow dataRow" *ngFor="let user of userData; let i = index" [class.alphaRow]="i % 2 === 0" >
+    <div class="userName">
+        {{ user.forename }} {{ user.surname }}
+        <br>
+        <span class="totalcomments">{{ user.totalComments }} comments made</span>
+    </div>
+    <div class="userFb userFbVideo">
+        <div class="userFbComment" *ngFor="let fbData of user.videonotes_feedback_given; let v = index;">
+            {{ fbData | slice:0:30 }}...
+        </div>
+    </div>
+    <div class="userFb userFbPhet">
+        <div class="userFbComment" *ngFor="let fbData of user.phetlab_feedback_given; let v = index;">
+            {{ fbData | slice:0:30 }}...
+        </div>
+    </div>
+    <div class="userFb userFbExp">
+        <div class="userFbComment" *ngFor="let fbData of user.experiment_feedback_given; let v = index;">
+            {{ fbData | slice:0:30 }}...
+        </div>
+    </div>
+    <div class="userFb userFbWorking">
+        <div class="userFbComment" *ngFor="let fbData of user.working_feedback_given; let v = index;">
+            {{ fbData | slice:0:30 }}...
+        </div>
+    </div>
+</div>

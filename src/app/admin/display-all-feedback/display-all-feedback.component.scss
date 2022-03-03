@@ -1,0 +1,67 @@
+* {
+    font-family: 'Bitter';
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    box-sizing: border-box;
+}
+
+.userFeedbackGivenRow {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr 1fr 1fr;
+}
+
+.userFeedbackGivenRow :hover {
+}
+
+.titleRow {
+    position: sticky;
+    top: 52px;
+    font-weight: bold;
+    background-color: steelblue;
+    z-index: 2;
+}
+
+.dataRow {
+    z-index: 1;
+}
+
+.alphaRow {
+    opacity: 80%;
+}
+
+.totalcomments {
+    font-size: 80%;
+}
+
+.userName {
+    padding: 5px;
+    background-color: steelblue;
+}
+
+.userFb {
+    padding: 5px;
+}
+
+.userFbComment {
+    padding: 5px 0px 0px 5px;
+}
+
+.userFbVideo {
+    background-color: lavenderblush;
+}
+
+.userFbPhet {
+    background-color: lightblue;
+}
+
+.userFbExp {
+    background-color: lightsalmon;
+}
+
+.userFbWorking {
+    background-color: lightskyblue;
+}

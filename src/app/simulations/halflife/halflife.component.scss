@@ -1,0 +1,88 @@
+.isotopic-abundance {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 40%;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+
+    h3 {
+        font-size: 2rem;
+        padding: 1rem 2rem;
+        text-align: center;
+    }
+
+}
+
+.isotopic-abundance__element {
+    display: grid;
+    grid-template-columns: 4rem 6rem 4rem 4rem 1fr;
+    font-size: 1.6rem;
+}
+
+.isotopic-abundance__element--header {
+    background-color: skyblue;
+    font-weight: bold;
+    text-align: center;
+}
+
+.isotopic-abundance__element--row {
+    background-color: thistle;
+    text-align: center;
+    border-top: .1rem dashed rgba(0,0,0,0.3);
+}
+
+.isotopic-abundance__element--generation {
+    grid-column: 1 / 2;
+    padding: .5rem;
+}
+
+.isotopic-abundance__element--symbol {
+    grid-column: 2 / 3;
+    padding: .5rem;
+}
+
+.isotopic-abundance__element--z {
+    grid-column: 3 / 4;
+    padding: 5px;
+    border-left: 1px dashed rgba(0,0,0,0.3);
+}
+
+.isotopic-abundance__element--a {
+    grid-column: 4 / 5;
+    padding: 5px;
+    border-left: 1px dashed rgba(0,0,0,0.3);
+    border-right: 1px dashed rgba(0,0,0,0.3);
+}
+
+.isotopic-abundance__element--perc {
+    grid-column: 6 / 7;
+    text-align: right;
+    padding: 5px;
+}
+
+.isotopic-abundance__stable-isotope {
+    background-color: rgb(194, 155, 194);
+    text-decoration: underline;
+}
+
+.isotopic-abundance__generation--0 { background-color: #ffffff; }
+.isotopic-abundance__generation--1 { background-color: #eeeeee; }
+.isotopic-abundance__generation--2 { background-color: #dddddd; }
+.isotopic-abundance__generation--3 { background-color: #cccccc; }
+.isotopic-abundance__generation--4 { background-color: #bbbbbb; }
+.isotopic-abundance__generation--5 { background-color: #aaaaaa; }
+.isotopic-abundance__generation--6 { background-color: #999999; }
+.isotopic-abundance__generation--7 { background-color: #888888; }
+.isotopic-abundance__generation--8 { background-color: #777777; }
+.isotopic-abundance__generation--9 { background-color: #666666; }
+
+.isotopic-abundance__current-generation { animation: glowEffect 1.0s infinite alternate; }
+
+@keyframes glowEffect {
+   from { background-color: inherit; }
+   to { background-color: skyblue; }
+}

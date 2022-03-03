@@ -1,0 +1,18 @@
+<div class="lab-container">
+    <div class="lab" *ngFor="let lab of labData; let i = index">
+        <div class="lab__name">{{ lab.name }}</div>
+        <div class="lab__description"><p>{{ lab.description }}</p></div>
+        <div class="lab__tags">
+            <div class="lab__tag tag--{{ getCourseStyle(level.name) }}" *ngFor="let level of lab.levels">{{ level.name }}</div>
+        </div>
+        <div class="lab__links">
+            <div class="lab__link">
+                <!-- <a routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" [routerLink]="[lab.simulation]" [queryParams]="directoryService.parameterDecoder(lab.arguments)">Simulation</a> -->
+                <a href="{{ lab.simulation}}{{ lab.arguments }}">Simulation</a>
+            </div>
+            <div class="lab__link">
+                <a href="{{ lab.path }}" target="_blank">Document</a>
+            </div>
+        </div>
+    </div>
+</div>

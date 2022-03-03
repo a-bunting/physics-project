@@ -1,0 +1,109 @@
+@import '../../styles/variables';
+
+.bodies__header-text {
+    font-size: 1.6rem;
+    padding: 1rem 2rem;
+    text-align: center;
+    color: white;
+}
+
+.simulation-body {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    grid-template-columns: 1fr 8rem 8rem 1fr 2rem 2rem;
+    transition: all .5s;
+    
+    &__item {
+        background-color: lighten(brown, 20%);
+        font-size: 1.4rem;
+
+        &:hover {
+            filter: brightness(1.2);
+            cursor: pointer;
+        }
+    }
+
+    &__header {
+        background-color: brown;
+        font-weight: bold;
+     }
+    
+    &__removed {
+       display: grid;
+       text-align: center;
+       font-size: 1.4rem;
+       grid-template-columns: 1fr 10rem 10rem 2rem 2rem; 
+    }
+    
+    &__header-cell {
+        padding: .5rem;
+        cursor: pointer !important;
+        font-size: 1.4rem;
+        font-weight: lighter;
+        color: white;
+    }
+    
+    &__cell {
+       padding: .5rem;
+    
+       &:focus {
+           border: 1px solid white;
+       }
+    }
+    
+    &__name { 
+        grid-column: 1 / 2; 
+        cursor: text;
+    }
+    
+    &__mass { 
+        grid-column: 2 / 3; 
+        cursor: text;
+    }
+    
+    &__radius { 
+        grid-column: 3 / 4; 
+        cursor: text;
+    }
+    
+    &__distance { 
+        grid-column: 4 / 5; 
+        cursor: default;
+    }
+    
+    &__destroy { 
+        grid-column: 5 / 6; 
+        cursor: pointer;
+        
+        &:hover { 
+            background-color: red; 
+            color: white; 
+        }
+    }
+    
+    &__add { 
+        grid-column: 4 / 5; 
+        cursor: pointer;
+        
+        &:hover { 
+            background-color: green; 
+            color: white; 
+        }
+    }
+    
+    &__follow { 
+        grid-column: 6 / 7; 
+        cursor: pointer;
+        
+        &:hover { 
+            background-color: green; 
+            color: white; 
+        }
+    }
+}
+
+
+
