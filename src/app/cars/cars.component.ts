@@ -90,6 +90,7 @@ export class CarsComponent implements OnInit {
     // get the screen dimensions for pixel conversion
     const screenWidth: number = this.canvas.nativeElement.offsetWidth;
     const screenHeight: number = this.canvas.nativeElement.offsetHeight;
+    const piBy180: number = 180 / Math.PI;
     // highlight connections
     const highlightConnectionIds: string[] = highlightSegment.id !== '' ? highlightSegment.connections : [];
     // draw in all road segments...
@@ -110,17 +111,97 @@ export class CarsComponent implements OnInit {
 
         this.ctx.lineWidth = 10;
 
-        for(let o = 0 ; o < roadPoints[i].connections.length ; o++) {
-          // dra w aline between this position using roadSeg coordinates as the start point, to all other connections
-          const segFound: RoadSegment = this.roadSegmentLocator(roadPoints[i].connections[o], '', [...this.network.roads, this.temporaryRoad]);
+        for(let t = 0 ; t < roadPoints[i].connections.length ; t++) {
+          // draw a line between this position using roadSeg coordinates as the start point, to all other connections
+          const segFound: RoadSegment = this.roadSegmentLocator(roadPoints[i].connections[t], '', [...this.network.roads, this.temporaryRoad]);
 
           if(segFound.id !== '') {
-            // and draw the line (temporary until graphics...)
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
-            this.ctx.moveTo(roadSeg.x, roadSeg.y);
-            this.ctx.lineTo((segFound.position.x / 100) * screenWidth, (segFound.position.y / 100) * screenHeight);
-            this.ctx.stroke();
+            let segFoundPx: number[] = [(segFound.position.x / 100) * screenWidth, (segFound.position.y / 100) * screenHeight]
+
+            const xPosLowHigh: { low: number, high: number, change: number} = roadSeg.x > segFoundPx[0] ? { low: segFoundPx[0], high: roadSeg.x, change: roadSeg.x - segFoundPx[0] } : { low: roadSeg.x, high: segFoundPx[0], change: segFoundPx[0] - roadSeg.x };
+            const yPosLowHigh: { low: number, high: number, change: number} = roadSeg.y > segFoundPx[1] ? { low: segFoundPx[1], high: roadSeg.y, change: roadSeg.y - segFoundPx[1] } : { low: roadSeg.y, high: segFoundPx[1], change: segFoundPx[1] - roadSeg.y };
+
+            let xGreater = this.mousePosition.x > xPosLowHigh.low - 10;
+            let xLower = this.mousePosition.x < xPosLowHigh.high + 10;
+            let yGreater = this.mousePosition.y > yPosLowHigh.low - 10;
+            let yLower = this.mousePosition.y < yPosLowHigh.high + 10;
+
+            // check first if the pointer is over the line, and if so draw the sgement as green...
+            if(xGreater && xLower && yGreater && yLower) {
+              // const mouseDx: number = this.mousePosition.x > xPosLowHigh.low ? this.mousePosition.x - xPosLowHigh.low : xPosLowHigh.low - this.mousePosition.x;
+              // const mouseDy: number = this.mousePosition.y > yPosLowHigh.high ? this.mousePosition.y - yPosLowHigh.high : yPosLowHigh.high - this.mousePosition.y;
+
+              // const lineAngle: number = Math.atan2(yPosLowHigh.change, xPosLowHigh.change);
+              // const angleByMousePosition: number = Math.atan2(mouseDy, mouseDx);
+
+              // const angleEqual: boolean = true; lineAngle + 0.1 >= angleByMousePosition && lineAngle - 0.1 <= angleByMousePosition;
+
+              // console.log(angleEqual, lineAngle, angleByMousePosition);
+              // console.log(yPosLowHigh.change, xPosLowHigh.change);
+
+              // y = mx + c format... c = 0;
+              let x1: number = roadSeg.x;
+              let y1: number = roadSeg.y;
+              let x2: number = segFoundPx[0];
+              let y2: number = segFoundPx[1];
+
+              let m: number = 0;
+              let x: number = 0;
+              let yrel: number = 0;
+              let y: number = 0;
+
+              if(x1 < x2 && y1 > y2) {
+
+                m = (y1 - y2) / (x2 - x1);
+                x = this.mousePosition.x - x1;
+                yrel = y2 - this.mousePosition.y;
+                y = m * x;
+                if(yrel < y-5 && yrel > y+5) console.log(y, yrel);
+
+              } else if(x1 > x2 && y1 < y2) {
+
+                m = (y2 - y1) / (x1 - x2);
+                x = x2 - this.mousePosition.x;
+                yrel = y1 - this.mousePosition.y;
+                y = m * x;
+                // console.log(y, yrel);
+
+              } else if(x1 < x2 && y1 < y2) {
+
+                m = (y2 - y1) / (x2 - x1);
+                x = this.mousePosition.x - x1;
+                yrel = y2 - this.mousePosition.y;
+                y = m * x;
+                // console.log(y, yrel);
+
+              } else if(x1 > x2 && y1 > y2) {
+
+                m = (y1 - y2) / (x1 - x2);
+                x = x2 - this.mousePosition.x;
+                yrel = y1 - this.mousePosition.y;
+                y = m * x;
+                // console.log(y, yrel);
+
+              }
+
+
+
+              this.ctx.beginPath();
+              this.ctx.strokeStyle = true ? 'green' : 'black';
+
+              this.ctx.moveTo(roadSeg.x, roadSeg.y);
+              this.ctx.lineTo(segFoundPx[0], segFoundPx[1]);
+              this.ctx.stroke();
+              // and put the road name up on the screen
+              this.ctx.fillText(road[o].name, this.mousePosition.x + 5, this.mousePosition.y);
+            } else {
+              // and draw the line (temporary until graphics...)
+              this.ctx.beginPath();
+              this.ctx.strokeStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
+              this.ctx.moveTo(roadSeg.x, roadSeg.y);
+              this.ctx.lineTo(segFoundPx[0], segFoundPx[1]);
+              this.ctx.stroke();
+            }
           }
         }
 
@@ -229,7 +310,7 @@ export class CarsComponent implements OnInit {
 
     if(this.temporaryRoadConstruction) {
       // a road is being built, draw apoint every...
-      const roadAccuracy: number = 5;
+      const roadAccuracy: number = 20;
       const distance: number = this.getDistanceSquared(this.temporaryLastRoadSegPosition.position.x, mouseCoordinates[0], this.temporaryLastRoadSegPosition.position.y, mouseCoordinates[1]);
 
       if(distance >= (roadAccuracy * roadAccuracy)) {
