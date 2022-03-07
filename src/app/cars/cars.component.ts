@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { distance } from 'mathjs';
+import { cos, distance } from 'mathjs';
 import { generate } from 'rxjs';
 
 interface Network {
@@ -93,6 +93,8 @@ export class CarsComponent implements OnInit {
     const piBy180: number = 180 / Math.PI;
     // highlight connections
     const highlightConnectionIds: string[] = highlightSegment.id !== '' ? highlightSegment.connections : [];
+    // hover icon to be painted last so its on top
+    let hover: { x: number, y: number, text: string, style: string};
     // draw in all road segments...
     for(let o = 0 ; o < road.length ; o++) {
       // the road to be drawn
@@ -104,12 +106,14 @@ export class CarsComponent implements OnInit {
         // draw the point
         this.ctx.beginPath();
 
+        const lineWidth: number = 50;
+        this.ctx.lineWidth = lineWidth;
+
         // doesnt work for connection
-        this.ctx.fillStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
-        this.ctx.arc(roadSeg.x, roadSeg.y, 5, 0, 2*Math.PI);
+        this.ctx.fillStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? fillColor : fillColor;//'yellow' : fillColor;
+        this.ctx.arc(roadSeg.x, roadSeg.y, lineWidth / 2, 0, 2*Math.PI);
         this.ctx.fill();
 
-        this.ctx.lineWidth = 10;
 
         for(let t = 0 ; t < roadPoints[i].connections.length ; t++) {
           // draw a line between this position using roadSeg coordinates as the start point, to all other connections
@@ -128,95 +132,93 @@ export class CarsComponent implements OnInit {
 
             // check first if the pointer is over the line, and if so draw the sgement as green...
             if(xGreater && xLower && yGreater && yLower) {
-              // const mouseDx: number = this.mousePosition.x > xPosLowHigh.low ? this.mousePosition.x - xPosLowHigh.low : xPosLowHigh.low - this.mousePosition.x;
-              // const mouseDy: number = this.mousePosition.y > yPosLowHigh.high ? this.mousePosition.y - yPosLowHigh.high : yPosLowHigh.high - this.mousePosition.y;
-
-              // const lineAngle: number = Math.atan2(yPosLowHigh.change, xPosLowHigh.change);
-              // const angleByMousePosition: number = Math.atan2(mouseDy, mouseDx);
-
-              // const angleEqual: boolean = true; lineAngle + 0.1 >= angleByMousePosition && lineAngle - 0.1 <= angleByMousePosition;
-
-              // console.log(angleEqual, lineAngle, angleByMousePosition);
-              // console.log(yPosLowHigh.change, xPosLowHigh.change);
 
               // y = mx + c format... c = 0;
-              let x1: number = roadSeg.x;
-              let y1: number = roadSeg.y;
-              let x2: number = segFoundPx[0];
-              let y2: number = segFoundPx[1];
+              const x1: number = roadSeg.x;
+              const y1: number = roadSeg.y;
+              const x2: number = segFoundPx[0];
+              const y2: number = segFoundPx[1];
 
               let m: number = 0;
               let x: number = 0;
               let yrel: number = 0;
               let y: number = 0;
 
+              // const thetaA: number = Math.atan2(y2 - y1, x2 - x1);
+              const thetaA: number = 90 - Math.atan2(y2 - y1, x2 - x1);
+
+              let online: boolean = false;
+
               if(x1 < x2 && y1 > y2) {
-
-                m = (y1 - y2) / (x2 - x1);
-                x = this.mousePosition.x - x1;
-                yrel = y2 - this.mousePosition.y;
-                y = m * x;
-                if(yrel < y-5 && yrel > y+5) console.log(y, yrel);
-
-              } else if(x1 > x2 && y1 < y2) {
-
-                m = (y2 - y1) / (x1 - x2);
-                x = x2 - this.mousePosition.x;
-                yrel = y1 - this.mousePosition.y;
-                y = m * x;
-                // console.log(y, yrel);
-
-              } else if(x1 < x2 && y1 < y2) {
-
-                m = (y2 - y1) / (x2 - x1);
-                x = this.mousePosition.x - x1;
-                yrel = y2 - this.mousePosition.y;
-                y = m * x;
-                // console.log(y, yrel);
-
-              } else if(x1 > x2 && y1 > y2) {
-
-                m = (y1 - y2) / (x1 - x2);
-                x = x2 - this.mousePosition.x;
-                yrel = y1 - this.mousePosition.y;
-                y = m * x;
-                // console.log(y, yrel);
-
+                m = (y1 - y2) / (x2 - x1); // yes
+                x = this.mousePosition.x - x1; // yes
+                yrel = y1 - this.mousePosition.y; // fixed
+            } else if(x1 > x2 && y1 < y2) {
+                m = (y2 - y1) / (x1 - x2); // yes
+                x = this.mousePosition.x - x2; // fixed
+                yrel = y2 - this.mousePosition.y; // fixed
+            } else if(x1 < x2 && y1 < y2) {
+                m = (y1 - y2) / (x2 - x1); // fixed
+                x = this.mousePosition.x - x1; // good
+                yrel = y1 - this.mousePosition.y; // ??
+            } else if(x1 > x2 && y1 > y2) {
+                m = (y2 - y1) / (x1 - x2); // fixed ***
+                x = this.mousePosition.x - x2; // fixed
+                yrel = y2 - this.mousePosition.y; // fixed
               }
 
+              y = m * x;
+              online = yrel < y + lineWidth && yrel > y - lineWidth;
 
+              const style: string ='black';
+              this.drawRoadSection(roadSeg.x, roadSeg.y, segFoundPx[0], segFoundPx[1], style, i%2===0);
 
-              this.ctx.beginPath();
-              this.ctx.strokeStyle = true ? 'green' : 'black';
-
-              this.ctx.moveTo(roadSeg.x, roadSeg.y);
-              this.ctx.lineTo(segFoundPx[0], segFoundPx[1]);
-              this.ctx.stroke();
-              // and put the road name up on the screen
-              this.ctx.fillText(road[o].name, this.mousePosition.x + 5, this.mousePosition.y);
+              // if the user is hovering over road braw a small circle at the point and put the road name up
+              if(online) {
+                hover = { x: this.mousePosition.x, y: this.mousePosition.y, text: road[o].name, style: 'white'};
+              }
             } else {
-              // and draw the line (temporary until graphics...)
-              this.ctx.beginPath();
-              this.ctx.strokeStyle = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
-              this.ctx.moveTo(roadSeg.x, roadSeg.y);
-              this.ctx.lineTo(segFoundPx[0], segFoundPx[1]);
-              this.ctx.stroke();
+              // const style: string = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
+              this.drawRoadSection(roadSeg.x, roadSeg.y, segFoundPx[0], segFoundPx[1], 'black', i % 2 === 0);
             }
           }
         }
 
-        this.ctx.lineWidth = 3;
-
-        // highlight any hoevred items
-        if(highlightSegment.id === roadPoints[i].id) {
-          // this.ctx.beginPath();
-          // this.ctx.strokeRect(roadSeg.x - 15, roadSeg.y - 15, 30, 30);
-          // this.ctx.stroke();
-          this.ctx.fillText(`ID: ` + roadPoints[i].id, roadSeg.x + 20, roadSeg.y, 50);
-          this.ctx.fillText(`Connected to: `+ roadPoints[i].connections.join(' - '), roadSeg.x + 20, roadSeg.y + 11, 200);
+        if(hover) {
+          this.ctx.fillStyle = hover.style;
+          this.ctx.beginPath();
+          this.ctx.arc(hover.x, hover.y, 8, 0, 2*Math.PI);
+          this.ctx.fill();
+          this.ctx.fillText(hover.text, hover.x + 5, hover.y);
         }
+
+        // // highlight any hoevred items
+        // if(highlightSegment.id === roadPoints[i].id) {
+        //   this.ctx.fillText(`ID: ` + roadPoints[i].id, roadSeg.x + 20, roadSeg.y, 50);
+        //   this.ctx.fillText(`Connected to: `+ roadPoints[i].connections.join(' - '), roadSeg.x + 20, roadSeg.y + 11, 200);
+        // }
       }
     }
+  }
+
+  drawRoadSection(x1: number, y1: number, x2: number, y2: number, style: string, whiteLine: boolean = false): void {
+     // and draw the line (temporary until graphics...)
+     this.ctx.beginPath();
+     this.ctx.setLineDash([0]);
+     this.ctx.strokeStyle = style
+     this.ctx.lineDashOffset = 0;
+     this.ctx.moveTo(x1, y1);
+     this.ctx.lineTo(x2, y2);
+     this.ctx.stroke();
+     // then draw the lines...
+     if(whiteLine) {
+       this.ctx.strokeStyle = 'white';
+       this.ctx.lineWidth = 5;
+       this.ctx.beginPath();
+       this.ctx.moveTo(x1, y1);
+       this.ctx.lineTo(x2, y2);
+       this.ctx.stroke();
+     }
   }
 
   hoverPointSegment: RoadSegment;
@@ -310,7 +312,7 @@ export class CarsComponent implements OnInit {
 
     if(this.temporaryRoadConstruction) {
       // a road is being built, draw apoint every...
-      const roadAccuracy: number = 20;
+      const roadAccuracy: number = 3;
       const distance: number = this.getDistanceSquared(this.temporaryLastRoadSegPosition.position.x, mouseCoordinates[0], this.temporaryLastRoadSegPosition.position.y, mouseCoordinates[1]);
 
       if(distance >= (roadAccuracy * roadAccuracy)) {
