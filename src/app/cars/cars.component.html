@@ -2,9 +2,13 @@
   <canvas class="cars__canvas" (mousemove)="onMouseMove($event)" (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" #ImageCanvas></canvas>
   <!-- what does intyeracting witht he canvas do? -->
   <div class="cars__actions">
-    <div class="cars__actions--button" [class.cars__actions--selected]="currentDrawMode === 0" (click)="drawRoadMode()">Create Track</div>
+    <div class="cars__actions--button" [class.cars__actions--selected]="currentMode === 0" (click)="drawRoadMode()">Create Track</div>
+    <div class="cars__actions--button" [class.cars__actions--selected]="currentMode === 1" (click)="addCarsMode()">Add Cars</div>
+    <div class="cars__actions--button" [class.cars__actions--selected]="currentMode === 2" (click)="navigateMode()">Navigate</div>
     <div class="cars__actions--button" (click)="clearNetwork()">Delete Roads</div>
     <div class="cars__actions--button" (click)="clearLastRoad()">Delete Last Road</div>
+    <div class="cars__actions--button" (click)="showRoadsToggle()">Draw Roads</div>
+    <div class="cars__actions--button" (click)="outputRoadArray()">Output Network</div>
   </div>
   <!-- what type of thing are you going to make? -->
   <!-- <div class="cars__actions">
