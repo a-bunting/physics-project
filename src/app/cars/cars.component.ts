@@ -27,25 +27,30 @@ interface RoadProperty {}
 
 interface DrawObject {
   x1: number; y1: number; style: string; order: number;
-  type: 'arc' | 'line' | 'text', properties: DrawArc | DrawLine | DrawText
+  type: 'arc' | 'line' | 'text' | 'square', properties: DrawArc | DrawLine | DrawText | DrawSquare
 }
 
-interface DrawArc {
-  radius: number;
-}
-
-interface DrawLine {
-  x2: number; y2: number; lineWidth: number; dashed?: boolean; dashOffset?: number[];
-}
-
-interface DrawText {
-  maxWidth: number, text: string
-}
-
+interface DrawArc { radius: number; }
+interface DrawLine { x2: number; y2: number; lineWidth: number; dashed?: boolean; dashOffset?: number[]; }
+interface DrawText { maxWidth: number, text: string }
+interface DrawSquare { width: number; height: number; center?: boolean}
 
 interface Heuristic {
   name: string;
   h: Function;
+}
+
+interface PathData {
+  id: string; parent: string; g: number; h: number; f: number; traversable: boolean
+}
+
+interface Car {
+  name: string,
+  startSeg: RoadSegment,
+  endSeg: RoadSegment,
+  x: number,
+  y: number,
+  path: string[]
 }
 
 @Component({
@@ -104,6 +109,7 @@ export class CarsComponent implements OnInit {
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     this.networkBuildingBlocks = []; // empty the previous array
     this.drawRoads(); // draw thew roads
+    this.drawCars();
     this.drawNetwork(this.networkBuildingBlocks); // and draw the network;
   }
 
@@ -115,8 +121,15 @@ export class CarsComponent implements OnInit {
         case 'arc': this.drawCircle(network[i]); break;
         case 'line': this.drawLine(network[i]); break;
         case 'text': this.drawText(network[i]); break;
+        case 'square': this.drawSquare(network[i]); break;
       }
     }
+  }
+
+  drawSquare(object: DrawObject): void {
+    const square: DrawSquare = object.properties as DrawSquare;
+    this.ctx.fillStyle = object.style;
+    this.ctx.fillRect( square.center ? object.x1 - (square.width / 2) : object.x1, square.center ? object.y1 - (square.height / 2) : object.y1, square.width, square.height )
   }
 
   drawText(object: DrawObject): void {
@@ -151,6 +164,24 @@ export class CarsComponent implements OnInit {
     const highlightIndex: RoadSegment = this.checkForCoordinateHighlight();
     this.drawRoad(highlightIndex, [this.temporaryRoad], 'green');
     this.drawRoad(highlightIndex, [...this.network.roads]);
+  }
+
+  drawCars(): void {
+    // get the screen dimensions for pixel conversion
+    const screenWidth: number = this.canvas.nativeElement.offsetWidth;
+    const screenHeight: number = this.canvas.nativeElement.offsetHeight;
+    for(let i = 0 ; i < this.carsArray.length ; i++) {
+      const car: Car = this.carsArray[i];
+      const drawCar: DrawObject = {
+        x1: (car.x / 100) * screenWidth,  y1: (car.y / 100) * screenHeight,
+        style: 'purple',
+        order: 5,
+        type: 'square',
+        properties: { width: 25, height: 40, center: true }
+      }
+      // add tot he drawing array
+      this.networkBuildingBlocks.push(drawCar)
+    }
   }
 
   networkBuildingBlocks: DrawObject[] = [];
@@ -264,7 +295,7 @@ export class CarsComponent implements OnInit {
               }
             } else {
               // const style: string = highlightSegment.id === roadPoints[i].id || !!highlightConnectionIds.find((con: string) => con === roadPoints[i].id) ? 'yellow' : fillColor;
-              const style: string = this.path.findIndex((t: string) => t === roadPoints[i].id) === -1 ? this.showRoadDrawn ? 'white' : 'black' : 'green';
+              const style: string = this.path.findIndex((t: string) => t === segFound.id) === -1 ? this.showRoadDrawn ? 'white' : 'black' : 'green';
               this.drawRoadSection(roadSeg.x, roadSeg.y, segFoundPx[0], segFoundPx[1], style, lineWidth, i % 2 === 0);
             }
           }
@@ -397,7 +428,7 @@ export class CarsComponent implements OnInit {
      switch(mouseEvent.button) {
        case 0:
          if(this.currentMode === 0) this.addFirstTemporaryRoadSegment(mouseCoordinates);
-         if(this.currentMode === 1) this.addCars();
+         if(this.currentMode === 1) this.addCar();
          if(this.currentMode === 2) this.addStartNavigationPoint();
          break;
         case 2:
@@ -427,7 +458,7 @@ export class CarsComponent implements OnInit {
 
   checkNavigation(): void {
     if(this.navStartSegment && this.navEndSegment) {
-      this.navigate(this.navStartSegment.id, this.navEndSegment.id, this.network, this.getHeuristic('Euclidian'));
+      this.navigate(this.navStartSegment.id, this.navEndSegment.id, this.network, this.getHeuristic('Dijkstra'));
     }
   }
 
@@ -550,8 +581,57 @@ export class CarsComponent implements OnInit {
     this.temporaryRoad = newRoad;
   }
 
-  addCars(): void {
+  carsArray: Car[] = []
 
+  addCar(startLocation?: string, endLocation?: string, carType?: Car): void {
+    // get the segments...
+    const startSegment: RoadSegment = startLocation ? this.roadSegmentLocator(startLocation, [...this.network.roads]) : this.hoverPointSegment ? this.hoverPointSegment : this.getClosestSegment();
+    const endSegment: RoadSegment = endLocation ? this.roadSegmentLocator(startLocation, [...this.network.roads]) : this.getRandomLocation();
+    // create a new car object and push to the main array
+    const car: Car = {
+      name: this.generateRandomString(3),
+      startSeg: startSegment,
+      endSeg: endSegment,
+      x: startSegment.position.x,
+      y: startSegment.position.y,
+      path: this.navigate(startSegment.id, endSegment.id, {...this.network}, 'Dijkstra')
+    }
+
+    this.carsArray.push(car);
+  }
+
+  getRandomLocation(): RoadSegment {
+    const randomRoad: number = Math.floor(Math.random() * this.network.roads.length);
+    const randomSegment: number = Math.floor(Math.random() * this.network.roads[randomRoad].segments.length);
+    return this.network.roads[randomRoad].segments[randomSegment];
+  }
+
+  /**
+   * Gets the closest segment to the cursor.
+   * @returns
+   */
+  getClosestSegment(): RoadSegment {
+    // get the height position data
+    const canvasWidth: number = this.canvas.nativeElement.width;
+    const canvasHeight: number = this.canvas.nativeElement.height;
+    const mouseCoordinates: {x: number, y: number } = { x: (this.mousePosition.x / canvasWidth) * 100, y: (this.mousePosition.y / canvasHeight) * 100 };
+    // the output and save variables
+    let closest: RoadSegment;
+    let closestDistanceSquared: number = 10000000;
+
+    for(let i = 0 ; i < this.network.roads.length ; i++) {
+      const segs: RoadSegment[] = this.network.roads[i].segments;
+
+      for(let o = 0 ; o < segs.length ; o ++) {
+        let distance: number = this.getDistanceSquared(mouseCoordinates.x, segs[o].position.x, mouseCoordinates.y, segs[o].position.y);
+
+        if(distance < closestDistanceSquared) {
+          closest = segs[o];
+          closestDistanceSquared = distance;
+        }
+      }
+    }
+    return closest;
   }
 
   // herustic algorithms found at https://www.geeksforgeeks.org/a-search-algorithm/
@@ -586,6 +666,8 @@ export class CarsComponent implements OnInit {
     }
   ]
 
+
+
   /**
    * Returns a Heuristic based upon the name of the heuristic
    * @param name
@@ -599,6 +681,7 @@ export class CarsComponent implements OnInit {
 
   /**
    * Navigates from A to B
+   * https://www.youtube.com/watch?v=-L-WgKMFuhE
    *
    * @param from
    * @param to
@@ -607,83 +690,91 @@ export class CarsComponent implements OnInit {
    * @returns
    */
   navigate(from: string, to: string, network: Network, heuristic: string | Heuristic) : string[] {
-
-    console.log(`Navigating from ${from} to ${to}`, heuristic);
-
     // an empty return path
     let path: string[] = [];
     // ensure heuristic is a Heuristic type...
     heuristic = typeof heuristic === 'string' ? this.getHeuristic(heuristic) : heuristic;
+    // get the from segment...
+    let fromLocation: RoadSegment = this.roadSegmentLocator(from, [...this.network.roads]);
     // get the end segments...
     let toLocation: RoadSegment = this.roadSegmentLocator(to, [...this.network.roads]);
 
-    let openNodes: { id: string, g: number, h: number, f: number}[] = [ { id: from, g: 0, h: 0, f: 0 } ];
-    let closedNodes: { id: string, g: number, h: number, f: number}[] = [];
+    // set up our two lists
+    // - open is for the nodes which have not yet been explored but have been found
+    // - closed is for the nodes which have been explored.
+    let hInitial: number = heuristic.h(fromLocation.position.x, fromLocation.position.y, toLocation.position.x, toLocation.position.y);
+    let openNodes: PathData[] = [ { id: from, parent: '', g: 0, h: hInitial, f: hInitial, traversable: true } ];
+    let closedNodes: PathData[] = [];
+    let current: PathData;
 
-    let current: { id: string, g: number, h: number, f: number};
-
-    while(true) {
+    while(openNodes.length > 0) {
 
       console.log(`Iteration phase`);
 
-      let location: RoadSegment = this.roadSegmentLocator(openNodes[0].id, [...this.network.roads]);
-      let connections: string[] = location.connections;
+      current = { ...openNodes[0] }; // make current the value with the lowest f value (as the lowest should be at the start of openNodes)
 
-      // remove from the open list and move to the closed list...
-      current = { ...openNodes[0] };
+
       closedNodes.push({...openNodes[0]}); // add to closed...
       openNodes.splice(0, 1); // this will be the first entry as at the end the
 
-      // check if we have gotten tot he end, and if so break...
+      // check if we have gotten to the end, and if so break...
       if(current.id === toLocation.id) break;
 
-      for(let i = 0 ; i < connections.length ; i++) {
-        // check if the connection is in the closed list...
-        let closedIndex: number = closedNodes.findIndex(temp => temp.id === connections[i]);
+      // get the node in questions connections...
+      let neighbourSegment: RoadSegment = this.roadSegmentLocator(current.id, [...this.network.roads]);
+      // set a variable 'neighbours;' to those connections to iterate over...
+      let neighbours: string[] = neighbourSegment.connections;
 
-        if(closedIndex === -1) {
-          // if its not in the closed list then continue
-          let g: number = current.g + 1; // its one away from the last one
+      // loop over all the neighbours of the current node...
+      for(let i = 0 ; i < neighbours.length ; i++) {
+
+        // check if the connection is in the closed list...
+        let closedIndex: number = closedNodes.findIndex(temp => temp.id === neighbours[i]);
+        // get the neighbour node to check for traversability
+        let neighbourSegment: RoadSegment = this.roadSegmentLocator(neighbours[i], [...this.network.roads]);
+
+        // if the neighbour node is either not passable or is already in the closed list, then skip this step
+        if(closedIndex === -1 && this.isTraversable(neighbourSegment)) {
+
+          // calculate g, the distance from the initial node.\
+          let g: number = current.g + 1;
 
           // find if neighbour is in the open list
-          let neighbourId: number = openNodes.findIndex(temp => temp.id === connections[i]);
+          let neighbourId: number = openNodes.findIndex(temp => temp.id === neighbours[i]);
 
-          // if its not in the open or the new path is shorter
+          // if its not in the open list or the new path is shorter
           if(neighbourId === -1 || g < current.g) {
-            let h: number = heuristic.h(location.position.x, location.position.y, toLocation.position.x, toLocation.position.y);
+            let h: number = heuristic.h(neighbourSegment.position.x, neighbourSegment.position.y, toLocation.position.x, toLocation.position.y);
             let f: number = g + h;
-            // console.log(current.id, g);
 
             if(neighbourId === -1) {
-              openNodes.push({ id: connections[i], g, h, f: f });
+              openNodes.push({ id: neighbours[i], parent: current.id, g, h, f, traversable: true });
             }
           }
         }
-
       }
-
-      // console.log(openNodes, toLocation);
-      // found = openNodes.length > 0 ? openNodes[openNodes.length - 1].id === toLocation.id : false;
-      // sort byt he total value...
+      // sort by the f value so current becomes openNodes[0]...
       openNodes.sort((a, b) => a.f - b.f);
-      // console.log([...openNodes]);
     }
 
     let finalPath: string[] = [];
-    let pathLength: number = closedNodes[closedNodes.length - 1].g;
-    console.log([...closedNodes]);
+    let currentBlockForRoute: PathData = { ...closedNodes[closedNodes.length - 1] };
 
-    for(let t = pathLength ; t > 0 ; t--) {
-      let gValues = closedNodes.filter((temp: { id: string, g: number, h: number, f: number}) => temp.g === t);
-      finalPath.unshift(gValues[gValues.length - 1].id);
-      closedNodes = closedNodes.filter((temp: { id: string, g: number, h: number, f: number}) => temp.g !== t);
+    while(currentBlockForRoute.id !== from) {
+      finalPath.unshift(currentBlockForRoute.id);
+      let parent: string = currentBlockForRoute.parent;
+      let linkedRoutes: PathData[] = { ...closedNodes.filter(temp => temp.id === parent) };
+      currentBlockForRoute = linkedRoutes[0];
     }
 
-    console.log(finalPath);
-
     this.path = finalPath;
-    return path;
+    return finalPath;
   }
+
+  isTraversable(node: RoadSegment): boolean {
+    return true;
+  }
+
 
   /**
    * Removes a road segment and any reference to it.
