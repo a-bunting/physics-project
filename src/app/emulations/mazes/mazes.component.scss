@@ -1,0 +1,27 @@
+.maze {
+
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    display: flex;
+  }
+
+  &__tile {
+    position: relative;
+    flex: 1;
+    background-color: white;
+    aspect-ratio: 1 / 1;
+    border: .1rem solid transparent;
+
+    &--topPass { border-top: .1rem solid black; };
+    &--botPass { border-bottom: .1rem solid black; };
+    &--leftPass { border-left: .1rem solid black; };
+    &--rightPass { border-right: .1rem solid black; };
+
+    &:hover {
+      background-color: red;
+    }
+  }
+
+}

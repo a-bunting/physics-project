@@ -31,10 +31,12 @@ import { FrictionAndMotionComponent } from './problems/friction-and-motion/frict
 import { ProblemsComponent } from './problems/problems.component';
 import { CarsComponent } from './cars/cars.component';
 import { DataGenComponent } from './educational/data-gen/data-gen.component';
+import { MazesComponent } from './emulations/mazes/mazes.component';
 
 const appRoutes: Routes = [
     { path: 'feedback', component: DisplayAllFeedbackComponent },
     { path: 'cars', component: CarsComponent },
+    { path: 'mazes', component: MazesComponent },
     { path: 'datagen', component: DataGenComponent },
     { path: 'problems', component: ProblemsComponent, children: [
         { path: '', redirectTo: '/search/Problem', pathMatch: 'full'},
@@ -88,7 +90,7 @@ const appRoutes: Routes = [
     GravityComponent,
     HeatTransferComponent,
     FrictionAndMotionComponent,
-    ProblemsComponent, CarsComponent, DataGenComponent
+    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent
    ],
   imports: [
     BrowserModule,

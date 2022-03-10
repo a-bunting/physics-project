@@ -1,0 +1,14 @@
+
+<div class="maze" *ngIf="maze">
+
+  <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
+    <div class="maze__tile"
+    [class.maze__tile--topPass]="!tile.passable.t"
+    [class.maze__tile--botPass]="!tile.passable.b"
+    [class.maze__tile--leftPass]="!tile.passable.l"
+    [class.maze__tile--rightPass]="!tile.passable.r"
+    *ngFor="let tile of row; let o = index">
+    </div>
+  </div>
+
+</div>
