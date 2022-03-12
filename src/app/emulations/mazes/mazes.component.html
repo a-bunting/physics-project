@@ -1,13 +1,79 @@
+<div class="mazes">
 
-<div class="maze" *ngIf="maze">
+  <div class="maze" *ngIf="maze">
 
-  <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
-    <div class="maze__tile"
-    [class.maze__tile--topPass]="!tile.passable.t"
-    [class.maze__tile--botPass]="!tile.passable.b"
-    [class.maze__tile--leftPass]="!tile.passable.l"
-    [class.maze__tile--rightPass]="!tile.passable.r"
-    *ngFor="let tile of row; let o = index">
+    <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
+      <div class="maze__tile"
+      [style]="createLinearGradientStyle(tile.passable.l, tile.passable.r, tile.passable.t, tile.passable.b)"
+      [class.maze__tile--current]="currentPiece.i === i && currentPiece.o === o"
+      [class.maze__tile--enter]="pathStartLocation.i === i && pathStartLocation.o === o"
+      [class.maze__tile--exit]="pathEndLocation.i === i && pathEndLocation.o === o"
+
+      (click)="addPositionHere(i, o);"
+      *ngFor="let tile of row; let o = index">
+        <div class="maze__graph" *ngIf="toggleGraph">
+          <div class="maze__graph--left" *ngIf="tile.passable.l"></div>
+          <div class="maze__graph--right" *ngIf="tile.passable.r"></div>
+          <div class="maze__graph--top" *ngIf="tile.passable.t"></div>
+          <div class="maze__graph--bottom" *ngIf="tile.passable.b"></div>
+          <div class="maze__graph--point"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="maze__data">
+      <p>Time Taken: {{ timeTaken | number:'0.0-0'}} s</p>
+      <p>Iteration Number: {{ iterationCount }}</p>
+      <p>Iteration / s: {{ iterationsPerSecond[iterationsPerSecond.length - 1].iterations - iterationsPerSecond[iterationsPerSecond.length - 2]?.iterations }}</p>
+      <p>Min Iterations to solve: {{ gridArea }}</p>
+      <p>Efficiency: {{ iterationCount < gridArea ? 'Waiting...' : ((gridArea / iterationCount) * 100 | number:'0.0-0') + '%' }}</p>
+    </div>
+
+  </div>
+
+  <div class="maze__controls">
+    <div class="maze__controls--header">Maze Algorithm</div>
+    <select name="algorithm" id="algorithm" class="maze__option" (change)="onLoadMazeType($event.target.value)">
+      <option value="" disabled selected>Select maze algorithm</option>
+      <option value="aldousbroder">Aldous Broder</option>
+    </select>
+    <div class="maze__controls--sidebyside">
+      <input type="text" name="width" id="width" placeholder="Width" class="maze__input" [(ngModel)]="width">
+      <input type="text" name="height" id="height" placeholder="Height" class="maze__input" [(ngModel)]="height">
+    </div>
+    <div class="maze__controls--sidebyside">
+      <button class="maze__button" [class.maze__button--pressed]="!instantDraw" (click)="onClickInstant(false)">Show Path Drawn</button>
+      <button class="maze__button" [class.maze__button--pressed]="instantDraw" (click)="onClickInstant(true)">Instant Draw</button>
+    </div>
+    <div class="maze__controls--sidebyside">
+      <div class="maze__controls--text"> Iterations / s </div>
+      <input type="range" name="itpersec" id="itpersec" min="1" max="300" class="maze__range" value="{{ 1 / timedMazeStepTime }}" (change)="onChangeIterationsPerSecond($event.target.value)">
+      <div class="maze__controls--text">{{ 1 / timedMazeStepTime | number:'0.0-0' }}</div>
+    </div>
+    <button class="maze__button maze__button--long" (click)="startNewMazeGeneration()">Generate Maze</button>
+
+    <div class="maze__controls--header">Path Solution</div>
+    <div class="maze__controls--sidebyside">
+      <button class="maze__button" (click)="addPosition(true)" *ngIf="!addingPosition">Add start point</button>
+      <button class="maze__button" (click)="addPosition(false)" *ngIf="!addingPosition">Add exit point</button>
+      <button class="maze__button maze__button--long" (click)="stopAddingPosition()" *ngIf="addingPosition">Cancel adding position</button>
+    </div>
+    <select name="pathsolver" id="pathsolver" class="maze__option">
+      <option value="" disabled selected>Select path algorithm</option>
+      <option value="A*">A*</option>
+    </select>
+    <div class="maze__controls--sidebyside">
+      <button class="maze__button">Show Path Drawn</button>
+      <button class="maze__button">Solve Immediatele</button>
+    </div>
+    <button class="maze__button maze__button--long">Solve Path</button>
+
+    <div class="maze__controls--header">Controls</div>
+    <div class="maze__controls--sidebyside">
+      <button class="maze__button maze__button--auto" (click)="generatedMaze.playMaze()" *ngIf="!instantDraw">Play</button>
+      <button class="maze__button maze__button--auto" (click)="generatedMaze.pauseMaze()" *ngIf="!instantDraw">Pause</button>
+      <button class="maze__button maze__button--auto" (click)="onToggleGraph()">Graph Overlay</button>
+      <button class="maze__button maze__button--auto" (click)="outputGraph()">Console the Graph</button>
     </div>
   </div>
 

@@ -1,5 +1,9 @@
 import { Maze2D, MazeAlgorithms } from "../maze-algorithms.model";
 
+export interface AldousBroderProperties {
+  visitedCells: number;
+}
+
 export class AldousBroderMaze extends MazeAlgorithms {
 
   constructor() {
@@ -14,23 +18,11 @@ export class AldousBroderMaze extends MazeAlgorithms {
    * @param height
    * @returns
    */
-  generateMaze(width: number, height: number): { maze: Maze2D, executionTime: number, iterationCount: number } {
+  generateMaze(width: number, height: number, timeDelay: number = 0): { maze: Maze2D, executionTime: number, iterationCount: number } {
     // make a new maze object
-    let maze: Maze2D = { width, height, tiles: [] };
+    let maze: Maze2D = this.generateMazeStructure(width, height);
     // start the performance indicator...
     const startingTime: number = performance.now();
-
-    // build the maze...
-    for(let i = 0 ; i < height ; i++) {
-      // start a new row
-      maze.tiles.push([]);
-      // and add the columns...
-      for(let o = 0 ; o < width ; o++) {
-        // i is the column
-        // o is the row
-        maze.tiles[i][o] = { passable: {l:false,r:false,t:false,b:false}, speed: 0 };
-      }
-    }
 
     // Psuedo Algorithm
     // https://people.cs.ksu.edu/~ashley78/wiki.ashleycoleman.me/index.php/Aldous-Broder_Algorithm.html
@@ -47,10 +39,55 @@ export class AldousBroderMaze extends MazeAlgorithms {
     let visitedCells: { i: number, o: number }[] = [];
     let currentCell: { i: number, o: number } = { i: Math.floor(Math.random() * height), o: Math.floor(Math.random() * width ) };
     let iterationCount: number = 0;
+    let timer: number;
+    let lastTime: number = 0;
+    let pausedTime: number = 0;
 
     // until all cells have been visited...
-    while(visitedCells.length < (width * height)) {
-      iterationCount++;
+    if(timeDelay > 0) {
+      timer = window.setInterval(() => {
+        if((visitedCells.length < (width * height))) {
+          if(this.play) {
+            iterationCount++;
+            [maze, currentCell, visitedCells] = this.iteration(maze, currentCell, visitedCells, width, height)
+            // send out updated coordinates...
+            lastTime = performance.now();
+            this.currentData.next({i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: lastTime - startingTime - pausedTime});
+            this.currentMaze.next(maze);
+          } else {
+            pausedTime += performance.now() - lastTime;
+            lastTime = performance.now();
+          }
+        } else {
+          clearInterval(timer);
+        }
+      }, timeDelay * 1000);
+    } else {
+      while(visitedCells.length < (width * height)) {
+        iterationCount++;
+        [maze, currentCell, visitedCells] = this.iteration(maze, currentCell, visitedCells, width, height)
+      }
+      // push the maze to the user
+      this.currentData.next({i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: performance.now() - startingTime});
+      this.currentMaze.next(maze);
+    }
+
+    // and find the time this ended execution...
+    const endingTime: number = performance.now();
+    return { maze, executionTime: endingTime - startingTime, iterationCount };
+  }
+
+  /**
+   * One iteration of the algorithm
+   *
+   * @param maze
+   * @param currentCell
+   * @param visitedCells
+   * @param width
+   * @param height
+   * @returns
+   */
+  iteration(maze: Maze2D, currentCell: { i: number, o: number }, visitedCells: { i: number, o: number }[], width: number, height: number): [Maze2D, { i: number, o: number }, { i: number, o: number }[]] {
       // select a random adjacent cell
       // 1 2 3
       // 4 5 6
@@ -78,9 +115,6 @@ export class AldousBroderMaze extends MazeAlgorithms {
           adji = currentCell.i + 1 <= height - 1 ? currentCell.i + 1 : currentCell.i;
           adjo = currentCell.o;
           break;
-        default:
-          console.log(`Weird! ${currentCell}`);
-          break;
       }
 
       // check if the new cell is inside of the grid, and if so continue the iteration, otherwise reiterate...
@@ -88,49 +122,30 @@ export class AldousBroderMaze extends MazeAlgorithms {
         // find if its in the list of visited cells...
         let isItVisited: boolean = !!visitedCells.find(temp => temp.i === adji && temp.o === adjo);
 
-        maze.tiles[currentCell.i][currentCell.o].passable = {
-          l: randomAdjacentCell === 4 ? true : false,
-          r: randomAdjacentCell === 6 ? true : false,
-          t: randomAdjacentCell === 8 ? true : false,
-          b: randomAdjacentCell === 2 ? true : false
-        };
+        if(!isItVisited) {
+          maze.tiles[currentCell.i][currentCell.o].passable = {
+            l: randomAdjacentCell === 4 ? true : maze.tiles[currentCell.i][currentCell.o].passable.l,
+            r: randomAdjacentCell === 6 ? true : maze.tiles[currentCell.i][currentCell.o].passable.r,
+            t: randomAdjacentCell === 2 ? true : maze.tiles[currentCell.i][currentCell.o].passable.t,
+            b: randomAdjacentCell === 8 ? true : maze.tiles[currentCell.i][currentCell.o].passable.b
+          };
+
+          // set the passables...
+          maze.tiles[adji][adjo].passable = {
+            l: randomAdjacentCell === 6 ? true : maze.tiles[adji][adjo].passable.l,
+            r: randomAdjacentCell === 4 ? true : maze.tiles[adji][adjo].passable.r,
+            t: randomAdjacentCell === 8 ? true : maze.tiles[adji][adjo].passable.t,
+            b: randomAdjacentCell === 2 ? true : maze.tiles[adji][adjo].passable.b
+          };
+          maze.tiles[adji][adjo].speed = 1;
+
+          visitedCells.push({ i: adji, o: adjo });
+        }
 
         // set it as the current cell
         currentCell = { i: adji, o: adjo };
-
-        if(!isItVisited) {
-          visitedCells.push({...currentCell});
-          // set the passables...
-          maze.tiles[currentCell.i][currentCell.o].passable = {
-            l: randomAdjacentCell === 6 ? true : false,
-            r: randomAdjacentCell === 4 ? true : false,
-            t: randomAdjacentCell === 2 ? true : false,
-            b: randomAdjacentCell === 8 ? true : false
-          };
-          maze.tiles[currentCell.i][currentCell.o].speed = 1;
-        }
       }
-    }
-
-    // finally just go through the tiles and ensure all routes are open both ways...
-    // build the maze...
-    for(let i = 0 ; i < height ; i++) {
-      // and the columns...
-      for(let o = 0 ; o < width ; o++) {
-        // if this or anything on either side is true, then both should be true
-        let l = o - 1 >= 0 ? maze.tiles[i][o-1].passable.r || maze.tiles[i][o].passable.l ? true : false : false;
-        let r = o + 1 <= width - 1 ? maze.tiles[i][o+1].passable.l || maze.tiles[i][o].passable.r ? true : false : false;
-        let t = i - 1 >= 0 ? maze.tiles[i-1][o].passable.b || maze.tiles[i][o].passable.t ? true : false : false;
-        let b = i + 1 <= height - 1 ? maze.tiles[i+1][o].passable.t || maze.tiles[i][o].passable.b ? true : false : false;
-
-        maze.tiles[i][o] = { passable: {l,r,t,b}, speed: 0 };
-      }
-    }
-
-    // and find the time this ended execution...
-    const endingTime: number = performance.now();
-    return { maze, executionTime: endingTime - startingTime, iterationCount };
-
+    return [maze, currentCell, visitedCells];
   }
 
 }

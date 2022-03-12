@@ -17,7 +17,7 @@ export class aStar extends algorithms {
    * @param heuristicName
    * @returns
    */
-   navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], heuristicName: 'Manhatten' | 'Euclidian' | 'Dijkstra' | 'Diagonal') : string[] {
+   public navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], heuristicName: 'Manhatten' | 'Euclidian' | 'Dijkstra' | 'Diagonal') : string[] {
     // an empty return path
     let path: string[] = [];
     // ensure heuristic is a Heuristic type...

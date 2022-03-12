@@ -58,22 +58,38 @@ export class DirectoryService {
                         subItems: [
                            {name: "Questions!", parameters: ""}
                         ]
-                  }
+                  },
+                  {
+                    name: "Meteor Problem", version: "0.5", tags: ["IB", "AP", "HS", "problem", "motion", "basics"],
+                    description: "A meteor collides with the Earth! Oh nnoooooo!.",
+                    route: "/problems/friction-and-motion", parameters: null, background: "motion-ramp.jpg",
+                    subItems: [
+                       {name: "Fully Enabled", parameters: ""}
+                    ]
+                 }
                ]
       }
 
       practiceItems: menuCategory = {
-          title: 'Practice Problems',
-          route: '/problems',
+          title: 'Emulators',
+          route: '/',
           items: [
             {
-                name: "Meteor", version: "0.5", tags: ["IB", "AP", "HS", "problem", "motion", "basics"],
-                description: "A meteor collides with the Earth! Oh nnoooooo!.",
-                route: "/problems/friction-and-motion", parameters: null, background: "motion-ramp.jpg",
-                subItems: [
-                   {name: "Fully Enabled", parameters: ""}
-                ]
-             }
+              name: "Mazes", version: "0.1", tags: ["Mazes"],
+              description: "Making Mazes!",
+              route: "/mazes", parameters: null, background: "motion-ramp.jpg",
+              subItems: [
+                 {name: "Fully Enabled", parameters: ""}
+              ]
+           },
+           {
+              name: "Cars",  version: "0.01 PrePreAlpha", tags: ["Fun"],
+              description: "Car simulator y'all!.",
+              route: "/cars/", parameters: null, background: "",
+              subItems: [
+                 {name: "Fully Enabled", parameters: ""}
+              ]
+           }
           ]
       }
 
@@ -167,14 +183,6 @@ export class DirectoryService {
                         name: "Heat (Pre-Alpha)",  version: "0.01 PreAlpha", tags: ["IB", "AP", "HS", "Simulation", "Momentum", "Chemistry"],
                         description: "Heat, the movement of thermal energy. Use this simulation to build thermal situations and see how energy moves between objects.",
                         route: "/simulations/heat-transfer/", parameters: null, background: "",
-                        subItems: [
-                           {name: "Fully Enabled", parameters: ""}
-                        ]
-                     },
-                     {
-                        name: "Cars",  version: "0.01 PrePreAlpha", tags: ["Fun"],
-                        description: "Car simulator y'all!.",
-                        route: "/cars/", parameters: null, background: "",
                         subItems: [
                            {name: "Fully Enabled", parameters: ""}
                         ]
