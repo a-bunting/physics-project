@@ -52,8 +52,7 @@ export class AldousBroderMaze extends MazeAlgorithms {
             [maze, currentCell, visitedCells] = this.iteration(maze, currentCell, visitedCells, width, height)
             // send out updated coordinates...
             lastTime = performance.now();
-            this.currentData.next({i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: lastTime - startingTime - pausedTime});
-            this.currentMaze.next(maze);
+            this.currentData.next({maze, i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: lastTime - startingTime - pausedTime, finalIteration: visitedCells.length === ((width * height) - 2)});
           } else {
             pausedTime += performance.now() - lastTime;
             lastTime = performance.now();
@@ -68,8 +67,7 @@ export class AldousBroderMaze extends MazeAlgorithms {
         [maze, currentCell, visitedCells] = this.iteration(maze, currentCell, visitedCells, width, height)
       }
       // push the maze to the user
-      this.currentData.next({i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: performance.now() - startingTime});
-      this.currentMaze.next(maze);
+      this.currentData.next({maze, i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: performance.now() - startingTime, finalIteration: true});
     }
 
     // and find the time this ended execution...

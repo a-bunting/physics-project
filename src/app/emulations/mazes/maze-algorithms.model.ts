@@ -10,7 +10,7 @@ export interface Tile {
 }
 
 export interface IterationData {
-  i: number; o: number; iteration: number, timeTaken: number
+  maze: Maze2D; i: number; o: number; iteration: number, timeTaken: number, finalIteration: boolean
 }
 
 export interface MazeGraph {
@@ -25,7 +25,6 @@ export abstract class MazeAlgorithms {
 
   // values which return data
   currentData = new BehaviorSubject<IterationData>(null);
-  currentMaze = new BehaviorSubject<Maze2D>(null);
 
   // control of the process
   play: boolean = true;

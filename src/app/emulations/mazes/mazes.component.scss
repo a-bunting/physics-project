@@ -22,6 +22,8 @@
     &--current { background-color: rgba(red, .3);}
     &--enter { background-color: green; }
     &--exit { background-color: black; }
+    &--open { background-color: #aaaaaa;}
+    &--closed { background-color: #555555;}
 
     &:hover {
       background-color: red;

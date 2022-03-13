@@ -1,14 +1,23 @@
-import { Heuristic, NodeData } from "./typedef";
+import { BehaviorSubject } from "rxjs";
+import { Heuristic, NodeData, PathData } from "./typedef";
 
-export class algorithms {
+export interface AlgorithmStepData {
+  x: number; y: number; open: PathData[]; closed: PathData[]; finished: boolean
+}
+
+export abstract class algorithms {
+
+  algorithmCurrentData = new BehaviorSubject<AlgorithmStepData>(null);
+
+  abstract navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], heuristicName: string, iterationDelay: number);
 
   constructor() {}
 
   // herustic algorithms found at https://www.geeksforgeeks.org/a-search-algorithm/
-  heuristics: Heuristic[] = [
+  public heuristics: Heuristic[] = [
+    { name: 'Dijkstra', h: (x1, x2, y1, y2) => { return 0; } },
     { name: 'Manhatten', h: (x1, y1, x2, y2) => { return Math.abs(x1 - x2) + Math.abs(y1 - y2); } },
     { name: 'Euclidian', h: (x1, y1, x2, y2) => { return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)); } },
-    { name: 'Dijkstra', h: (x1, x2, y1, y2) => { return 0; } },
     {
       name: 'Diagonal',
       h: (x1, y1, x2, y2) => {
@@ -27,7 +36,7 @@ export class algorithms {
    * @returns
    */
    public getHeuristic(name: string): Heuristic {
-    return this.heuristics.find((temp: Heuristic) => temp.name === name);
+    return this.heuristics.find((temp: Heuristic) => temp.name === name) || this.heuristics[0];
   }
 
   /**

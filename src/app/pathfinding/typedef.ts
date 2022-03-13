@@ -4,7 +4,7 @@ export interface Heuristic {
 }
 
 export interface PathData {
-  id: string; parent: string; g: number; h: number; f: number; traversable: boolean
+ id: string; parent: string; g: number; h: number; f: number; traversable: boolean
 }
 
 export interface NodeData {

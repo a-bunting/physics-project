@@ -4,20 +4,25 @@
 
     <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
       <div class="maze__tile"
-      [style]="createLinearGradientStyle(tile.passable.l, tile.passable.r, tile.passable.t, tile.passable.b)"
-      [class.maze__tile--current]="currentPiece.i === i && currentPiece.o === o"
-      [class.maze__tile--enter]="pathStartLocation.i === i && pathStartLocation.o === o"
-      [class.maze__tile--exit]="pathEndLocation.i === i && pathEndLocation.o === o"
+        [style]="createLinearGradientStyle(tile.passable.l, tile.passable.r, tile.passable.t, tile.passable.b)"
+        [class.maze__tile--current]="currentPiece.i === i && currentPiece.o === o"
+        [class.maze__tile--current]="currentPathData.x === i && currentPathData.y === o"
+        [class.maze__tile--enter]="pathStartLocation === tile.id"
+        [class.maze__tile--exit]="pathEndLocation === tile.id"
+        [class.maze__tile--open]="partOfOpenList(tile.id)"
+        [class.maze__tile--closed]="partOfClosedList(tile.id) && !partOfRoute(tile.id)"
+        [class.maze__tile--enter]="partOfRoute(tile.id)"
+        (click)="addPositionHere(i, o);"
+        *ngFor="let tile of row; let o = index">
 
-      (click)="addPositionHere(i, o);"
-      *ngFor="let tile of row; let o = index">
-        <div class="maze__graph" *ngIf="toggleGraph">
-          <div class="maze__graph--left" *ngIf="tile.passable.l"></div>
-          <div class="maze__graph--right" *ngIf="tile.passable.r"></div>
-          <div class="maze__graph--top" *ngIf="tile.passable.t"></div>
-          <div class="maze__graph--bottom" *ngIf="tile.passable.b"></div>
-          <div class="maze__graph--point"></div>
-        </div>
+          <div class="maze__graph" *ngIf="toggleGraph">
+            <div class="maze__graph--left" *ngIf="tile.passable.l"></div>
+            <div class="maze__graph--right" *ngIf="tile.passable.r"></div>
+            <div class="maze__graph--top" *ngIf="tile.passable.t"></div>
+            <div class="maze__graph--bottom" *ngIf="tile.passable.b"></div>
+            <div class="maze__graph--point"></div>
+          </div>
+
       </div>
     </div>
 
@@ -58,22 +63,27 @@
       <button class="maze__button" (click)="addPosition(false)" *ngIf="!addingPosition">Add exit point</button>
       <button class="maze__button maze__button--long" (click)="stopAddingPosition()" *ngIf="addingPosition">Cancel adding position</button>
     </div>
-    <select name="pathsolver" id="pathsolver" class="maze__option">
-      <option value="" disabled selected>Select path algorithm</option>
-      <option value="A*">A*</option>
-    </select>
     <div class="maze__controls--sidebyside">
-      <button class="maze__button">Show Path Drawn</button>
-      <button class="maze__button">Solve Immediatele</button>
+      <select name="pathsolver" id="pathsolver" class="maze__option" (click)="onLoadPathingAlgorithm($event.target.value)">
+        <option value="" disabled selected>Select path algorithm</option>
+        <option value="astar">A*</option>
+      </select>
+      <select name="pathsolver" id="pathsolver" class="maze__option" (click)="onLoadPathingHeuristic($event.target.value)">
+        <option value="" disabled selected>Select heuristic</option>
+        <option value="{{ heuristic.name }}" *ngFor="let heuristic of heuristicOptions">{{ heuristic.name }}</option>
+      </select>
     </div>
-    <button class="maze__button maze__button--long">Solve Path</button>
+    <div class="maze__controls--sidebyside">
+      <button class="maze__button" [class.maze__button--pressed]="!instantPath" (click)="onClickPathInstant(false)">Show Path Drawn</button>
+      <button class="maze__button" [class.maze__button--pressed]="instantPath" (click)="onClickPathInstant(true)">Solve Immediatele</button>
+    </div>
+    <button class="maze__button maze__button--long" (click)="solvePath()" [disabled]="!pathStartLocation || !pathEndLocation">Solve Path</button>
 
     <div class="maze__controls--header">Controls</div>
     <div class="maze__controls--sidebyside">
       <button class="maze__button maze__button--auto" (click)="generatedMaze.playMaze()" *ngIf="!instantDraw">Play</button>
       <button class="maze__button maze__button--auto" (click)="generatedMaze.pauseMaze()" *ngIf="!instantDraw">Pause</button>
       <button class="maze__button maze__button--auto" (click)="onToggleGraph()">Graph Overlay</button>
-      <button class="maze__button maze__button--auto" (click)="outputGraph()">Console the Graph</button>
     </div>
   </div>
 
