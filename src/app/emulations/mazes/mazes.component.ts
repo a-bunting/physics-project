@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import {  Subscription } from 'rxjs';
 import { AldousBroderMaze } from 'src/app/emulations/mazes/algorithms/aldousBroderMaze.model';
-import { Maze2D, MazeAlgorithms, MazeGraph } from 'src/app/emulations/mazes/maze-algorithms.model';
+import { Maze2D, MazeAlgorithms, MazeGraph, Tile } from 'src/app/emulations/mazes/maze-algorithms.model';
 import { algorithms, AlgorithmStepData } from 'src/app/pathfinding/algorithms.model';
 import { aStar } from 'src/app/pathfinding/astar/astar.model';
 import { Heuristic, NodeData, PathData } from 'src/app/pathfinding/typedef';
@@ -14,7 +14,7 @@ import { Heuristic, NodeData, PathData } from 'src/app/pathfinding/typedef';
 
 export class MazesComponent implements OnInit, OnDestroy {
 
-	maze: Maze2D;
+	maze: Maze2D = { width: 0, height: 0, tiles: [] };
   generatedMaze: MazeAlgorithms;
   currentData: Subscription;
   currentMaze: Subscription;
@@ -45,8 +45,8 @@ export class MazesComponent implements OnInit, OnDestroy {
   // selecting entry and exit points
   pathStartLocation: string = '';
   pathEndLocation: string = '';
-  addingPosition: boolean = false;
-  addingStartPosition: boolean = true;
+  // addingPosition: boolean = false;
+  // addingStartPosition: boolean = true;
 
   // pathing
   route: string[] = [];
@@ -57,6 +57,10 @@ export class MazesComponent implements OnInit, OnDestroy {
   constructor() { }
 
   ngOnInit(): void {
+    document.getElementById('mazes').addEventListener('contextmenu', e => {
+      e.preventDefault();
+      e.stopPropagation();
+    })
   }
 
   ngOnDestroy(): void {
@@ -112,10 +116,8 @@ export class MazesComponent implements OnInit, OnDestroy {
 
           // after the final iteration build the graph and traversal
           if(pos.finalIteration) {
-            console.log("loading");
             const algorithm: algorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
-            this.nodes = this.generatedMaze.generateMazeGraph(pos.maze);
-            this.nodeData = algorithm.networkConversionToNodeData(this.nodes.nodes, { id: 'id', x: 'x', y: 'y', connections: 'connections' });
+            this.generateNodesGraph(pos.maze, algorithm);
           }
         }
 
@@ -125,6 +127,11 @@ export class MazesComponent implements OnInit, OnDestroy {
     }
   }
 
+  generateNodesGraph(maze: Maze2D, algorithm: algorithms): void {
+    this.nodes = this.generatedMaze.generateMazeGraph(maze);
+    this.nodeData = algorithm.networkConversionToNodeData(this.nodes.nodes, { id: 'id', x: 'x', y: 'y', connections: 'connections' });
+  }
+
   nodes: MazeGraph;
   nodeData: NodeData[];
   algorithm: algorithms;
@@ -132,23 +139,88 @@ export class MazesComponent implements OnInit, OnDestroy {
   pathSubscription: Subscription;
   currentPathData: AlgorithmStepData = {x: 0, y: 0, open: [], closed: [], finished: false};
 
+  clickedTile: { tile: Tile, i: number, o: number };
+
+  clickMenu(mouseEvent: MouseEvent, i: number, o: number): void {
+    // load the menu element.
+    const menuElement: HTMLElement = document.getElementById('maze__menu');
+    menuElement.classList.add('maze__menu--display');
+    menuElement.style.left = `${mouseEvent.clientX + 10}px`;
+    menuElement.style.top = `${mouseEvent.clientY}px`;
+    this.clickedTile = { tile: this.maze.tiles[i][o], i, o };
+  }
+
+  hideClickMenu(): void {
+    const menuElement: HTMLElement = document.getElementById('maze__menu');
+    menuElement.classList.remove('maze__menu--display');
+    this.clickedTile = undefined;
+  }
+
+  setEntryToMaze(id: string): void {
+    this.pathStartLocation = id;
+    this.hideClickMenu();
+  }
+
+  setExitFromMaze(id: string): void {
+    this.pathEndLocation = id;
+    this.hideClickMenu();
+  }
+
+  /**
+   * Manually modify the currently clicked tiles walls...
+   * @param side
+   */
+  changeTileWall(side: string): void {
+    this.clickedTile.tile.passable[side] = !this.clickedTile.tile.passable[side];
+
+    // find the tile next to it and make sure it also is blocked or opened.
+    let newi: number;
+    let newo: number;
+    let newside: string;
+
+    switch(side) {
+      case 'l':
+        newo = this.clickedTile.o - 1 >= 0 ? this.clickedTile.o - 1 : 0;
+        newi = this.clickedTile.i;
+        newside = 'r'; break;
+      case 'r':
+        newo = this.clickedTile.o + 1 <= this.maze.width - 1 ? this.clickedTile.o + 1 : this.maze.width - 1;
+        newi = this.clickedTile.i;
+        newside = 'l'; break;
+      case 't':
+        newo = this.clickedTile.o;
+        newi = this.clickedTile.i - 1 >= 0 ? this.clickedTile.i - 1 : 0;
+        newside = 'b'; break;
+      case 'b':
+        newo = this.clickedTile.o;
+        newi = this.clickedTile.i + 1 <= this.maze.height - 1 ? this.clickedTile.i + 1 : this.maze.height - 1;
+        newside = 't'; break;
+    }
+
+    // if the new coordinates are different to the originals then no change needed...
+    if((newi !== this.clickedTile.i) || (newo !== this.clickedTile.o)) { this.maze.tiles[newi][newo].passable[newside] = this.clickedTile.tile.passable[side]; }
+
+    this.generateNodesGraph(this.maze, this.algorithm);
+    this.solvePath();
+  }
+
+
+
+  /**
+   * Solves a path between the start and end locations on the grid.
+   */
   solvePath(): void {
     // get current data....
-    this.pathSubscription = this.algorithm.algorithmCurrentData.subscribe((data: AlgorithmStepData) => {
-      this.currentPathData = data;
-    })
-
+    this.pathSubscription = this.algorithm.algorithmCurrentData.subscribe((data: AlgorithmStepData) => { this.currentPathData = data; })
     // set the starting and ending nodes
     const startingNode: NodeData = this.nodeData.find((temp: NodeData) => temp.id === this.pathStartLocation);
     const endingNode: NodeData = this.nodeData.find((temp: NodeData) => temp.id === this.pathEndLocation);
     // construct a route
-    const route: string[] = this.algorithm.navigate(startingNode, endingNode, this.nodeData, this.heuristic, this.instantPath ? 0 : 0.05);
-
-
-
-
-    // push it to the route variable
-    this.route = route;
+    if(startingNode && endingNode) {
+      const route: string[] = this.algorithm.navigate(startingNode, endingNode, this.nodeData, this.heuristic, this.instantPath ? 0 : 0.05);
+      // push it to the route variable
+      this.route = route;
+    }
   }
 
   /**
@@ -181,20 +253,23 @@ export class MazesComponent implements OnInit, OnDestroy {
     }
   }
 
-  addPosition(start: boolean): void { this.addingPosition = true; this.addingStartPosition = start; }
-  stopAddingPosition(): void { this.addingPosition = false; }
+  // addPosition(start: boolean): void { this.addingPosition = true; this.addingStartPosition = start; }
+  // stopAddingPosition(): void { this.addingPosition = false; }
 
-  addPositionHere(i: number, o: number): void {
-    if(this.addingPosition) {
-      this.addingStartPosition ? this.pathStartLocation = this.maze.tiles[i][o].id : this.pathEndLocation = this.maze.tiles[i][o].id;
-      this.addingPosition = false;
-    }
-  }
+  // addPositionHere(i: number, o: number): void {
+  //   if(this.addingPosition) {
+  //     this.addingStartPosition ? this.pathStartLocation = this.maze.tiles[i][o].id : this.pathEndLocation = this.maze.tiles[i][o].id;
+  //     this.addingPosition = false;
+  //   }
+  // }
 
   // load a pathing algorithm
   onLoadPathingAlgorithm(algorithm: string): void {
     this.algorithm = this.loadPathingAlgorithm(algorithm);
-    this.heuristicOptions = this.algorithm.heuristics;
+    // if the algorithm is real load the heuristic data
+    if(this.algorithm) {
+      this.heuristicOptions = this.algorithm.heuristics;
+    }
   }
 
   /**
@@ -209,8 +284,8 @@ export class MazesComponent implements OnInit, OnDestroy {
    */
   createLinearGradientStyle(l: boolean, r: boolean, t: boolean, b: boolean): string {
     let str: string = `
-        background-image: ${!t ? 'linear-gradient(to bottom , black 0rem, black '+this.lineWidth+', transparent '+this.lineWidth+', transparent 100%)' + (!b || !r || !l ? ',' : '') : ''}
-                          ${!b ? 'linear-gradient(to top    , black 0rem, black '+this.lineWidth+', transparent '+this.lineWidth+', transparent 100%)' + (!r || !l ? ',' : '') : '' }
+        background-image: ${!t ? 'linear-gradient(to bottom , black -'+(this.lineWidth)+', black '+this.lineWidth+', transparent '+this.lineWidth+', transparent 100%)' + (!b || !r || !l ? ',' : '') : ''}
+                          ${!b ? 'linear-gradient(to top    , black -'+(this.lineWidth)+', black '+this.lineWidth+', transparent '+this.lineWidth+', transparent 100%)' + (!r || !l ? ',' : '') : '' }
                           ${!r ? 'linear-gradient(to left   , black 0rem, black '+this.lineWidth+', transparent '+this.lineWidth+', transparent 100%)' + (!l ? ',' : ''): '' }
                           ${!l ? 'linear-gradient(to right  , black 0rem, black '+this.lineWidth+', transparent '+this.lineWidth+', transparent 100%)' : '' }
         `

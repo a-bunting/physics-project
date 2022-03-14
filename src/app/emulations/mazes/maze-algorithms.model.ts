@@ -82,7 +82,6 @@ export abstract class MazeAlgorithms {
         graph.nodes.push(node);
       }
     }
-    console.log(graph);
     return graph;
   }
 
