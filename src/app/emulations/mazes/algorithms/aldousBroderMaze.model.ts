@@ -11,14 +11,14 @@ export class AldousBroderMaze extends MazeAlgorithms {
   }
 
   /**
-   * Generate an Aldouse Border Maze
+   * Generate an Aldous Broder  Maze
    * INFO: https://weblog.jamisbuck.org/2011/1/17/maze-generation-aldous-broder-algorithm
    *
    * @param width
    * @param height
    * @returns
    */
-  generateMaze(width: number, height: number, timeDelay: number = 0): { maze: Maze2D, executionTime: number, iterationCount: number } {
+  generateMaze(width: number, height: number, iterationsPerSecond: number = 0): { maze: Maze2D, executionTime: number, iterationCount: number } {
     // make a new maze object
     let maze: Maze2D = this.generateMazeStructure(width, height);
     // start the performance indicator...
@@ -44,8 +44,35 @@ export class AldousBroderMaze extends MazeAlgorithms {
     let pausedTime: number = 0;
 
     // until all cells have been visited...
-    if(timeDelay > 0) {
-      timer = window.setInterval(() => {
+    if(iterationsPerSecond > 0) {
+
+
+
+      // // then iterate
+      // timer = window.setInterval(() => {
+      //   if((visitedCells.length < (width * height))) {
+      //     if(this.play) {
+      //       iterationCount++;
+      //       [maze, currentCell, visitedCells] = this.iteration(maze, currentCell, visitedCells, width, height)
+      //       // send out updated coordinates...
+      //       lastTime = performance.now();
+      //       this.currentData.next({maze, i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: lastTime - startingTime - pausedTime, finalIteration: visitedCells.length === ((width * height) - 2)});
+      //     } else {
+      //       pausedTime += performance.now() - lastTime;
+      //       lastTime = performance.now();
+      //     }
+      //   } else {
+      //     clearInterval(timer);
+      //     // and find the time this ended execution...
+      //     const endingTime: number = performance.now();
+      //     return { maze, executionTime: endingTime - startingTime, iterationCount };
+      //   }
+      // }, (1 / this.iterationsPerSecond) * 1000);
+
+
+      timer = window.setTimeout(() => { fn(); }, (1 / this.iterationsPerSecond) * 1000);
+
+      const fn = () => {
         if((visitedCells.length < (width * height))) {
           if(this.play) {
             iterationCount++;
@@ -57,10 +84,13 @@ export class AldousBroderMaze extends MazeAlgorithms {
             pausedTime += performance.now() - lastTime;
             lastTime = performance.now();
           }
+          timer = window.setTimeout(() => { fn(); }, (1 / this.iterationsPerSecond) * 1000);
         } else {
-          clearInterval(timer);
+          // and return the final data...
+          return { maze, executionTime: performance.now() - startingTime, iterationCount };
         }
-      }, timeDelay * 1000);
+      }
+
     } else {
       while(visitedCells.length < (width * height)) {
         iterationCount++;
@@ -68,11 +98,11 @@ export class AldousBroderMaze extends MazeAlgorithms {
       }
       // push the maze to the user
       this.currentData.next({maze, i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: performance.now() - startingTime, finalIteration: true});
+      // and return
+      return { maze, executionTime: performance.now() - startingTime, iterationCount };
     }
 
-    // and find the time this ended execution...
-    const endingTime: number = performance.now();
-    return { maze, executionTime: endingTime - startingTime, iterationCount };
+
   }
 
   /**

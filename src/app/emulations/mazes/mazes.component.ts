@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import {  Subscription } from 'rxjs';
 import { AldousBroderMaze } from 'src/app/emulations/mazes/algorithms/aldousBroderMaze.model';
-import { Maze2D, MazeAlgorithms, MazeGraph, Tile } from 'src/app/emulations/mazes/maze-algorithms.model';
+import { Maze2D, MazeAlgorithms, MazeGraph, MazeStatsData, Tile } from 'src/app/emulations/mazes/maze-algorithms.model';
 import { algorithms, AlgorithmStepData } from 'src/app/pathfinding/algorithms.model';
 import { aStar } from 'src/app/pathfinding/astar/astar.model';
 import { Heuristic, NodeData, PathData } from 'src/app/pathfinding/typedef';
@@ -32,7 +32,7 @@ export class MazesComponent implements OnInit, OnDestroy {
 
   // in the case we want the maze to be timed then have variables to define this.
   timedMaze: boolean = false;
-  timedMazeStepTime: number = 0.005;
+  timedMazeIterationsPerSecond: number = 100;
   iterationsPerSecond: { time: number, iterations: number }[] = [{ time: 0, iterations: 0 }]
 
   // toggle booleans
@@ -86,10 +86,16 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.pathEndLocation = '';
     // and reset the maze algorithm
     this.maze = undefined;
-    this.generatedMaze = this.loadMazeType(this.mazeAlgorithmName);;
+    this.statsSaved = false;
+    this.mazeCompleted = false;
+    this.generatedMaze = this.loadMazeType(this.mazeAlgorithmName);
+    this.generatedMaze.mazeGenerationSpeed(this.timedMazeIterationsPerSecond);
     // and generate the maze
     this.generate();
   }
+
+  maxIterationsPerSecond: number = 0;
+  mazeCompleted: boolean = false;
 
   /**
    * Starts the maze generation process...
@@ -107,23 +113,32 @@ export class MazesComponent implements OnInit, OnDestroy {
 
           // if the time is 1s past the last recorded iteraitions then record a new one
           if(Math.floor(this.timeTaken) === this.iterationsPerSecond[this.iterationsPerSecond.length - 1].time + 1) {
+            // if its faster than the last one make this the new max...
+            let itPerSec: number = pos.iteration - this.iterationsPerSecond[this.iterationsPerSecond.length - 1].iterations;
+
+            if(itPerSec > this.maxIterationsPerSecond) {
+              this.maxIterationsPerSecond = pos.iteration - this.iterationsPerSecond[this.iterationsPerSecond.length - 1].iterations;
+            }
+
             // and push to the iterations array
             this.iterationsPerSecond.push({
               time: Math.floor(this.timeTaken),
               iterations: pos.iteration
             });
+
           }
 
           // after the final iteration build the graph and traversal
           if(pos.finalIteration) {
             const algorithm: algorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
             this.generateNodesGraph(pos.maze, algorithm);
+            this.mazeCompleted = true;
           }
         }
-
       })
 
-      this.generatedMaze.generateMaze(this.width, this.height, this.instantDraw ? 0 : this.timedMazeStepTime );
+      // and generate the data...
+      this.generatedMaze.generateMaze(this.width, this.height, this.instantDraw ? 0 : this.timedMazeIterationsPerSecond );
     }
   }
 
@@ -137,7 +152,7 @@ export class MazesComponent implements OnInit, OnDestroy {
   algorithm: algorithms;
 
   pathSubscription: Subscription;
-  currentPathData: AlgorithmStepData = {x: 0, y: 0, open: [], closed: [], finished: false};
+  currentPathData: AlgorithmStepData = {x: 0, y: 0, open: [], closed: [], finished: false, route: []};
 
   clickedTile: { tile: Tile, i: number, o: number };
 
@@ -210,17 +225,20 @@ export class MazesComponent implements OnInit, OnDestroy {
    * Solves a path between the start and end locations on the grid.
    */
   solvePath(): void {
-    // get current data....
-    this.pathSubscription = this.algorithm.algorithmCurrentData.subscribe((data: AlgorithmStepData) => { this.currentPathData = data; })
     // set the starting and ending nodes
     const startingNode: NodeData = this.nodeData.find((temp: NodeData) => temp.id === this.pathStartLocation);
     const endingNode: NodeData = this.nodeData.find((temp: NodeData) => temp.id === this.pathEndLocation);
     // construct a route
     if(startingNode && endingNode) {
-      const route: string[] = this.algorithm.navigate(startingNode, endingNode, this.nodeData, this.heuristic, this.instantPath ? 0 : 0.05);
+      const route: string[] = this.algorithm.navigate(startingNode, endingNode, this.nodeData, this.heuristic, this.instantPath ? 0 : this.algorithmSolveSpeed);
       // push it to the route variable
       this.route = route;
     }
+    // get current data....
+    this.pathSubscription = this.algorithm.algorithmCurrentData.subscribe((data: AlgorithmStepData) => {
+      this.route = data.route;
+      this.currentPathData = data;
+    })
   }
 
   /**
@@ -272,6 +290,43 @@ export class MazesComponent implements OnInit, OnDestroy {
     }
   }
 
+  statsSaved: boolean = false;
+
+  saveData(): void {
+    // make a new object
+    const newData: MazeStatsData = {
+      width: this.width,
+      height: this.height,
+      iterations: { min: this.gridArea, actual: this.iterationCount },
+      efficiency: this.gridArea / this.iterationCount,
+      time: this.timeTaken,
+      maxIterationsPerSecond: this.maxIterationsPerSecond
+    }
+    // get the localdata
+    let currentSavedData: { mazeAlgorithmName: string, data: MazeStatsData[] }[] = JSON.parse(localStorage.getItem('mazeGenerationStats'));
+
+    if(currentSavedData) {
+      // we have saved before so save again!!
+      let algorithmIndex: number = currentSavedData.findIndex(temp => temp.mazeAlgorithmName === this.mazeAlgorithmName)
+
+      // if the algorithm has been used before...
+      if(algorithmIndex !== -1) {
+        currentSavedData[algorithmIndex].data.push(newData)
+      } else {
+        currentSavedData.push({ mazeAlgorithmName: this.mazeAlgorithmName, data: [newData]});
+      }
+    } else {
+      // never been saved, so save it now!!
+      currentSavedData = [{ mazeAlgorithmName: this.mazeAlgorithmName, data: [newData]}];
+    }
+
+    try {
+      // and resave
+      localStorage.setItem('mazeGenerationStats', JSON.stringify(currentSavedData));
+      this.statsSaved = true;
+    } catch(e) { }
+  }
+
   /**
    * Generates a linear gradient which is the walls of the cells
    * Preferable to borders to avoid border tapering.
@@ -292,11 +347,24 @@ export class MazesComponent implements OnInit, OnDestroy {
     return str;
   }
 
+  timeFormat(seconds: number): string {
+    let minutes: number = seconds < 60 ? 0 : Math.floor(seconds / 60);
+    let secondsBase: number = Math.floor(seconds - (minutes * 60));
+    let afterSeconds: number = seconds - (minutes * 60) - secondsBase;
+    return `${minutes < 10 ? `0` + minutes : minutes}:${secondsBase < 10 ? '0' + secondsBase : secondsBase }:${afterSeconds.toString().substring(2, 4)}`
+  }
+
+  // the following functions simply determine the height of a div by the ratio between the max and min values.
+  createDynamicWidthForCount(current: number, max: number): string { return current < max ? `${(current / max)*100}%` : `100%`; }
+  createDynamicHeightForCount(current: number, max: number): string { return `${(current / max)*100}%` }
+
   heuristic: string = '';
   heuristicOptions: Heuristic[] = [];
+  algorithmSolveSpeed: number = 0.1;
 
   // change values
-  onChangeIterationsPerSecond(iterationsPerSec: number): void { this.timedMazeStepTime = 1 / iterationsPerSec; }
+  modifyMazeBuildSpeed(): void { if(this.generatedMaze) this.generatedMaze.mazeGenerationSpeed(this.timedMazeIterationsPerSecond); }
+  modifyPathSolveSpeed(): void { if(this.algorithm) this.algorithm.solvingSpeed(this.algorithmSolveSpeed); }
   onLoadMazeType(mazeName: string): void { this.mazeAlgorithmName = mazeName; }
   onLoadPathingHeuristic(heuristic: string): void { this.heuristic = heuristic; }
   onToggleGraph(): void { this.toggleGraph = !this.toggleGraph; }

@@ -21,13 +21,20 @@ export interface MazeNode {
   x: number; y: number; id: string; connections: string[]
 }
 
+export interface MazeStatsData {
+  width: number; height: number; iterations: { min: number; actual: number }; efficiency: number; time: number; maxIterationsPerSecond: number;
+}
+
 export abstract class MazeAlgorithms {
 
   // values which return data
-  currentData = new BehaviorSubject<IterationData>(null);
+  currentData = new BehaviorSubject<IterationData>({maze: { width: 1, height: 1, tiles: []}, i: 0, o: 0, iteration: 0, timeTaken: 0, finalIteration: false});
 
   // control of the process
   play: boolean = true;
+
+  // maze speed for solved over tiem mazes
+  iterationsPerSecond: number = 100;
 
   abstract generateMaze(width: number, height: number, timeDelay?: number);
 
@@ -61,6 +68,8 @@ export abstract class MazeAlgorithms {
 
   /**
    * Creates a mazegraph out of a maze2d.
+   * This is essentially a series of nodes with connectionsbetween adjacent tiles
+   * with no wall between them. It can be used for navigation fo the maze
    * @param maze
    * @returns
    */
@@ -100,6 +109,15 @@ export abstract class MazeAlgorithms {
       }
 
       return randomString;
+    }
+
+    /**
+     * Modify the iteration speed of the maze generation
+     * @param newSpeed
+     */
+    mazeGenerationSpeed(newSpeed: number): void {
+      console.log(newSpeed);
+      this.iterationsPerSecond = newSpeed;
     }
 
 }

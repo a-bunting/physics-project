@@ -33,21 +33,47 @@ export class aStar extends algorithms {
 
     if(iterationDelay) {
       // they want to watch the algorithm so report it step by step
-      timer = window.setInterval(() => {
+      // modify the solution speed to whatever is passed here
+      // shoul dbe the same anyway!
+      this.algorithmSolutionSpeed = iterationDelay;
+
+      // timer = window.setInterval(() => {
+      //   if(openNodes.length > 0) {
+      //     [openNodes, closedNodes, current, finished] = this.iterate(openNodes, closedNodes, current, toLocation, network, heuristic);
+      //     // get the coordinates of the current node.
+      //     let currentLocation: NodeData = this.nodeLocator(current.id, [...network]);
+      //     const currentRoute: string[] = this.buildFinalPathFromClosed(closedNodes, fromLocation);
+      //     // broadcast the current step info to anybody interested.
+      //     this.algorithmCurrentData.next({ x: currentLocation.x, y: currentLocation.y, open: openNodes, closed: closedNodes, finished, route: currentRoute })
+      //     // quit out...
+      //     if(finished || openNodes.length === 0) {
+      //       // stop iterating
+      //       clearInterval(timer);
+      //       return currentRoute;
+      //     }
+      //   }
+      // }, this.algorithmSolutionSpeed * 1000);
+
+      timer = window.setTimeout(() => { fn(); }, this.algorithmSolutionSpeed * 1000)
+
+      const fn = () => {
         if(openNodes.length > 0) {
           [openNodes, closedNodes, current, finished] = this.iterate(openNodes, closedNodes, current, toLocation, network, heuristic);
           // get the coordinates of the current node.
           let currentLocation: NodeData = this.nodeLocator(current.id, [...network]);
+          const currentRoute: string[] = this.buildFinalPathFromClosed(closedNodes, fromLocation);
           // broadcast the current step info to anybody interested.
-          this.algorithmCurrentData.next({ x: currentLocation.x, y: currentLocation.y, open: openNodes, closed: closedNodes, finished })
+          this.algorithmCurrentData.next({ x: currentLocation.x, y: currentLocation.y, open: openNodes, closed: closedNodes, finished, route: currentRoute })
+
           // quit out...
           if(finished || openNodes.length === 0) {
             // stop iterating
-            clearInterval(timer);
-            return this.buildFinalPathFromClosed(closedNodes, fromLocation);
+            return currentRoute;
+          } else {
+            timer = window.setTimeout(() => { fn(); }, this.algorithmSolutionSpeed * 1000)
           }
         }
-      }, iterationDelay * 1000);
+      }
 
     } else {
       // do it all them report back the final path...
@@ -57,10 +83,11 @@ export class aStar extends algorithms {
       }
       // get the coordinates of the last node.
       let lastLocation: NodeData = this.nodeLocator(closedNodes[closedNodes.length - 1].id, [...network]);
+      const finalRoute: string[] = this.buildFinalPathFromClosed(closedNodes, fromLocation);
       // broadcast only once...
-      this.algorithmCurrentData.next({ x: lastLocation.x, y: lastLocation.y, open: [], closed: closedNodes, finished: true })
+      this.algorithmCurrentData.next({ x: lastLocation.x, y: lastLocation.y, open: [], closed: closedNodes, finished: true, route: finalRoute })
       // and return the route..
-      return this.buildFinalPathFromClosed(closedNodes, fromLocation);
+      return finalRoute;
     }
   }
 

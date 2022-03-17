@@ -2,12 +2,13 @@ import { BehaviorSubject } from "rxjs";
 import { Heuristic, NodeData, PathData } from "./typedef";
 
 export interface AlgorithmStepData {
-  x: number; y: number; open: PathData[]; closed: PathData[]; finished: boolean
+  x: number; y: number; open: PathData[]; closed: PathData[]; finished: boolean; route: string[]
 }
 
 export abstract class algorithms {
 
-  algorithmCurrentData = new BehaviorSubject<AlgorithmStepData>(null);
+  algorithmCurrentData = new BehaviorSubject<AlgorithmStepData>({ x: 0, y: 0, open: [], closed: [], finished: false, route: [] });
+  algorithmSolutionSpeed: number = 1;
 
   abstract navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], heuristicName: string, iterationDelay: number);
 
@@ -92,5 +93,13 @@ export abstract class algorithms {
       nodeData.push(newNode);
     }
     return nodeData;
+  }
+
+  /**
+   * Chnages the iteration speed of the simulation if solving over time as opposed to instantaneously.
+   * @param iterationTime
+   */
+  solvingSpeed(iterationTime: number): void {
+    this.algorithmSolutionSpeed = iterationTime;
   }
 }

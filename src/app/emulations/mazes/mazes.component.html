@@ -5,13 +5,11 @@
     <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
       <div class="maze__tile"
         [style]="createLinearGradientStyle(tile.passable.l, tile.passable.r, tile.passable.t, tile.passable.b)"
-        [class.maze__tile--current]="currentPiece.i === i && currentPiece.o === o"
-        [class.maze__tile--current]="currentPathData.x === i && currentPathData.y === o"
-        [class.maze__tile--enter]="pathStartLocation === tile.id"
+        [class.maze__tile--current]="(currentPiece.i === i && currentPiece.o === o) || (currentPathData.x === i && currentPathData.y === o)"
+        [class.maze__tile--enter]="(pathStartLocation === tile.id) || partOfRoute(tile.id)"
         [class.maze__tile--exit]="pathEndLocation === tile.id"
         [class.maze__tile--open]="partOfOpenList(tile.id)"
         [class.maze__tile--closed]="partOfClosedList(tile.id) && !partOfRoute(tile.id)"
-        [class.maze__tile--enter]="partOfRoute(tile.id)"
         (click)="clickMenu($event, i, o);" (contextmenu)="hideClickMenu()"
         *ngFor="let tile of row; let o = index">
 
@@ -25,15 +23,6 @@
 
       </div>
     </div>
-
-    <div class="maze__data" *ngIf="maze.tiles.length > 0">
-      <p>Time Taken: {{ timeTaken | number:'0.0-0'}} s</p>
-      <p>Iteration Number: {{ iterationCount }}</p>
-      <p>Iteration / s: {{ iterationsPerSecond[iterationsPerSecond.length - 1].iterations - iterationsPerSecond[iterationsPerSecond.length - 2]?.iterations }}</p>
-      <p>Min Iterations to solve: {{ gridArea }}</p>
-      <p>Efficiency: {{ iterationCount < gridArea ? 'Waiting...' : ((gridArea / iterationCount) * 100 | number:'0.0-0') + '%' }}</p>
-    </div>
-
   </div>
 
   <div class="maze__controls">
@@ -51,10 +40,10 @@
         <button class="maze__button" [class.maze__button--pressed]="!instantDraw" (click)="onClickInstant(false)">Show Path Drawn</button>
         <button class="maze__button" [class.maze__button--pressed]="instantDraw" (click)="onClickInstant(true)">Instant Draw</button>
       </div>
-      <div class="maze__controls--sidebyside">
+      <div class="maze__controls--sidebyside" *ngIf="!instantDraw">
         <div class="maze__controls--text"> Iterations / s </div>
-        <input type="range" name="itpersec" id="itpersec" min="1" max="300" class="maze__range" value="{{ 1 / timedMazeStepTime }}" (change)="onChangeIterationsPerSecond($event.target.value)">
-        <div class="maze__controls--text">{{ 1 / timedMazeStepTime | number:'0.0-0' }}</div>
+        <input type="range" name="itpersec" id="itpersec" min="1" max="300" class="maze__range" [(ngModel)]="timedMazeIterationsPerSecond" (mouseup)="modifyMazeBuildSpeed()">
+        <div class="maze__controls--text">{{ timedMazeStepTime | number:'0.0-0' }}</div>
       </div>
       <button class="maze__button maze__button--long" (click)="startNewMazeGeneration()">Generate Maze</button>
     </section>
@@ -62,9 +51,6 @@
     <section class="maze__controls--section"  *ngIf="maze.tiles.length > 0">
       <div class="maze__controls--header">Path Solution</div>
       <div class="maze__controls--sidebyside">
-        <!-- <button class="maze__button" (click)="addPosition(true)" *ngIf="!addingPosition">Add start point</button>
-        <button class="maze__button" (click)="addPosition(false)" *ngIf="!addingPosition">Add exit point</button> -->
-        <!-- <button class="maze__button maze__button--long" (click)="stopAddingPosition()" *ngIf="addingPosition">Cancel adding position</button> -->
       </div>
       <div class="maze__controls--sidebyside">
         <select name="pathsolver" id="pathsolver" class="maze__option" (click)="onLoadPathingAlgorithm($event.target.value)">
@@ -80,6 +66,11 @@
         <button class="maze__button" [class.maze__button--pressed]="!instantPath" (click)="onClickPathInstant(false)">Show Path Drawn</button>
         <button class="maze__button" [class.maze__button--pressed]="instantPath" (click)="onClickPathInstant(true)">Solve Immediatele</button>
       </div>
+      <div class="maze__controls--sidebyside" *ngIf="!instantPath">
+        <div class="maze__controls--text">Speed</div>
+        <input type="range" name="pathspeed" id="pathspeed" min="0.01" max="0.50" step="0.01" class="maze__range" [(ngModel)]="algorithmSolveSpeed" (mouseup)="modifyPathSolveSpeed()">
+        <div class="maze__controls--text">{{ algorithmSolveSpeed | number:'0.2-2' }} s</div>
+      </div>
       <button class="maze__button maze__button--long" (click)="solvePath()" [disabled]="!pathStartLocation || !pathEndLocation">Solve Path</button>
     </section>
 
@@ -90,6 +81,67 @@
         <button class="maze__button maze__button--auto" (click)="generatedMaze.pauseMaze()" *ngIf="!instantDraw">Pause</button>
         <button class="maze__button maze__button--auto" (click)="onToggleGraph()">Graph Overlay</button>
       </div>
+    </section>
+
+    <section class="maze__controls--section" *ngIf="maze.tiles.length > 0">
+      <div class="maze__controls--header">Map Generation Stats</div>
+
+      <div class="maze__stats">
+        <div class="maze__stats--iterations">
+          <div class="maze__stats--header">Iterations</div>
+          <div class="maze__stats--sidebyside" style="height: 100%">
+
+            <div class="maze__stats--ontop">
+              <div class="maze__stats--smallheader">Min</div>
+              <div class="maze__stats--verticalcounter">
+                <div class="maze__stats--verticalcounter--count" [style.height]="iterationCount <= gridArea ? '100%' : createDynamicHeightForCount(gridArea, iterationCount)">
+                  {{ gridArea }}
+                </div>
+              </div>
+            </div>
+            <div class="maze__stats--ontop">
+              <div class="maze__stats--smallheader">Actual</div>
+              <div class="maze__stats--verticalcounter">
+                <div class="maze__stats--verticalcounter--count" [style.height]="iterationCount <= gridArea ? createDynamicHeightForCount(iterationCount, gridArea) : '100%'">
+                  {{ iterationCount }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="maze__stats--time">
+          <div class="maze__stats--header">Time</div>
+          <div class="maze__stats--timetaken">{{ timeFormat(timeTaken) }} s</div>
+        </div>
+        <div class="maze__stats--solvespeed">
+          <div class="maze__stats--header">Solve Speed</div>
+          <div class="maze__stats--smallheader">Iterations per second</div>
+
+          <div class="maze__stats--sidebyside">
+            <div class="maze__stats--sideheader">Maximum</div>
+            <div class="maze__stats--horizontalcounter">
+                <div class="maze__stats--horizontalcounter--count">
+                  {{ maxIterationsPerSecond }}
+                </div>
+            </div>
+          </div>
+          <div class="maze__stats--sidebyside">
+            <div class="maze__stats--sideheader">Current</div>
+            <div class="maze__stats--horizontalcounter">
+                <div class="maze__stats--horizontalcounter--count" [style.width]="createDynamicWidthForCount(iterationsPerSecond[iterationsPerSecond.length - 1].iterations - iterationsPerSecond[iterationsPerSecond.length - 2]?.iterations, maxIterationsPerSecond)">
+                  {{ (iterationsPerSecond[iterationsPerSecond.length - 1].iterations - iterationsPerSecond[iterationsPerSecond.length - 2]?.iterations) || (iterationCount / timeTaken) | number:'0.0-0'}}
+                </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="maze__stats--efficiency">
+          <div class="maze__stats--header">Efficiency</div>
+          <div class="maze__stats--header" [class.maze__stats--efficiency--good]="(gridArea / iterationCount) > 0.5" [class.maze__stats--efficiency--medium]="(gridArea / iterationCount) > 0.2 && (gridArea / iterationCount) < 0.5"  [class.maze__stats--efficiency--bad]="(gridArea / iterationCount) <= 0.2">{{ iterationCount < gridArea ? 'Waiting...' : ((gridArea / iterationCount) * 100 | number:'0.0-0') + '%' }}</div>
+          <button class="maze__button maze__button--auto" [disabled]="!mazeCompleted" (click)="saveData()" *ngIf="!statsSaved">Save Stats</button>
+        </div>
+      </div>
+
     </section>
   </div>
 
