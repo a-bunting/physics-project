@@ -2,9 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import {  Subscription } from 'rxjs';
 import { AldousBroderMaze } from 'src/app/emulations/mazes/algorithms/aldousBroderMaze.model';
 import { Maze2D, MazeAlgorithms, MazeGraph, MazeStatsData, Tile } from 'src/app/emulations/mazes/maze-algorithms.model';
-import { algorithms, AlgorithmStepData } from 'src/app/pathfinding/algorithms.model';
+import { PathingAlgorithms, AlgorithmStepData } from 'src/app/pathfinding/algorithms.model';
 import { aStar } from 'src/app/pathfinding/astar/astar.model';
+import { Dijkstra } from 'src/app/pathfinding/dijkstra/dijkstra.model';
 import { Heuristic, NodeData, PathData } from 'src/app/pathfinding/typedef';
+import { PrimsMaze } from './algorithms/primsMaze.component';
 
 @Component({
 	selector: 'app-mazes',
@@ -17,8 +19,8 @@ export class MazesComponent implements OnInit, OnDestroy {
 	maze: Maze2D = { width: 0, height: 0, tiles: [] };
   generatedMaze: MazeAlgorithms;
   currentData: Subscription;
-  currentMaze: Subscription;
-  mazeAlgorithmName: string = '';
+  pathSubscription: Subscription;
+  mazeAlgorithmName: string = 'prims';
 
   // keep track of the maze as its begin updated
   currentPiece: {i: number, o: number} = { i: 0, o: 0 };
@@ -26,18 +28,21 @@ export class MazesComponent implements OnInit, OnDestroy {
   timeTaken: number = 0;
 
   // maze properties
-  width: number = 25;
-  height: number = 25;
+  width: number = 30;
+  height: number = 20;
   gridArea: number = this.width * this.height;
 
-  // in the case we want the maze to be timed then have variables to define this.
+  // in the case we want the maze to be timed then have variables to define this and sotre data.
   timedMaze: boolean = false;
   timedMazeIterationsPerSecond: number = 100;
   iterationsPerSecond: { time: number, iterations: number }[] = [{ time: 0, iterations: 0 }]
+  maxIterationsPerSecond: number = 0;
+  mazeCompleted: boolean = false;
 
-  // toggle booleans
+  // booleans
   toggleGraph: boolean = false;
   instantDraw: boolean = true;
+  statsSaved: boolean = false;
 
   // maze style properties
   lineWidth: string = "10%";
@@ -45,28 +50,42 @@ export class MazesComponent implements OnInit, OnDestroy {
   // selecting entry and exit points
   pathStartLocation: string = '';
   pathEndLocation: string = '';
-  // addingPosition: boolean = false;
-  // addingStartPosition: boolean = true;
 
   // pathing
   route: string[] = [];
   pathingAlgorithm: string = 'astar';
   instantPath: boolean = true;
+  algorithmsAvailable: {name: string, value: string}[] = [
+    { name: 'Aldous Broder', value: 'aldousbroder'},
+    { name: 'Prims', value: 'prims'}
+  ];
+  algorithm: PathingAlgorithms;
+  currentPathData: AlgorithmStepData = {x: 0, y: 0, open: [], closed: [], finished: false, route: []};
+  algorithmSolveSpeed: number = 0.05;
+
+  // heuristic
+  heuristic: string = '';
+  heuristicOptions: Heuristic[] = [];
+
+  // maze graph variables
+  nodes: MazeGraph;
+  nodeData: NodeData[];
+
+  // mouse interactions
+  clickedTile: { tile: Tile, i: number, o: number };
 
 
   constructor() { }
 
   ngOnInit(): void {
-    document.getElementById('mazes').addEventListener('contextmenu', e => {
-      e.preventDefault();
-      e.stopPropagation();
-    })
+    // stop right click issues...
+    document.getElementById('mazes').addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); })
   }
 
   ngOnDestroy(): void {
     // unsubscribe for the subscriptions
     if(this.currentData) this.currentData.unsubscribe();
-    if(this.currentMaze) this.currentMaze.unsubscribe();
+    if(this.pathSubscription) this.pathSubscription.unsubscribe();
   }
 
   /**
@@ -75,11 +94,11 @@ export class MazesComponent implements OnInit, OnDestroy {
   startNewMazeGeneration(): void {
     // unsubscribe for the subscriptions
     if(this.currentData) this.currentData.unsubscribe();
-    if(this.currentMaze) this.currentMaze.unsubscribe();
+    if(this.pathSubscription) this.pathSubscription.unsubscribe();
     // reset data
     this.iterationsPerSecond = [{ time: 0, iterations: 0 }]
     this.currentPiece = { i: 0, o: 0 };
-    this.iterationCount = 0;
+    this.iterationCount = 1;
     this.timeTaken = 0;
     // reset any path positioning
     this.pathStartLocation = '';
@@ -90,12 +109,10 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.mazeCompleted = false;
     this.generatedMaze = this.loadMazeType(this.mazeAlgorithmName);
     this.generatedMaze.mazeGenerationSpeed(this.timedMazeIterationsPerSecond);
+    this.gridArea = this.width * this.height;
     // and generate the maze
     this.generate();
   }
-
-  maxIterationsPerSecond: number = 0;
-  mazeCompleted: boolean = false;
 
   /**
    * Starts the maze generation process...
@@ -107,7 +124,7 @@ export class MazesComponent implements OnInit, OnDestroy {
       this.currentData = this.generatedMaze.currentData.subscribe((pos: { maze: Maze2D, i: number, o: number, iteration: number, timeTaken: number, finalIteration: boolean }) => {
         if(pos) {
           this.currentPiece = { i: pos.i, o: pos.o };
-          this.iterationCount = pos.iteration;
+          this.iterationCount = pos.iteration + 1;
           this.timeTaken = pos.timeTaken / 1000;
           this.maze = pos.maze;
 
@@ -130,7 +147,7 @@ export class MazesComponent implements OnInit, OnDestroy {
 
           // after the final iteration build the graph and traversal
           if(pos.finalIteration) {
-            const algorithm: algorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
+            const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
             this.generateNodesGraph(pos.maze, algorithm);
             this.mazeCompleted = true;
           }
@@ -142,20 +159,22 @@ export class MazesComponent implements OnInit, OnDestroy {
     }
   }
 
-  generateNodesGraph(maze: Maze2D, algorithm: algorithms): void {
+  /**
+   * Generate a graph from the maze positions. This is used for navigation.
+   * @param maze
+   * @param algorithm
+   */
+  generateNodesGraph(maze: Maze2D, algorithm: PathingAlgorithms): void {
     this.nodes = this.generatedMaze.generateMazeGraph(maze);
     this.nodeData = algorithm.networkConversionToNodeData(this.nodes.nodes, { id: 'id', x: 'x', y: 'y', connections: 'connections' });
   }
 
-  nodes: MazeGraph;
-  nodeData: NodeData[];
-  algorithm: algorithms;
-
-  pathSubscription: Subscription;
-  currentPathData: AlgorithmStepData = {x: 0, y: 0, open: [], closed: [], finished: false, route: []};
-
-  clickedTile: { tile: Tile, i: number, o: number };
-
+  /**
+   * Loaad the click menu on right click.
+   * @param mouseEvent
+   * @param i
+   * @param o
+   */
   clickMenu(mouseEvent: MouseEvent, i: number, o: number): void {
     // load the menu element.
     const menuElement: HTMLElement = document.getElementById('maze__menu');
@@ -165,17 +184,27 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.clickedTile = { tile: this.maze.tiles[i][o], i, o };
   }
 
+  /**
+   * Hide the right click menu
+   */
   hideClickMenu(): void {
     const menuElement: HTMLElement = document.getElementById('maze__menu');
     menuElement.classList.remove('maze__menu--display');
     this.clickedTile = undefined;
   }
 
+  /**
+   * Sets the maze entry point
+   */
   setEntryToMaze(id: string): void {
     this.pathStartLocation = id;
     this.hideClickMenu();
   }
 
+  /**
+   * Sets the maze exit point
+   * @param id
+   */
   setExitFromMaze(id: string): void {
     this.pathEndLocation = id;
     this.hideClickMenu();
@@ -219,8 +248,6 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.solvePath();
   }
 
-
-
   /**
    * Solves a path between the start and end locations on the grid.
    */
@@ -230,7 +257,11 @@ export class MazesComponent implements OnInit, OnDestroy {
     const endingNode: NodeData = this.nodeData.find((temp: NodeData) => temp.id === this.pathEndLocation);
     // construct a route
     if(startingNode && endingNode) {
-      const route: string[] = this.algorithm.navigate(startingNode, endingNode, this.nodeData, this.heuristic, this.instantPath ? 0 : this.algorithmSolveSpeed);
+      // if its a heuristic algorithm set the heuristic.
+      if(this.heuristic) {
+        this.algorithm.setHeuristic(this.heuristic);
+      }
+      const route: string[] = this.algorithm.navigate(startingNode, endingNode, this.nodeData, this.instantPath ? 0 : this.algorithmSolveSpeed);
       // push it to the route variable
       this.route = route;
     }
@@ -257,6 +288,7 @@ export class MazesComponent implements OnInit, OnDestroy {
   loadMazeType(mazeName: string): MazeAlgorithms {
     switch(mazeName) {
       case 'aldousbroder': return new AldousBroderMaze();
+      case 'prims': return new PrimsMaze();
     }
   }
 
@@ -265,33 +297,35 @@ export class MazesComponent implements OnInit, OnDestroy {
    * @param algorithmName
    * @returns
    */
-  loadPathingAlgorithm(algorithmName: string): algorithms {
+  loadPathingAlgorithm(algorithmName: string): PathingAlgorithms {
     switch(algorithmName) {
       case 'astar': return new aStar();
+      case 'dijkstra': return new Dijkstra();
     }
   }
 
-  // addPosition(start: boolean): void { this.addingPosition = true; this.addingStartPosition = start; }
-  // stopAddingPosition(): void { this.addingPosition = false; }
-
-  // addPositionHere(i: number, o: number): void {
-  //   if(this.addingPosition) {
-  //     this.addingStartPosition ? this.pathStartLocation = this.maze.tiles[i][o].id : this.pathEndLocation = this.maze.tiles[i][o].id;
-  //     this.addingPosition = false;
-  //   }
-  // }
-
-  // load a pathing algorithm
+  /**
+   * Load a pathing algorithm into the system.
+   * @param algorithm
+   */
   onLoadPathingAlgorithm(algorithm: string): void {
     this.algorithm = this.loadPathingAlgorithm(algorithm);
     // if the algorithm is real load the heuristic data
     if(this.algorithm) {
-      this.heuristicOptions = this.algorithm.heuristics;
+      this.heuristicOptions = this.algorithm.getHeuristics(); // load the heuristic data...
+      this.heuristic = this.heuristicOptions.length > 0 ? this.heuristicOptions[0].name : ''; // set the heuristic to the first one
+
+      if(this.maze.tiles.length > 0) {
+        // set the path start and end locations to the top left and bottom right of the maze
+        this.pathStartLocation = this.maze.tiles[0][0].id;
+        this.pathEndLocation = this.maze.tiles[this.height - 1][this.width - 1].id;
+      }
     }
   }
 
-  statsSaved: boolean = false;
-
+  /**
+   * Saves previous map generation data into the local storage
+   */
   saveData(): void {
     // make a new object
     const newData: MazeStatsData = {
@@ -347,6 +381,12 @@ export class MazesComponent implements OnInit, OnDestroy {
     return str;
   }
 
+  /**
+   * Returns a number of seconds in the format mm:ss:dddd
+   *
+   * @param seconds
+   * @returns
+   */
   timeFormat(seconds: number): string {
     let minutes: number = seconds < 60 ? 0 : Math.floor(seconds / 60);
     let secondsBase: number = Math.floor(seconds - (minutes * 60));
@@ -354,13 +394,42 @@ export class MazesComponent implements OnInit, OnDestroy {
     return `${minutes < 10 ? `0` + minutes : minutes}:${secondsBase < 10 ? '0' + secondsBase : secondsBase }:${afterSeconds.toString().substring(2, 4)}`
   }
 
+  /**
+   * Because of the range of options for a tile to be styles, this function will execute the specific style
+   * for a specific tile.
+   *
+   * replaces:
+   *    [class.maze__tile--current]="(currentPiece.i === i && currentPiece.o === o) || (currentPathData.x === i && currentPathData.y === o)"
+        [class.maze__tile--enter]="(pathStartLocation === tile.id) || partOfRoute(tile.id)"
+        [class.maze__tile--exit]="pathEndLocation === tile.id"
+        [class.maze__tile--open]="partOfOpenList(tile.id)"
+        [class.maze__tile--closed]="partOfClosedList(tile.id) && !partOfRoute(tile.id)"
+   *
+   * @param tile
+   * @returns
+   */
+  tileStyle(i: number, o: number, tile: Tile): string {
+    // find out what we can about the tile...
+    const current: boolean = (this.currentPiece.i === i && this.currentPiece.o === o) || (this.currentPathData.x === i && this.currentPathData.y === o);
+    const entryPoint: boolean = this.pathStartLocation === tile.id;
+    const partOfRoute: boolean = this.partOfRoute(tile.id);
+    const exitPoint: boolean = this.pathEndLocation === tile.id;
+    const openList: boolean = this.partOfOpenList(tile.id);
+    const closedList: boolean = this.partOfClosedList(tile.id);// && !partOfRoute(tile.id)
+
+    if(current) return 'maze__tile--current';
+    if(entryPoint) return 'maze__tile--enter';
+    if(exitPoint) return 'maze__tile--exit';
+    if(partOfRoute) return 'maze__tile--enter'
+    if(openList) return 'maze__tile--open';
+    if(closedList) return 'maze__tile--closed';
+
+    return '';
+  }
+
   // the following functions simply determine the height of a div by the ratio between the max and min values.
   createDynamicWidthForCount(current: number, max: number): string { return current < max ? `${(current / max)*100}%` : `100%`; }
   createDynamicHeightForCount(current: number, max: number): string { return `${(current / max)*100}%` }
-
-  heuristic: string = '';
-  heuristicOptions: Heuristic[] = [];
-  algorithmSolveSpeed: number = 0.1;
 
   // change values
   modifyMazeBuildSpeed(): void { if(this.generatedMaze) this.generatedMaze.mazeGenerationSpeed(this.timedMazeIterationsPerSecond); }
@@ -370,5 +439,4 @@ export class MazesComponent implements OnInit, OnDestroy {
   onToggleGraph(): void { this.toggleGraph = !this.toggleGraph; }
   onClickInstant(instant: boolean) { this.instantDraw = instant; }
   onClickPathInstant(instant: boolean) { this.instantPath = instant; }
-  onPlay(): void { }
 }

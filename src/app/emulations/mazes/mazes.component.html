@@ -5,11 +5,7 @@
     <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
       <div class="maze__tile"
         [style]="createLinearGradientStyle(tile.passable.l, tile.passable.r, tile.passable.t, tile.passable.b)"
-        [class.maze__tile--current]="(currentPiece.i === i && currentPiece.o === o) || (currentPathData.x === i && currentPathData.y === o)"
-        [class.maze__tile--enter]="(pathStartLocation === tile.id) || partOfRoute(tile.id)"
-        [class.maze__tile--exit]="pathEndLocation === tile.id"
-        [class.maze__tile--open]="partOfOpenList(tile.id)"
-        [class.maze__tile--closed]="partOfClosedList(tile.id) && !partOfRoute(tile.id)"
+        [class]="tileStyle(i,o,tile)"
         (click)="clickMenu($event, i, o);" (contextmenu)="hideClickMenu()"
         *ngFor="let tile of row; let o = index">
 
@@ -30,7 +26,7 @@
       <div class="maze__controls--header">Maze Algorithm</div>
       <select name="algorithm" id="algorithm" class="maze__option" (change)="onLoadMazeType($event.target.value)">
         <option value="" disabled selected>Select maze algorithm</option>
-        <option value="aldousbroder">Aldous Broder</option>
+        <option value="{{ alg.value }}" [selected]="alg.value === mazeAlgorithmName" *ngFor="let alg of algorithmsAvailable">{{ alg.name }}</option>
       </select>
       <div class="maze__controls--sidebyside">
         <input type="text" name="width" id="width" placeholder="Width" class="maze__input" [(ngModel)]="width">
@@ -43,7 +39,7 @@
       <div class="maze__controls--sidebyside" *ngIf="!instantDraw">
         <div class="maze__controls--text"> Iterations / s </div>
         <input type="range" name="itpersec" id="itpersec" min="1" max="300" class="maze__range" [(ngModel)]="timedMazeIterationsPerSecond" (mouseup)="modifyMazeBuildSpeed()">
-        <div class="maze__controls--text">{{ timedMazeStepTime | number:'0.0-0' }}</div>
+        <div class="maze__controls--text">{{ timedMazeIterationsPerSecond | number:'0.0-0' }}</div>
       </div>
       <button class="maze__button maze__button--long" (click)="startNewMazeGeneration()">Generate Maze</button>
     </section>
@@ -56,10 +52,11 @@
         <select name="pathsolver" id="pathsolver" class="maze__option" (click)="onLoadPathingAlgorithm($event.target.value)">
           <option value="" disabled selected>Select path algorithm</option>
           <option value="astar">A*</option>
+          <option value="dijkstra">Dijkstra</option>
         </select>
-        <select name="pathsolver" id="pathsolver" class="maze__option" (click)="onLoadPathingHeuristic($event.target.value)" *ngIf="algorithm">
+        <select name="pathsolver" id="pathsolver" class="maze__option" (click)="onLoadPathingHeuristic($event.target.value)" *ngIf="heuristicOptions.length > 0">
           <option value="" disabled selected>Select heuristic</option>
-          <option value="{{ heuristic.name }}" *ngFor="let heuristic of heuristicOptions">{{ heuristic.name }}</option>
+          <option value="{{ heuristicOption.name }}" *ngFor="let heuristicOption of heuristicOptions" [selected]="heuristicOption.name === heuristic">{{ heuristicOption.name }}</option>
         </select>
       </div>
       <div class="maze__controls--sidebyside">
@@ -67,7 +64,7 @@
         <button class="maze__button" [class.maze__button--pressed]="instantPath" (click)="onClickPathInstant(true)">Solve Immediatele</button>
       </div>
       <div class="maze__controls--sidebyside" *ngIf="!instantPath">
-        <div class="maze__controls--text">Speed</div>
+        <div class="maze__controls--text">Step Duration</div>
         <input type="range" name="pathspeed" id="pathspeed" min="0.01" max="0.50" step="0.01" class="maze__range" [(ngModel)]="algorithmSolveSpeed" (mouseup)="modifyPathSolveSpeed()">
         <div class="maze__controls--text">{{ algorithmSolveSpeed | number:'0.2-2' }} s</div>
       </div>

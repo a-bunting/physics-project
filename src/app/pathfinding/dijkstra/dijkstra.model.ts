@@ -1,14 +1,14 @@
 import { PathingAlgorithms } from "../algorithms.model"
 import { Heuristic, NodeData, PathData } from '../typedef';
 
-export class aStar extends PathingAlgorithms {
+export class Dijkstra extends PathingAlgorithms {
 
   constructor() {
       super();
   }
 
-  // all heuristics for astar
-  getHeuristics(): Heuristic[] { return this.heuristics; }
+  // no heurstics for dijkstra
+  getHeuristics(): Heuristic[] { return []; }
 
   /**
    * Navigates from A to B
@@ -21,14 +21,10 @@ export class aStar extends PathingAlgorithms {
    * @returns
    */
   public navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], iterationDelay: number = 0) : string[] {
-    // ensure heuristic is a Heuristic type...
-    const heuristic: Heuristic = this.heuristic;
-
     // set up our two lists
     // - open is for the nodes which have not yet been explored but have been found
     // - closed is for the nodes which have been explored.
-    let hInitial: number = heuristic.h(fromLocation.x, fromLocation.y, toLocation.x, toLocation.y);
-    let openNodes: PathData[] = [ { id: fromLocation.id, parent: '', g: 0, h: hInitial, f: hInitial, traversable: fromLocation.traversable } ];
+    let openNodes: PathData[] = [ { id: fromLocation.id, parent: '', g: 0, h: 0, f: 0, traversable: fromLocation.traversable } ];
     let closedNodes: PathData[] = [];
     let current: PathData;
     let finished: boolean = false;
@@ -44,7 +40,7 @@ export class aStar extends PathingAlgorithms {
 
       const fn = () => {
         if(openNodes.length > 0) {
-          [openNodes, closedNodes, current, finished] = this.iterate(openNodes, closedNodes, current, toLocation, network, heuristic);
+          [openNodes, closedNodes, current, finished] = this.iterate(openNodes, closedNodes, current, toLocation, network);
           // get the coordinates of the current node.
           let currentLocation: NodeData = this.nodeLocator(current.id, [...network]);
           const currentRoute: string[] = this.buildFinalPathFromClosed(closedNodes, fromLocation);
@@ -64,7 +60,7 @@ export class aStar extends PathingAlgorithms {
     } else {
       // do it all them report back the final path...
       while(openNodes.length > 0) {
-        [openNodes, closedNodes, current, finished] = this.iterate(openNodes, closedNodes, current, toLocation, network, heuristic);
+        [openNodes, closedNodes, current, finished] = this.iterate(openNodes, closedNodes, current, toLocation, network);
         if(finished) break;
       }
       // get the coordinates of the last node.
@@ -110,7 +106,7 @@ export class aStar extends PathingAlgorithms {
  * @param heuristic
  * @returns
  */
-  iterate(openNodes: PathData[], closedNodes: PathData[], current: PathData, toLocation: NodeData, network: NodeData[], heuristic: Heuristic): [PathData[], PathData[], PathData, boolean] {
+  iterate(openNodes: PathData[], closedNodes: PathData[], current: PathData, toLocation: NodeData, network: NodeData[]): [PathData[], PathData[], PathData, boolean] {
       // make current the value with the lowest f value (as the lowest should be at the start of openNodes)
       current = { ...openNodes[0] };
       // add to closed...
@@ -145,11 +141,10 @@ export class aStar extends PathingAlgorithms {
 
             // if its not in the open list or the new path is shorter
             if(neighbourId === -1 || g < current.g) {
-              let h: number = heuristic.h(neighbourSegment.x, neighbourSegment.y, toLocation.x, toLocation.y);
-              let f: number = g + h;
+              let f: number = g;
 
               if(neighbourId === -1) {
-                openNodes.push({ id: parentNeighbours[i], parent: current.id, g, h, f, traversable: true });
+                openNodes.push({ id: parentNeighbours[i], parent: current.id, g, h: 0, f, traversable: true });
               }
             }
           }

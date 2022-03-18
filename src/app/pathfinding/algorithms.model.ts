@@ -5,18 +5,19 @@ export interface AlgorithmStepData {
   x: number; y: number; open: PathData[]; closed: PathData[]; finished: boolean; route: string[]
 }
 
-export abstract class algorithms {
+export abstract class PathingAlgorithms {
 
   algorithmCurrentData = new BehaviorSubject<AlgorithmStepData>({ x: 0, y: 0, open: [], closed: [], finished: false, route: [] });
   algorithmSolutionSpeed: number = 1;
+  heuristic: Heuristic;
 
-  abstract navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], heuristicName: string, iterationDelay: number);
+  abstract navigate(fromLocation: NodeData, toLocation: NodeData, network: NodeData[], iterationDelay: number);
+  abstract getHeuristics(): Heuristic[];
 
   constructor() {}
 
   // herustic algorithms found at https://www.geeksforgeeks.org/a-search-algorithm/
   public heuristics: Heuristic[] = [
-    { name: 'Dijkstra', h: (x1, x2, y1, y2) => { return 0; } },
     { name: 'Manhatten', h: (x1, y1, x2, y2) => { return Math.abs(x1 - x2) + Math.abs(y1 - y2); } },
     { name: 'Euclidian', h: (x1, y1, x2, y2) => { return Math.sqrt(Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2)); } },
     {
@@ -36,8 +37,16 @@ export abstract class algorithms {
    * @param name
    * @returns
    */
-   public getHeuristic(name: string): Heuristic {
+  public getHeuristic(name: string): Heuristic {
     return this.heuristics.find((temp: Heuristic) => temp.name === name) || this.heuristics[0];
+  }
+
+  /**
+   * Sets a heuristic which will be used be any heuristic algorithms such as A*
+   * @param name
+   */
+  public setHeuristic(name: string): void {
+    this.heuristic = this.getHeuristic(name);
   }
 
   /**

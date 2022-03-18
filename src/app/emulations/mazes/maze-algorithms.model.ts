@@ -116,7 +116,6 @@ export abstract class MazeAlgorithms {
      * @param newSpeed
      */
     mazeGenerationSpeed(newSpeed: number): void {
-      console.log(newSpeed);
       this.iterationsPerSecond = newSpeed;
     }
 
