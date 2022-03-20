@@ -28,8 +28,8 @@ export class MazesComponent implements OnInit, OnDestroy {
   timeTaken: number = 0;
 
   // maze properties
-  width: number = 30;
-  height: number = 20;
+  width: number = 10;
+  height: number = 5;
   gridArea: number = this.width * this.height;
 
   // in the case we want the maze to be timed then have variables to define this and sotre data.
@@ -157,6 +157,10 @@ export class MazesComponent implements OnInit, OnDestroy {
       // and generate the data...
       this.generatedMaze.generateMaze(this.width, this.height, this.instantDraw ? 0 : this.timedMazeIterationsPerSecond );
     }
+  }
+
+  thickenMaze(): void {
+    this.maze = this.generatedMaze.makeWallsThick(this.maze);
   }
 
   /**
@@ -414,9 +418,11 @@ export class MazesComponent implements OnInit, OnDestroy {
     const entryPoint: boolean = this.pathStartLocation === tile.id;
     const partOfRoute: boolean = this.partOfRoute(tile.id);
     const exitPoint: boolean = this.pathEndLocation === tile.id;
+    const wall: boolean = tile.wall;
     const openList: boolean = this.partOfOpenList(tile.id);
     const closedList: boolean = this.partOfClosedList(tile.id);// && !partOfRoute(tile.id)
 
+    if(wall) return 'maze__tile--wall';
     if(current) return 'maze__tile--current';
     if(entryPoint) return 'maze__tile--enter';
     if(exitPoint) return 'maze__tile--exit';
