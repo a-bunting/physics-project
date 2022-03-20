@@ -119,6 +119,13 @@ export abstract class MazeAlgorithms {
       this.iterationsPerSecond = newSpeed;
     }
 
+    /**
+     * Makes thick walls throughout the maze so there are no sharp turns.
+     * Useful for game mazes.
+     * Elegant? No. Working? Yeah!
+     * @param maze
+     * @returns
+     */
     makeWallsThick(maze: Maze2D): Maze2D {
       // new maze is twice as thick as the last
       let thickMaze: Maze2D = this.generateMazeStructure((maze.width * 2) + 1, (maze.height * 2) + 1, true, true);
@@ -131,27 +138,30 @@ export abstract class MazeAlgorithms {
 
           // set this tile as open
           thickMaze.tiles[2*i][2*o].wall = false;
-          thickMaze.tiles[2*i][2*o].passable = tile.passable;
+          thickMaze.tiles[2*i][2*o].wall = false;
 
-          // do stuff on all adjacent tiles...
-          if(2*i + 1 <= thickMaze.height - 1) {
-            tile.passable.b ? thickMaze.tiles[(2*i)+1][2*o] = { ...tile } : thickMaze.tiles[(2*i)+1][2*o].wall = true;
-          }
-
-          if(2*o + 1 <= thickMaze.width - 1) {
-            tile.passable.r ? thickMaze.tiles[2*i][(2*o)+1] = { ...tile } : thickMaze.tiles[2*i][(2*o)+1].wall = true;
-          }
+          // to make thickmaze essentially if the cell is passable tot he right, duplicate this tile right, and the same in the y direction
+          // if it is NOT passable, make thay adjacent cell a wall...
+          if(2*i + 1 <= thickMaze.height - 1) { tile.passable.b ? thickMaze.tiles[(2*i)+1][2*o] = { ...tile } : thickMaze.tiles[(2*i)+1][2*o].wall = true; }
+          if(2*o + 1 <= thickMaze.width - 1) { tile.passable.r ? thickMaze.tiles[2*i][(2*o)+1] = { ...tile } : thickMaze.tiles[2*i][(2*o)+1].wall = true; }
         }
       }
 
+      // and make every cell passable (no need for passable when you have walls!)
       for(let t = 0 ; t < thickMaze.height ; t++) {
         for(let s = 0 ; s < thickMaze.width ; s++) {
-          thickMaze.tiles[t][s].passable = { t: true, b: true, l: true, r: true };
+          thickMaze.tiles[t][s].passable = thickMaze.tiles[t][s].wall ? { t: false, b: false, l: false, r: false } : { t: true, b: true, l: true, r: true };
+          // get rid of the last cell which will always be a wall next to a wall..
+          if(s === thickMaze.width - 1) {
+            thickMaze.tiles[t].unshift(thickMaze.tiles[t][s]);
+            thickMaze.tiles[t].splice(s, 1);
+          }
         }
       }
 
-      // make all the otuside walls...
-
+      // make the top a wall and the bottom only have a single line of wall.
+      thickMaze.tiles.unshift(thickMaze.tiles[thickMaze.tiles.length - 1]);
+      thickMaze.tiles.splice(thickMaze.tiles.length - 1, 1);
 
       return thickMaze;
     }
