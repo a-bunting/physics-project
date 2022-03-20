@@ -42,6 +42,7 @@
         <div class="maze__controls--text">{{ timedMazeIterationsPerSecond | number:'0.0-0' }}</div>
       </div>
       <button class="maze__button maze__button--long" (click)="startNewMazeGeneration()">Generate Maze</button>
+      <button class="maze__button maze__button--long" (click)="thickenMaze()">Thicken Maze</button>
     </section>
 
     <section class="maze__controls--section"  *ngIf="maze.tiles.length > 0">

@@ -6,7 +6,7 @@ export interface Maze2D {
 }
 
 export interface Tile {
-  id: string, passable: {l:boolean,r:boolean,t:boolean,b:boolean}; speed: number;
+  id: string, passable: {l:boolean,r:boolean,t:boolean,b:boolean}; speed: number; wall: boolean;
 }
 
 export interface IterationData {
@@ -49,7 +49,7 @@ export abstract class MazeAlgorithms {
    * @param height
    * @returns
    */
-  generateMazeStructure(width: number, height: number): Maze2D {
+  generateMazeStructure(width: number, height: number, makeWalled: boolean = false, passable: boolean = false): Maze2D {
      // make a new maze object
      let maze: Maze2D = { width, height, tiles: [] };
      // build the maze...
@@ -60,7 +60,7 @@ export abstract class MazeAlgorithms {
        for(let o = 0 ; o < width ; o++) {
          // i is the column
          // o is the row
-         maze.tiles[i][o] = { id: this.generateRandomString(5), passable: {l:false,r:false,t:false,b:false}, speed: 0 };
+         maze.tiles[i][o] = { id: this.generateRandomString(5), passable: {l:passable,r:passable,t:passable,b:passable}, speed: 0, wall: makeWalled };
        }
      }
      return maze;
@@ -119,4 +119,42 @@ export abstract class MazeAlgorithms {
       this.iterationsPerSecond = newSpeed;
     }
 
+    makeWallsThick(maze: Maze2D): Maze2D {
+      // new maze is twice as thick as the last
+      let thickMaze: Maze2D = this.generateMazeStructure((maze.width * 2) + 1, (maze.height * 2) + 1, true, true);
+
+      for(let i = 0 ; i < maze.height ; i++) {
+        //each row
+        for(let o = 0 ; o < maze.width ; o++) {
+          // each column
+          const tile: Tile = maze.tiles[i][o];
+
+          // set this tile as open
+          thickMaze.tiles[2*i][2*o].wall = false;
+          thickMaze.tiles[2*i][2*o].passable = tile.passable;
+
+          // do stuff on all adjacent tiles...
+          if(2*i + 1 <= thickMaze.height - 1) {
+            tile.passable.b ? thickMaze.tiles[(2*i)+1][2*o] = { ...tile } : thickMaze.tiles[(2*i)+1][2*o].wall = true;
+          }
+
+          if(2*o + 1 <= thickMaze.width - 1) {
+            tile.passable.r ? thickMaze.tiles[2*i][(2*o)+1] = { ...tile } : thickMaze.tiles[2*i][(2*o)+1].wall = true;
+          }
+        }
+      }
+
+      for(let t = 0 ; t < thickMaze.height ; t++) {
+        for(let s = 0 ; s < thickMaze.width ; s++) {
+          thickMaze.tiles[t][s].passable = { t: true, b: true, l: true, r: true };
+        }
+      }
+
+      // make all the otuside walls...
+
+
+      return thickMaze;
+    }
+    // 20w -> 41
+    // 12 --> 25
 }
