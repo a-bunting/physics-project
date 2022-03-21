@@ -9,7 +9,7 @@
         (click)="clickMenu($event, i, o);" (contextmenu)="hideClickMenu()"
         *ngFor="let tile of row; let o = index">
 
-          <div class="maze__graph" *ngIf="toggleGraph">
+          <div class="maze__graph" *ngIf="toggleGraph && !tile.wall">
             <div class="maze__graph--left" *ngIf="tile.passable.l"></div>
             <div class="maze__graph--right" *ngIf="tile.passable.r"></div>
             <div class="maze__graph--top" *ngIf="tile.passable.t"></div>
@@ -42,7 +42,11 @@
         <div class="maze__controls--text">{{ timedMazeIterationsPerSecond | number:'0.0-0' }}</div>
       </div>
       <button class="maze__button maze__button--long" (click)="startNewMazeGeneration()">Generate Maze</button>
-      <button class="maze__button maze__button--long" (click)="thickenMaze()">Thicken Maze</button>
+      <div class="maze__controls--sidebyside">
+        <button class="maze__button maze__button--long" (click)="thickenMaze()">Thicken Maze</button>
+        <button class="maze__button maze__button--long" (click)="mirrorMazeXDirection()">Mirror X</button>
+        <button class="maze__button maze__button--long" (click)="mirrorMazeYDirection()">Mirror Y</button>
+      </div>
     </section>
 
     <section class="maze__controls--section"  *ngIf="maze.tiles.length > 0">
@@ -168,6 +172,10 @@
     <div class="maze__menu--input">
       <input type="checkbox" name="bottom" id="bottom" [checked]="!clickedTile.tile.passable.b" (change)="changeTileWall('b')">
       <label for="bottom">Bottom Wall</label>
+    </div>
+    <div class="maze__menu--input">
+      <input type="checkbox" name="wall" id="wall" [checked]="clickedTile.tile.wall" (change)="addOrRemoveWall()">
+      <label for="wall">Wall Section</label>
     </div>
   </div>
 </div>

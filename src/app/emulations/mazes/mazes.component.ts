@@ -161,6 +161,20 @@ export class MazesComponent implements OnInit, OnDestroy {
 
   thickenMaze(): void {
     this.maze = this.generatedMaze.makeWallsThick(this.maze);
+    const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
+    this.generateNodesGraph(this.maze, algorithm);
+  }
+
+  mirrorMazeXDirection(): void {
+    this.maze = this.generatedMaze.mirrorMazeXDirection(this.maze);
+    const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
+    this.generateNodesGraph(this.maze, algorithm);
+  }
+
+  mirrorMazeYDirection(): void {
+    this.maze = this.generatedMaze.mirrorMazeYDirection(this.maze);
+    const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
+    this.generateNodesGraph(this.maze, algorithm);
   }
 
   /**
@@ -170,6 +184,7 @@ export class MazesComponent implements OnInit, OnDestroy {
    */
   generateNodesGraph(maze: Maze2D, algorithm: PathingAlgorithms): void {
     this.nodes = this.generatedMaze.generateMazeGraph(maze);
+    algorithm = algorithm || this.loadPathingAlgorithm(this.pathingAlgorithm);
     this.nodeData = algorithm.networkConversionToNodeData(this.nodes.nodes, { id: 'id', x: 'x', y: 'y', connections: 'connections' });
   }
 
@@ -181,11 +196,16 @@ export class MazesComponent implements OnInit, OnDestroy {
    */
   clickMenu(mouseEvent: MouseEvent, i: number, o: number): void {
     // load the menu element.
-    const menuElement: HTMLElement = document.getElementById('maze__menu');
-    menuElement.classList.add('maze__menu--display');
-    menuElement.style.left = `${mouseEvent.clientX + 10}px`;
-    menuElement.style.top = `${mouseEvent.clientY}px`;
-    this.clickedTile = { tile: this.maze.tiles[i][o], i, o };
+    if(!this.clickedTile) {
+      const menuElement: HTMLElement = document.getElementById('maze__menu');
+      menuElement.classList.add('maze__menu--display');
+      menuElement.style.left = `${mouseEvent.clientX + 10}px`;
+      menuElement.style.top = `${mouseEvent.clientY}px`;
+      this.clickedTile = { tile: this.maze.tiles[i][o], i, o };
+    } else {
+      this.hideClickMenu();
+    }
+
   }
 
   /**
@@ -219,7 +239,6 @@ export class MazesComponent implements OnInit, OnDestroy {
    * @param side
    */
   changeTileWall(side: string): void {
-    this.clickedTile.tile.passable[side] = !this.clickedTile.tile.passable[side];
 
     // find the tile next to it and make sure it also is blocked or opened.
     let newi: number;
@@ -228,29 +247,75 @@ export class MazesComponent implements OnInit, OnDestroy {
 
     switch(side) {
       case 'l':
+        this.clickedTile.tile.passable[side] = !this.clickedTile.tile.passable[side];
         newo = this.clickedTile.o - 1 >= 0 ? this.clickedTile.o - 1 : 0;
         newi = this.clickedTile.i;
         newside = 'r'; break;
       case 'r':
+        this.clickedTile.tile.passable[side] = !this.clickedTile.tile.passable[side];
         newo = this.clickedTile.o + 1 <= this.maze.width - 1 ? this.clickedTile.o + 1 : this.maze.width - 1;
         newi = this.clickedTile.i;
         newside = 'l'; break;
       case 't':
+        this.clickedTile.tile.passable[side] = !this.clickedTile.tile.passable[side];
         newo = this.clickedTile.o;
         newi = this.clickedTile.i - 1 >= 0 ? this.clickedTile.i - 1 : 0;
         newside = 'b'; break;
       case 'b':
+        this.clickedTile.tile.passable[side] = !this.clickedTile.tile.passable[side];
         newo = this.clickedTile.o;
         newi = this.clickedTile.i + 1 <= this.maze.height - 1 ? this.clickedTile.i + 1 : this.maze.height - 1;
         newside = 't'; break;
+      }
+
+      // if the new coordinates are different to the originals then no change needed...
+      if((newi !== this.clickedTile.i) || (newo !== this.clickedTile.o)) { this.maze.tiles[newi][newo].passable[newside] = this.clickedTile.tile.passable[side]; }
+
+      this.generateNodesGraph(this.maze, this.algorithm);
+      this.solvePath();
     }
 
-    // if the new coordinates are different to the originals then no change needed...
-    if((newi !== this.clickedTile.i) || (newo !== this.clickedTile.o)) { this.maze.tiles[newi][newo].passable[newside] = this.clickedTile.tile.passable[side]; }
+    /**
+   * Adds or removes a wall section using the right click menu
+   * slightly more complex logic to work through...
+     */
+    addOrRemoveWall(): void {
+      const impassible = { t: false, b: false, l: false, r: false };
 
-    this.generateNodesGraph(this.maze, this.algorithm);
-    this.solvePath();
-  }
+      // helper function to open or close borders between cells.
+      const checkBorders = (tile1: { i: number, o: number, tile: Tile}, tile2: { i: number, o: number, tile: Tile}) => {
+        // find a common edge...
+        if(tile1.i === tile2.i - 1) {
+          // tile 1 is just under tile 2
+          if(!tile1.tile.wall && !tile2.tile.wall) { tile1.tile.passable.b = true; tile2.tile.passable.t = true; } else { tile1.tile.passable.b = false; tile2.tile.passable.t = false; }
+        } else if( tile1.i === tile2.i + 1) {
+          /// tile 1 is on top of tile 2
+          if(!tile1.tile.wall && !tile2.tile.wall) { tile1.tile.passable.t = true; tile2.tile.passable.b = true; } else { tile1.tile.passable.t = false; tile2.tile.passable.b = false; }
+        } else if(tile1.o === tile2.o - 1) {
+          // tile 1 is to the left of tile 2
+          if(!tile1.tile.wall && !tile2.tile.wall) { tile1.tile.passable.r = true; tile2.tile.passable.l = true; } else { tile1.tile.passable.r = false; tile2.tile.passable.l = false; }
+        } else if(tile1.o === tile2.o + 1) {
+          // tile 1 is to the right of tile 2
+          if(!tile1.tile.wall && !tile2.tile.wall) { tile1.tile.passable.l = true; tile2.tile.passable.r = true; } else { tile1.tile.passable.l = false; tile2.tile.passable.r = false; }
+        }
+      }
+
+      // change the wall status
+      if(this.clickedTile.tile.wall === true) {
+        this.clickedTile.tile.wall = false;
+      } else {
+        this.clickedTile.tile.wall = true;
+        this.clickedTile.tile.passable = {...impassible};
+      }
+
+      // change the adjacent cells...
+      if(this.clickedTile.o - 1 >= 0)                     checkBorders(this.clickedTile, { i: this.clickedTile.i, o: this.clickedTile.o - 1, tile: this.maze.tiles[this.clickedTile.i][this.clickedTile.o - 1] });
+      if(this.clickedTile.o + 1<= this.maze.width - 1)    checkBorders(this.clickedTile, { i: this.clickedTile.i, o: this.clickedTile.o + 1, tile: this.maze.tiles[this.clickedTile.i][this.clickedTile.o + 1] });
+      if(this.clickedTile.i - 1 >= 0)                     checkBorders(this.clickedTile, { i: this.clickedTile.i - 1, o: this.clickedTile.o, tile: this.maze.tiles[this.clickedTile.i - 1][this.clickedTile.o] });
+      if(this.clickedTile.i + 1 <= this.maze.height - 1)  checkBorders(this.clickedTile, { i: this.clickedTile.i + 1, o: this.clickedTile.o, tile: this.maze.tiles[this.clickedTile.i + 1][this.clickedTile.o] });
+
+      this.generateNodesGraph(this.maze, this.algorithm);
+    }
 
   /**
    * Solves a path between the start and end locations on the grid.
@@ -321,8 +386,8 @@ export class MazesComponent implements OnInit, OnDestroy {
 
       if(this.maze.tiles.length > 0) {
         // set the path start and end locations to the top left and bottom right of the maze
-        this.pathStartLocation = this.maze.tiles[0][0].id;
-        this.pathEndLocation = this.maze.tiles[this.height - 1][this.width - 1].id;
+        this.pathStartLocation = this.pathStartLocation || this.maze.tiles[0][0].id;
+        this.pathEndLocation = this.pathEndLocation || this.maze.tiles[this.height - 1][this.width - 1].id;
       }
     }
   }

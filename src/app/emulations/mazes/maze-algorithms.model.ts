@@ -80,17 +80,19 @@ export abstract class MazeAlgorithms {
       for(let o= 0 ; o < maze.tiles[i].length ; o++) {
         // each columns in row i
         const mazeSection: Tile = maze.tiles[i][o];
+
         let connections: string[] = [];
         // connections can only be up down left right, so.
-        mazeSection.passable.l ? connections.push(maze.tiles[i][o-1].id) : null;
-        mazeSection.passable.r ? connections.push(maze.tiles[i][o+1].id) : null;
-        mazeSection.passable.t ? connections.push(maze.tiles[i-1][o].id) : null;
-        mazeSection.passable.b ? connections.push(maze.tiles[i+1][o].id) : null;
+        mazeSection.passable.l && maze.tiles[i][o-1].passable.r ? connections.push(maze.tiles[i][o-1].id) : null;
+        mazeSection.passable.r && maze.tiles[i][o+1].passable.l ? connections.push(maze.tiles[i][o+1].id) : null;
+        mazeSection.passable.t && maze.tiles[i-1][o].passable.b ? connections.push(maze.tiles[i-1][o].id) : null;
+        mazeSection.passable.b && maze.tiles[i+1][o].passable.t ? connections.push(maze.tiles[i+1][o].id) : null;
         // build the node
         const node: MazeNode = { x: i, y: o, id: mazeSection.id, connections: connections }
         graph.nodes.push(node);
       }
     }
+    console.log(graph);
     return graph;
   }
 
@@ -129,7 +131,9 @@ export abstract class MazeAlgorithms {
     makeWallsThick(maze: Maze2D): Maze2D {
       // new maze is twice as thick as the last
       let thickMaze: Maze2D = this.generateMazeStructure((maze.width * 2) + 1, (maze.height * 2) + 1, true, true);
+      const impassible = { t: false, b: false, l: false, r: false };
 
+      // need multiple iterations because the maze is being rebuilt and no true forward lookup is available...
       for(let i = 0 ; i < maze.height ; i++) {
         //each row
         for(let o = 0 ; o < maze.width ; o++) {
@@ -142,21 +146,28 @@ export abstract class MazeAlgorithms {
 
           // to make thickmaze essentially if the cell is passable tot he right, duplicate this tile right, and the same in the y direction
           // if it is NOT passable, make thay adjacent cell a wall...
-          if(2*i + 1 <= thickMaze.height - 1) { tile.passable.b ? thickMaze.tiles[(2*i)+1][2*o] = { ...tile } : thickMaze.tiles[(2*i)+1][2*o].wall = true; }
-          if(2*o + 1 <= thickMaze.width - 1) { tile.passable.r ? thickMaze.tiles[2*i][(2*o)+1] = { ...tile } : thickMaze.tiles[2*i][(2*o)+1].wall = true; }
+          if(2*i + 1 <= thickMaze.height - 1) { tile.passable.b ? thickMaze.tiles[(2*i)+1][2*o] = { ...tile, id: this.generateRandomString(5)} : thickMaze.tiles[(2*i)+1][2*o] = { ...thickMaze.tiles[(2*i)+1][2*o], wall: true, passable: impassible} }
+          if(2*o + 1 <= thickMaze.width - 1) { tile.passable.r ? thickMaze.tiles[2*i][(2*o)+1] = { ...tile, id: this.generateRandomString(5)} : thickMaze.tiles[2*i][(2*o)+1] = { ...thickMaze.tiles[2*i][(2*o)+1], wall: true, passable: impassible} }
         }
       }
 
-      // and make every cell passable (no need for passable when you have walls!)
+      // and add walls to cell where needed (helps build the graphs...)
       for(let t = 0 ; t < thickMaze.height ; t++) {
         for(let s = 0 ; s < thickMaze.width ; s++) {
-          thickMaze.tiles[t][s].passable = thickMaze.tiles[t][s].wall ? { t: false, b: false, l: false, r: false } : { t: true, b: true, l: true, r: true };
-          // get rid of the last cell which will always be a wall next to a wall..
-          if(s === thickMaze.width - 1) {
-            thickMaze.tiles[t].unshift(thickMaze.tiles[t][s]);
-            thickMaze.tiles[t].splice(s, 1);
-          }
+          thickMaze.tiles[t][s].passable = thickMaze.tiles[t][s].wall
+                                              ? { t: false, b: false, l: false, r: false }
+                                              : {
+                                                  b: t + 1 <= thickMaze.height - 1  ? !thickMaze.tiles[t+1][s].wall ? true : false : false,
+                                                  t: t - 1 >= 0                     ? !thickMaze.tiles[t-1][s].wall ? true : false : false,
+                                                  r: s + 1 <= thickMaze.width - 1   ? !thickMaze.tiles[t][s+1].wall ? true : false : false,
+                                                  l: s - 1 >= 0                     ? !thickMaze.tiles[t][s-1].wall ? true : false : false
+                                                };
         }
+      }
+
+      for(let t = 0 ; t < thickMaze.height ; t++) {
+        thickMaze.tiles[t].unshift(thickMaze.tiles[t][thickMaze.tiles[t].length - 1]);
+        thickMaze.tiles[t].splice(thickMaze.tiles[t].length - 1, 1);
       }
 
       // make the top a wall and the bottom only have a single line of wall.
@@ -165,6 +176,68 @@ export abstract class MazeAlgorithms {
 
       return thickMaze;
     }
-    // 20w -> 41
-    // 12 --> 25
+
+    /**
+     * Takes a maze object and mirrors it in the x direction, adding the same again in a mirror position tot he right hand side
+     * @param maze
+     * @returns
+     */
+    mirrorMazeXDirection(maze: Maze2D): Maze2D {
+      let longMaze: Maze2D = {...maze};
+      // iterate the rows...
+      for(let i = 0 ; i < maze.tiles.length ; i++) {
+        // store the value for the tile length or it might end up going forever as it grows itself.
+        const rowLength: number = maze.tiles[i].length;
+        // iterate over cols...
+        for(let o = 0 ; o < rowLength ; o++) {
+          // now work backwards from the RHS adding to the array.
+          let oldTile: Tile = {...maze.tiles[i][rowLength - 1 - o]};
+          let newTile: Tile = {...oldTile};
+          // generate a new unique id for the new tile
+          newTile.id = this.generateRandomString(5);
+          // flip the passables to be a mirror...
+          newTile.passable = { l: oldTile.passable.r, r: oldTile.passable.l, t: oldTile.passable.t, b: oldTile.passable.b };
+
+          // and push tot he main array...
+          longMaze.tiles[i].push({...newTile});
+        }
+      }
+      // open a hole in the right hand side of the maze...
+      let randomHeight = Math.floor(Math.random() * longMaze.tiles.length);
+      longMaze.tiles[randomHeight][Math.floor(longMaze.tiles[randomHeight].length / 2) -1].passable.r = true;
+      longMaze.tiles[randomHeight][Math.floor(longMaze.tiles[randomHeight].length / 2)].passable.l = true;
+
+      return longMaze;
+    }
+
+    /**
+     * Takes a maze object and mirrors in the y direction, doubling the height. Provides one door
+     * @param maze
+     * @returns
+     */
+    mirrorMazeYDirection(maze: Maze2D): Maze2D {
+      let highMaze: Maze2D = {...maze};
+      const mazeHeight: number = maze.tiles.length;
+      // iterate the rows...
+      for(let i = mazeHeight - 1 ; i >= 0 ; i--) {
+        // copy the row
+        let mazeLength: number = maze.tiles[i].length;
+        let newRow : Tile[] = [];
+        // iterate over and flip the up and down walls...
+        for(let o = 0 ; o < mazeLength ; o++) {
+          let newTile: Tile = {...maze.tiles[i][o]};
+          newTile.passable = { t: maze.tiles[i][o].passable.b, b: maze.tiles[i][o].passable.t, l: maze.tiles[i][o].passable.l, r: maze.tiles[i][o].passable.r };
+          newTile.id = this.generateRandomString(5);
+          newRow.push(newTile);
+        }
+        // and put it back onto the array...
+        highMaze.tiles.push(newRow);
+      }
+      // open a hole in the bottom!
+      let randomPosition: number = Math.floor(Math.random() * highMaze.tiles[0].length);
+      highMaze.tiles[Math.floor(highMaze.tiles.length / 2) - 1][randomPosition].passable.b = true;
+      highMaze.tiles[Math.floor(highMaze.tiles.length / 2)][randomPosition].passable.t = true;
+
+      return highMaze;
+    }
 }
