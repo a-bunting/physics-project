@@ -37,7 +37,7 @@ export class PrimsMaze extends MazeAlgorithms {
     if(currentCell.o - 1 >= 0) markedCells.push({ o: currentCell.o - 1, i: currentCell.i });
     if(currentCell.o + 1 <= width - 1) markedCells.push({ o: currentCell.o + 1, i: currentCell.i });
     if(currentCell.i - 1 >= 0) markedCells.push({ o: currentCell.o, i: currentCell.i - 1 });
-    if(currentCell.i - 1 <= height - 1) markedCells.push({ o: currentCell.o, i: currentCell.i + 1 });
+    if(currentCell.i + 1 <= height - 1) markedCells.push({ o: currentCell.o, i: currentCell.i + 1 });
 
     // stats
     let iterationCount: number = 0;
@@ -104,9 +104,9 @@ export class PrimsMaze extends MazeAlgorithms {
         (temp.i === (cell.i - 1) && temp.o === cell.o ) ||
         (temp.i === (cell.i + 1) && temp.o === cell.o )
         );
-        let cellVisited: { i: number, o: number } = possibleVisited[Math.floor(Math.random() * possibleVisited.length)]
+      let cellVisited: { i: number, o: number } = possibleVisited[Math.floor(Math.random() * possibleVisited.length)]
 
-        // remove the connecting edges...
+      // remove the connecting edges...
       if(cell.i === cellVisited.i && cell.o === cellVisited.o - 1) {
         maze.tiles[cell.i][cell.o].passable.r = true;
         maze.tiles[cellVisited.i][cellVisited.o].passable.l = true;
@@ -120,7 +120,6 @@ export class PrimsMaze extends MazeAlgorithms {
         maze.tiles[cell.i][cell.o].passable.t = true;
         maze.tiles[cellVisited.i][cellVisited.o].passable.b = true;
       }
-
       // set current cell to the last cell...
       currentCell = cell;
 

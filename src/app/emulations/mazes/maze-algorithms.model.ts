@@ -60,7 +60,7 @@ export abstract class MazeAlgorithms {
        for(let o = 0 ; o < width ; o++) {
          // i is the column
          // o is the row
-         maze.tiles[i][o] = { id: this.generateRandomString(5), passable: {l:passable,r:passable,t:passable,b:passable}, speed: 0, wall: makeWalled };
+         maze.tiles[i][o] = { id: this.generateRandomString(5), passable: {l:passable,r:passable,t:passable,b:passable}, speed: 1, wall: makeWalled };
        }
      }
      return maze;
@@ -182,7 +182,7 @@ export abstract class MazeAlgorithms {
      * @param maze
      * @returns
      */
-    mirrorMazeXDirection(maze: Maze2D): Maze2D {
+    mirrorMazeXDirection(maze: Maze2D, timesMirrored?: number): Maze2D {
       let longMaze: Maze2D = {...maze};
       // iterate the rows...
       for(let i = 0 ; i < maze.tiles.length ; i++) {
@@ -215,29 +215,74 @@ export abstract class MazeAlgorithms {
      * @param maze
      * @returns
      */
-    mirrorMazeYDirection(maze: Maze2D): Maze2D {
-      let highMaze: Maze2D = {...maze};
-      const mazeHeight: number = maze.tiles.length;
-      // iterate the rows...
-      for(let i = mazeHeight - 1 ; i >= 0 ; i--) {
-        // copy the row
-        let mazeLength: number = maze.tiles[i].length;
-        let newRow : Tile[] = [];
-        // iterate over and flip the up and down walls...
-        for(let o = 0 ; o < mazeLength ; o++) {
-          let newTile: Tile = {...maze.tiles[i][o]};
-          newTile.passable = { t: maze.tiles[i][o].passable.b, b: maze.tiles[i][o].passable.t, l: maze.tiles[i][o].passable.l, r: maze.tiles[i][o].passable.r };
-          newTile.id = this.generateRandomString(5);
-          newRow.push(newTile);
+    mirrorMazeYDirection(maze: Maze2D, timesMirrored: number = 2): Maze2D {
+        let highMaze: Maze2D = {...maze};
+        const mazeHeight: number = maze.tiles.length;
+        // iterate the rows...
+        for(let i = mazeHeight - 1 ; i >= 0 ; i--) {
+            // copy the row
+            let mazeLength: number = maze.tiles[i].length;
+            let newRow : Tile[] = [];
+            // iterate over and flip the up and down walls...
+            for(let o = 0 ; o < mazeLength ; o++) {
+            let newTile: Tile = {...maze.tiles[i][o]};
+            newTile.passable = { t: maze.tiles[i][o].passable.b, b: maze.tiles[i][o].passable.t, l: maze.tiles[i][o].passable.l, r: maze.tiles[i][o].passable.r };
+            newTile.id = this.generateRandomString(5);
+            newRow.push(newTile);
+            }
+            // and put it back onto the array...
+            highMaze.tiles.push(newRow);
         }
-        // and put it back onto the array...
-        highMaze.tiles.push(newRow);
-      }
-      // open a hole in the bottom!
-      let randomPosition: number = Math.floor(Math.random() * highMaze.tiles[0].length);
-      highMaze.tiles[Math.floor(highMaze.tiles.length / 2) - 1][randomPosition].passable.b = true;
-      highMaze.tiles[Math.floor(highMaze.tiles.length / 2)][randomPosition].passable.t = true;
+        // open a hole in the bottom!
+        if(timesMirrored) {
+            // the maze has already had multiple mirrors
+            let division: number = Math.floor(highMaze.tiles[0].length / timesMirrored);
+            for(let i = 0 ; i < timesMirrored ; i+=2) {
+                highMaze.tiles[Math.floor(highMaze.tiles.length / 2)-1][i*division].passable.b = true;
+                highMaze.tiles[Math.floor(highMaze.tiles.length / 2)][i*division].passable.t = true;
+                highMaze.tiles[Math.floor(highMaze.tiles.length / 2)-1][highMaze.tiles[0].length - i*division - 1].passable.b = true;
+                highMaze.tiles[Math.floor(highMaze.tiles.length / 2)][highMaze.tiles[0].length - i*division - 1].passable.t = true;
+            }
+        } else {
+            let randomPosition: number = Math.floor(Math.random() * highMaze.tiles[0].length);
+            highMaze.tiles[Math.floor(highMaze.tiles.length / 2) - 1][randomPosition].passable.b = true;
+            highMaze.tiles[Math.floor(highMaze.tiles.length / 2)][randomPosition].passable.t = true;
+        }
 
-      return highMaze;
+        return highMaze;
+    }
+
+
+    addSpace(maze: Maze2D,  width: number = 5, height: number = 4, xCenter?: number, yCenter?: number): Maze2D {
+
+      // place it in the middle if center is not defined...
+      if(!xCenter) xCenter = maze.tiles[0].length / 2;
+      if(!yCenter) yCenter = maze.tiles.length / 2;
+
+      let xStart: number = xCenter - (width / 2);
+      let yStart: number = yCenter - (height / 2);
+
+      if(xStart % 1 !== 0) { xStart -= 0.5; width += 1; }
+      if(yStart % 1 !== 0) { yStart -= 0.5; height += 1; }
+
+      console.log(xStart, yStart, width, height);
+
+      for(let i = 0 ; i < height ; i++) {
+        for(let o = 0 ; o < width ; o++) {
+
+          maze.tiles[i+yStart][(o+xStart)].passable = { l: true, r: true, t: true, b: true };
+          maze.tiles[i+yStart][(o+xStart)].wall = false;
+
+          if((i+yStart) === yStart) { maze.tiles[i+yStart][o+xStart].passable.t = false;  maze.tiles[i+yStart-1][o+xStart].passable.b = false; }
+          if((o+xStart) === xStart) { maze.tiles[i+yStart][o+xStart].passable.l = false; maze.tiles[i+yStart][o+xStart-1].passable.r = false;}
+          if((i+yStart) === yStart + height) { maze.tiles[i+yStart][o+xStart].passable.b = false; maze.tiles[i+yStart+1][o+xStart].passable.t = false;}
+          if((o+xStart) === xStart + width) { maze.tiles[i+yStart][o+xStart].passable.r = false; maze.tiles[i+yStart][o+xStart+1].passable.l = false;}
+
+          console.log(`yep`);
+
+        }
+      }
+
+      return maze;
     }
 }

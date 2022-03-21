@@ -28,8 +28,8 @@ export class MazesComponent implements OnInit, OnDestroy {
   timeTaken: number = 0;
 
   // maze properties
-  width: number = 10;
-  height: number = 5;
+  width: number = 20;
+  height: number = 10;
   gridArea: number = this.width * this.height;
 
   // in the case we want the maze to be timed then have variables to define this and sotre data.
@@ -109,6 +109,8 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.mazeCompleted = false;
     this.generatedMaze = this.loadMazeType(this.mazeAlgorithmName);
     this.generatedMaze.mazeGenerationSpeed(this.timedMazeIterationsPerSecond);
+    this.mirroredInXDirection = 1;
+    this.mirroredInYDirection = 1;
     this.gridArea = this.width * this.height;
     // and generate the maze
     this.generate();
@@ -165,14 +167,25 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.generateNodesGraph(this.maze, algorithm);
   }
 
+  mirroredInXDirection: number = 1;
+  mirroredInYDirection: number = 1;
+
   mirrorMazeXDirection(): void {
-    this.maze = this.generatedMaze.mirrorMazeXDirection(this.maze);
+    this.maze = this.generatedMaze.mirrorMazeXDirection(this.maze, this.mirroredInYDirection);
+    this.mirroredInXDirection *= 2;
     const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
     this.generateNodesGraph(this.maze, algorithm);
   }
 
   mirrorMazeYDirection(): void {
-    this.maze = this.generatedMaze.mirrorMazeYDirection(this.maze);
+    this.maze = this.generatedMaze.mirrorMazeYDirection(this.maze, this.mirroredInXDirection);
+    this.mirroredInYDirection *= 2;
+    const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
+    this.generateNodesGraph(this.maze, algorithm);
+  }
+
+  addSpaceToMiddle(): void {
+    this.maze = this.generatedMaze.addSpace(this.maze);
     const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
     this.generateNodesGraph(this.maze, algorithm);
   }
