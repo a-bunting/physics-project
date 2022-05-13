@@ -32,10 +32,11 @@ import { ProblemsComponent } from './problems/problems.component';
 import { CarsComponent } from './cars/cars.component';
 import { DataGenComponent } from './educational/data-gen/data-gen.component';
 import { MazesComponent } from './emulations/mazes/mazes.component';
+import { SelfDriveComponent } from './emulations/self-drive/self-drive.component';
 
 const appRoutes: Routes = [
     { path: 'feedback', component: DisplayAllFeedbackComponent },
-    { path: 'cars', component: CarsComponent },
+    { path: 'cars', component: SelfDriveComponent },
     { path: 'mazes', component: MazesComponent },
     { path: 'datagen', component: DataGenComponent },
     { path: 'problems', component: ProblemsComponent, children: [
@@ -90,7 +91,7 @@ const appRoutes: Routes = [
     GravityComponent,
     HeatTransferComponent,
     FrictionAndMotionComponent,
-    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent
+    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent
    ],
   imports: [
     BrowserModule,
