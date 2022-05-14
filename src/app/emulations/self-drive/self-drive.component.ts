@@ -3,6 +3,7 @@ import { CarsComponent } from 'src/app/cars/cars.component';
 import { Car } from './models/car.model';
 
 // https://www.freecodecamp.org/news/self-driving-car-javascript
+// up to 32:59
 
 @Component({
   selector: 'app-self-drive',

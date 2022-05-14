@@ -11,6 +11,7 @@ export class Car {
   controls;
   maxSpeed;
   friction;
+  angle;
 
   constructor(x: number, y: number, width: number, height: number) {
     this.x = x;
@@ -21,41 +22,55 @@ export class Car {
     this.acceleration = 0.2;
     this.maxSpeed = 3;
     this.friction = 0.05;
+    this.angle = 0;
 
     this.controls = new Controls();
   }
 
   update(): void {
-    // check the speed constraints...
-    if(this.controls.forward) this.speed += this.acceleration;
-    if(this.controls.reverse) this.speed -= this.acceleration;
-    if(this.controls.left) this.x -= 2;
-    if(this.controls.right) this.x += 2;
+   this.#move();
+  }
 
-    // check the maximum speed has not been exceeded...
-    if(this.speed > this.maxSpeed) this.speed = this.maxSpeed;
-    if(this.speed < -this.maxSpeed) this.speed = -this.maxSpeed / 2;
+  #move(): void {
+     // check the speed constraints...
+     if(this.controls.forward) this.speed += this.acceleration;
+     if(this.controls.reverse) this.speed -= this.acceleration;
 
-    // set friction...
-    if(this.speed > 0) this.speed -= this.friction;
-    if(this.speed < 0) this.speed += this.friction;
+     // when arrows keys are used just rotate the angle...
+     if(this.speed !== 0) {
+       let flip = this.speed > 0 ? 1 : -1;
+       if(this.controls.left) this.angle -= 0.03 * flip;
+       if(this.controls.right) this.angle += 0.03 * flip;
+     }
+     // check the maximum speed has not been exceeded...
+     if(this.speed > this.maxSpeed) this.speed = this.maxSpeed;
+     if(this.speed < -this.maxSpeed) this.speed = -this.maxSpeed / 1.5;
 
-    // stop the car being buggy at low speed...
-    if(Math.abs(this.speed) < this.friction) this.speed = 0;
+     // set friction...
+     if(this.speed > 0) this.speed -= this.friction;
+     if(this.speed < 0) this.speed += this.friction;
 
-    // set the y value to the speed of the car.
-    this.y -= this.speed;
+     // stop the car being buggy at low speed...
+     if(Math.abs(this.speed) < this.friction) this.speed = 0;
+
+     // then set the x and y position of the car
+     this.x += Math.sin(this.angle) * this.speed;
+     this.y -= Math.cos(this.angle) * this.speed;
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
     ctx.beginPath();
     ctx.rect(
-      this.x - this.width / 2,
-      this.y - this.height / 2,
+      - this.width / 2,
+      - this.height / 2,
       this.width,
       this.height
     );
     ctx.fill();
+    ctx.restore();
   }
 
 }
