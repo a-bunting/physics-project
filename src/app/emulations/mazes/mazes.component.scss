@@ -34,6 +34,8 @@
   }
 
   &__stats {
+
+
     display: grid;
     grid-template: 2fr 3fr 5rem / 1fr 2fr;
     background-color: blanchedalmond;
@@ -299,6 +301,8 @@
     display: flex;
     flex-direction: column;
 
+    @media print { display: none; }
+
     &--section {
       display: flex;
       flex-direction: column;
@@ -382,6 +386,55 @@
     &--pressed {
       background-color: aquamarine;
     }
+  }
+
+  &__info {
+
+    @media print { display: none; }
+
+    font-size: 1.4rem;
+
+    &--title, &--subtitle {
+      font-weight: bold;
+    }
+
+    &--title {
+      font-size: 1.6rem;
+    }
+
+    &--subtitle {
+      font-size: 1.4rem;
+    }
+
+    &--description {
+      margin-top: 1rem;
+    }
+
+    &--packages {
+      display: flex;
+      flex-direction: column;
+      margin-top: 1rem;
+    }
+
+    &--package {
+      font-weight: bold;
+    }
+
+    &--applications {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &--notes {
+
+      ul {
+        li {
+          margin-top: .3rem;
+        }
+      }
+    }
+
   }
 }
 

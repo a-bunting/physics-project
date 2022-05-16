@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import {  Subscription } from 'rxjs';
 import { AldousBroderMaze } from 'src/app/emulations/mazes/algorithms/aldousBroderMaze.model';
-import { Maze2D, MazeAlgorithms, MazeGraph, MazeStatsData, Tile } from 'src/app/emulations/mazes/maze-algorithms.model';
+import { Maze2D, MazeAlgorithms, MazeGraph, MazeNode, MazeStatsData, Tile } from 'src/app/emulations/mazes/maze-algorithms.model';
 import { PathingAlgorithms, AlgorithmStepData } from 'src/app/pathfinding/algorithms.model';
 import { aStar } from 'src/app/pathfinding/astar/astar.model';
 import { Dijkstra } from 'src/app/pathfinding/dijkstra/dijkstra.model';
@@ -31,6 +31,10 @@ export class MazesComponent implements OnInit, OnDestroy {
   width: number = 20;
   height: number = 10;
   gridArea: number = this.width * this.height;
+
+  // maze generations values
+  mirroredInXDirection: number = 1;
+  mirroredInYDirection: number = 1;
 
   // in the case we want the maze to be timed then have variables to define this and sotre data.
   timedMaze: boolean = false;
@@ -72,7 +76,7 @@ export class MazesComponent implements OnInit, OnDestroy {
   nodeData: NodeData[];
 
   // mouse interactions
-  clickedTile: { tile: Tile, i: number, o: number };
+  clickedTile: { tile: Tile, node: MazeNode, i: number, o: number };
 
 
   constructor() { }
@@ -161,15 +165,18 @@ export class MazesComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Thickens the maze! Making all walls a tile thick.
+   */
   thickenMaze(): void {
     this.maze = this.generatedMaze.makeWallsThick(this.maze);
     const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
     this.generateNodesGraph(this.maze, algorithm);
   }
 
-  mirroredInXDirection: number = 1;
-  mirroredInYDirection: number = 1;
-
+  /**
+   * Mirrors the maze in the x direction, adding doorsways between
+   */
   mirrorMazeXDirection(): void {
     this.maze = this.generatedMaze.mirrorMazeXDirection(this.maze, this.mirroredInYDirection);
     this.mirroredInXDirection *= 2;
@@ -177,6 +184,9 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.generateNodesGraph(this.maze, algorithm);
   }
 
+  /**
+   * Mirrors the maze in the y direction, adding doorways between the mazes...
+   */
   mirrorMazeYDirection(): void {
     this.maze = this.generatedMaze.mirrorMazeYDirection(this.maze, this.mirroredInXDirection);
     this.mirroredInYDirection *= 2;
@@ -184,8 +194,11 @@ export class MazesComponent implements OnInit, OnDestroy {
     this.generateNodesGraph(this.maze, algorithm);
   }
 
+  /**
+   * Adds an empty room to the middle of the map...
+   */
   addSpaceToMiddle(): void {
-    this.maze = this.generatedMaze.addSpace(this.maze);
+    this.maze = this.generatedMaze.addRoom(this.maze);
     const algorithm: PathingAlgorithms = this.loadPathingAlgorithm(this.pathingAlgorithm);
     this.generateNodesGraph(this.maze, algorithm);
   }
@@ -214,7 +227,8 @@ export class MazesComponent implements OnInit, OnDestroy {
       menuElement.classList.add('maze__menu--display');
       menuElement.style.left = `${mouseEvent.clientX + 10}px`;
       menuElement.style.top = `${mouseEvent.clientY}px`;
-      this.clickedTile = { tile: this.maze.tiles[i][o], i, o };
+      const clickedNode: MazeNode = this.nodes.nodes.find((node: MazeNode) => node.x === o && node.y === i);
+      this.clickedTile = { tile: this.maze.tiles[i][o],node: clickedNode, i, o };
     } else {
       this.hideClickMenu();
     }

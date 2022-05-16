@@ -2,6 +2,8 @@
 
   <div class="maze" id="mazes">
 
+    <div class="maze__info--title">Maze Generator!</div>
+
     <div class="maze__row" *ngFor="let row of maze.tiles; let i = index">
       <div class="maze__tile"
         [style]="createLinearGradientStyle(tile.passable.l, tile.passable.r, tile.passable.t, tile.passable.b)"
@@ -19,6 +21,31 @@
 
       </div>
     </div>
+
+    <div class="maze__info">
+      <div class="maze__info--description">
+        This maze generator uses multiple algorithms to generate perfect mazes, which is a maze which has exactly one route between any two points.
+        You can use it to test maze generation or pathing algorithms. You can even use it to teach about the power of heuristic techniques in computer science and pathfinding algorithms.
+      </div>
+      <div class="maze__info--packages">
+        You can download and use the mazes and pathfinding packages in your own programs, just follow the links below.
+        <div class="maze__info--package">Mazes Package (Angular)</div>
+        <div class="maze__info--package">Pathfinding Package (Angular)</div>
+      </div>
+      <div class="maze__info--applications">
+        The following pages were made using these modules.
+        <div class="maze__info--application">Pacman?</div>
+      </div>
+      <div class="maze__info--notes">
+        <div class="maze__info--subtitle">Notes</div>
+        <ul>
+          <li>The generation of maps on this page is done in HTML and not CANVAS. For huge maps this will get tedious for your computer. If you choose to use the mazes package in your application and require a very large map, I recommend using canvas to render the mazes... it will be faster. I used HTML for ease and because I wanted to focus development on the algorithms and not the display.</li>
+          <li>The mazes and pathfinding moduels are fully extendible and are by no means representative of all available algorithms. Not all mazing algorithms are useful and not all pathfinding algorithms are efficient. Information on the modules themselves can be found on their GitHub pages.</li>
+          <li>If you want to print the mazes, just hit the print button on your browser and they should print out without anything else on the page - I recommend setting landscape mode!</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
   <div class="maze__controls">
@@ -43,10 +70,10 @@
       </div>
       <button class="maze__button maze__button--long" (click)="startNewMazeGeneration()">Generate Maze</button>
       <div class="maze__controls--sidebyside">
-        <button class="maze__button maze__button--long" (click)="thickenMaze()">Thicken Maze</button>
-        <button class="maze__button maze__button--long" (click)="mirrorMazeXDirection()">Mirror X</button>
-        <button class="maze__button maze__button--long" (click)="mirrorMazeYDirection()">Mirror Y</button>
-        <button class="maze__button maze__button--long" (click)="addSpaceToMiddle()">Add Center</button>
+        <button class="maze__button maze__button--long" (click)="thickenMaze()" [disabled]="maze.tiles.length === 0">Thicken Maze</button>
+        <button class="maze__button maze__button--long" (click)="mirrorMazeXDirection()" [disabled]="maze.tiles.length === 0">Mirror X</button>
+        <button class="maze__button maze__button--long" (click)="mirrorMazeYDirection()" [disabled]="maze.tiles.length === 0">Mirror Y</button>
+        <button class="maze__button maze__button--long" (click)="addSpaceToMiddle()" [disabled]="maze.tiles.length === 0">Add Center</button>
       </div>
     </section>
 
@@ -178,5 +205,9 @@
       <input type="checkbox" name="wall" id="wall" [checked]="clickedTile.tile.wall" (change)="addOrRemoveWall()">
       <label for="wall">Wall Section</label>
     </div>
+    <hr>
+    <p>{{ clickedTile.tile.id }}</p>
+    <p>Connections</p>
+    <p>{{ clickedTile.node.connections.toString() }}</p>
   </div>
 </div>

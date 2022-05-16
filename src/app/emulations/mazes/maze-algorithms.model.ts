@@ -77,22 +77,22 @@ export abstract class MazeAlgorithms {
     let graph: MazeGraph = { nodes: [] };
     for(let i = 0 ; i < maze.tiles.length ; i++) {
       // each row
-      for(let o= 0 ; o < maze.tiles[i].length ; o++) {
+      for(let o = 0 ; o < maze.tiles[i].length ; o++) {
         // each columns in row i
         const mazeSection: Tile = maze.tiles[i][o];
 
         let connections: string[] = [];
+
         // connections can only be up down left right, so.
-        mazeSection.passable.l && maze.tiles[i][o-1].passable.r ? connections.push(maze.tiles[i][o-1].id) : null;
-        mazeSection.passable.r && maze.tiles[i][o+1].passable.l ? connections.push(maze.tiles[i][o+1].id) : null;
-        mazeSection.passable.t && maze.tiles[i-1][o].passable.b ? connections.push(maze.tiles[i-1][o].id) : null;
-        mazeSection.passable.b && maze.tiles[i+1][o].passable.t ? connections.push(maze.tiles[i+1][o].id) : null;
+        mazeSection.passable.l && maze.tiles[i][o-1].passable.r && !maze.tiles[i][o-1].wall   ? connections.push(maze.tiles[i][o-1].id) : null;
+        mazeSection.passable.r && maze.tiles[i][o+1].passable.l && !maze.tiles[i][o+1].wall   ? connections.push(maze.tiles[i][o+1].id) : null;
+        mazeSection.passable.t && maze.tiles[i-1][o].passable.b && !maze.tiles[i-1][o].wall   ? connections.push(maze.tiles[i-1][o].id) : null;
+        mazeSection.passable.b && maze.tiles[i+1][o].passable.t && !maze.tiles[i+1][o].wall   ? connections.push(maze.tiles[i+1][o].id) : null;
         // build the node
-        const node: MazeNode = { x: i, y: o, id: mazeSection.id, connections: connections }
+        const node: MazeNode = { x: o, y: i, id: mazeSection.id, connections: connections }
         graph.nodes.push(node);
       }
     }
-    console.log(graph);
     return graph;
   }
 
@@ -183,7 +183,7 @@ export abstract class MazeAlgorithms {
      * @returns
      */
     mirrorMazeXDirection(maze: Maze2D, timesMirrored?: number): Maze2D {
-      let longMaze: Maze2D = {...maze};
+      let longMaze: Maze2D = {...maze, width: maze.width*2  };
       // iterate the rows...
       for(let i = 0 ; i < maze.tiles.length ; i++) {
         // store the value for the tile length or it might end up going forever as it grows itself.
@@ -207,6 +207,7 @@ export abstract class MazeAlgorithms {
       longMaze.tiles[randomHeight][Math.floor(longMaze.tiles[randomHeight].length / 2) -1].passable.r = true;
       longMaze.tiles[randomHeight][Math.floor(longMaze.tiles[randomHeight].length / 2)].passable.l = true;
 
+      console.log(longMaze);
       return longMaze;
     }
 
@@ -216,7 +217,7 @@ export abstract class MazeAlgorithms {
      * @returns
      */
     mirrorMazeYDirection(maze: Maze2D, timesMirrored: number = 2): Maze2D {
-        let highMaze: Maze2D = {...maze};
+        let highMaze: Maze2D = {...maze, height: maze.height*2 };
         const mazeHeight: number = maze.tiles.length;
         // iterate the rows...
         for(let i = mazeHeight - 1 ; i >= 0 ; i--) {
@@ -253,7 +254,16 @@ export abstract class MazeAlgorithms {
     }
 
 
-    addSpace(maze: Maze2D,  width: number = 5, height: number = 4, xCenter?: number, yCenter?: number): Maze2D {
+    /**
+     * Doors can be made manually...
+     * @param maze
+     * @param width
+     * @param height
+     * @param xCenter
+     * @param yCenter
+     * @returns
+     */
+    addRoom(maze: Maze2D,  width: number = 5, height: number = 4, xCenter?: number, yCenter?: number): Maze2D {
 
       // place it in the middle if center is not defined...
       if(!xCenter) xCenter = maze.tiles[0].length / 2;
@@ -265,21 +275,15 @@ export abstract class MazeAlgorithms {
       if(xStart % 1 !== 0) { xStart -= 0.5; width += 1; }
       if(yStart % 1 !== 0) { yStart -= 0.5; height += 1; }
 
-      console.log(xStart, yStart, width, height);
-
       for(let i = 0 ; i < height ; i++) {
         for(let o = 0 ; o < width ; o++) {
-
           maze.tiles[i+yStart][(o+xStart)].passable = { l: true, r: true, t: true, b: true };
           maze.tiles[i+yStart][(o+xStart)].wall = false;
 
           if((i+yStart) === yStart) { maze.tiles[i+yStart][o+xStart].passable.t = false;  maze.tiles[i+yStart-1][o+xStart].passable.b = false; }
           if((o+xStart) === xStart) { maze.tiles[i+yStart][o+xStart].passable.l = false; maze.tiles[i+yStart][o+xStart-1].passable.r = false;}
-          if((i+yStart) === yStart + height) { maze.tiles[i+yStart][o+xStart].passable.b = false; maze.tiles[i+yStart+1][o+xStart].passable.t = false;}
-          if((o+xStart) === xStart + width) { maze.tiles[i+yStart][o+xStart].passable.r = false; maze.tiles[i+yStart][o+xStart+1].passable.l = false;}
-
-          console.log(`yep`);
-
+          if((i+yStart+1) === yStart + height) { maze.tiles[i+yStart][o+xStart].passable.b = false; maze.tiles[i+yStart+1][o+xStart].passable.t = false;}
+          if((o+xStart+1) === xStart + width) { maze.tiles[i+yStart][o+xStart].passable.r = false; maze.tiles[i+yStart][o+xStart+1].passable.l = false;}
         }
       }
 

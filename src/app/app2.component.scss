@@ -2,7 +2,7 @@
 
 #grid-container {
     position: relative;
-    display: grid; 
+    display: grid;
     grid-template-columns: 30rem 1fr;
     grid-template-rows: 1fr 15rem;
     min-height: 100vh;
@@ -15,6 +15,8 @@ header {
     grid-column: 1 / 2;
     filter: drop-shadow(0 .5rem 1rem white);
     height: 100%;
+
+    @media print { display: none; }
 }
 
 // this isnt smooth, partiuclarly in chrome but it works to make the simulation
@@ -30,7 +32,6 @@ header {
     height: 4rem;
     background-color: black;
     color: white;
-    
     cursor: pointer;
     font-size: 3.6rem;
     z-index: 10;
@@ -38,9 +39,11 @@ header {
     border-bottom-right-radius: 50%;
     transition: left 1s, opacity 1s, visibility 1s;
 
+    @media print { display: none; }
+
     &--checkbox {
         display: none;
-    
+
         &:checked ~ label {
             left: 0;
         }
@@ -52,13 +55,13 @@ header {
 
         &:checked ~ #grid-container {
             grid-template-columns: 0rem 1fr;
-        
+
             header {
                 transform: translateX(-30rem);
                 opacity: 0;
                 visibility: hidden;
             }
-        
+
             footer {
                 transform: translateX(-30rem);
                 opacity: 0;
@@ -73,6 +76,8 @@ header {
     position: relative;
     transition: all 1s;
 
+    @media print { display: none; }
+
     &__logo {
         color: white;
         font-size: 2.4rem;
@@ -80,14 +85,14 @@ header {
         padding: 2rem 4rem;
         border-bottom: 3px dashed black;
         text-align: center;
-        
+
         & > * {
             display: inline-block;
             position: relative;
             transition: transform .2s;
 
-            &:hover { 
-                transform: scale(1.7); 
+            &:hover {
+                transform: scale(1.7);
             }
         }
 
@@ -130,7 +135,7 @@ header {
                 width: 25rem;
             }
 
-            &:focus {                
+            &:focus {
                 width: 25rem;
                 background-color: rgba($color-gray-lightest, .8);
                 outline: none;
@@ -177,7 +182,7 @@ header {
         transform: translateX(-100%);
         transition: all 1s;
     }
-    
+
     &__rotate {
         transition: transform .3s;
         transform: rotateZ(180deg);
@@ -255,20 +260,20 @@ header {
             background-color: var(--color-juxtapose-light);
 
             transform: scaleY(0) translateX(-100%);
-            transition: transform .5s .2s, 
-                        opacity .5s, 
-                        font-size .2s; 
+            transition: transform .5s .2s,
+                        opacity .5s,
+                        font-size .2s;
 
             div {
                 position: absolute;
                 display: block;
                 height: 100%;
                 width: 100%;
-                transition: left .2s ease-in-out, 
-                            top .2s ease-in-out, 
+                transition: left .2s ease-in-out,
+                            top .2s ease-in-out,
                             background-color 0s .2s;
             }
-            
+
             &:hover {
                 cursor: pointer;
             }
@@ -276,10 +281,10 @@ header {
             &:focus {
                 outline: none;
             }
-            
+
         }
-        
-        .header__section--radio:checked + & > &--items {           
+
+        .header__section--radio:checked + & > &--items {
             max-height: 100rem;
             transition: max-height .4s ease-in-out;
 
@@ -300,6 +305,8 @@ header {
 main {
     grid-row: 1 / span 2;
     grid-column: 2 / 3;
+
+    @media print { grid-column: 1 / 3; }
 }
 
 footer {
@@ -309,10 +316,12 @@ footer {
     background-color: var(--color-main);
     transition: all 1s;
     filter: drop-shadow(0 .5rem 1rem white);
+
+    @media print { display: none; }
 }
 
 .footer {
-    
+
     font-size: 1.4rem;
     color: rgba($color-gray-lightest, .9);
 
@@ -324,6 +333,8 @@ footer {
     text-align: center;
 
     width: 90%;
+
+    @media print { display: none; }
 
     &__link {
         text-decoration: none;

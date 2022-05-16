@@ -18,7 +18,7 @@ export class AldousBroderMaze extends MazeAlgorithms {
    * @param height
    * @returns
    */
-  generateMaze(width: number, height: number, iterationsPerSecond: number = 0): { maze: Maze2D, executionTime: number, iterationCount: number } {
+  generateMaze(width: number, height: number, iterationsPerSecond: number = 0): void {//{ maze: Maze2D, executionTime: number, iterationCount: number } {
     // make a new maze object
     let maze: Maze2D = this.generateMazeStructure(width, height);
     // start the performance indicator...
@@ -87,7 +87,7 @@ export class AldousBroderMaze extends MazeAlgorithms {
           timer = window.setTimeout(() => { fn(); }, (1 / this.iterationsPerSecond) * 1000);
         } else {
           // and return the final data...
-          return { maze, executionTime: performance.now() - startingTime, iterationCount };
+          //return { maze, executionTime: performance.now() - startingTime, iterationCount };
         }
       }
 
@@ -99,7 +99,7 @@ export class AldousBroderMaze extends MazeAlgorithms {
       // push the maze to the user
       this.currentData.next({maze, i: currentCell.i, o: currentCell.o, iteration: iterationCount, timeTaken: performance.now() - startingTime, finalIteration: true});
       // and return
-      return { maze, executionTime: performance.now() - startingTime, iterationCount };
+      //return { maze, executionTime: performance.now() - startingTime, iterationCount };
     }
 
 
