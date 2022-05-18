@@ -29,6 +29,7 @@ export class SelfDriveComponent implements OnInit {
 
   // car stuff
   car: Car;
+  traffic: Car[];
 
   // road stuff
   road: Road;
@@ -43,13 +44,21 @@ export class SelfDriveComponent implements OnInit {
     // define the road.
     this.road = new Road(this.canvas.nativeElement.width / 2, this.canvas.nativeElement.width);
     // define the car
-    this.car = new Car(this.road.getLaneCenter(1), 100, 40, 60);
+    this.car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3);
+    // define the traffic
+    this.traffic = [
+      new Car(this.road.getLaneCenter(1), -100, 40, 60, "DUMMY", 2)
+    ]
     // animate
     this.animate();
   }
 
   updates(): void {
-    this.car.update(this.road.borders);
+
+    for(let i = 0 ; i < this.traffic.length ; i++) {
+      this.traffic[i].update(this.road.borders, []);
+    }
+    this.car.update(this.road.borders, this.traffic);
   }
 
   drawToCanvas(): void {
@@ -58,8 +67,12 @@ export class SelfDriveComponent implements OnInit {
     this.ctx.save();
     this.ctx.translate(0, -this.car.y + this.canvas.nativeElement.height * 0.7);
 
+    for(let i = 0 ; i < this.traffic.length ; i++) {
+      this.traffic[i].draw(this.ctx, "red");
+    }
+
     this.road.draw(this.ctx);
-    this.car.draw(this.ctx);
+    this.car.draw(this.ctx, "blue");
 
     this.ctx.restore();
   }

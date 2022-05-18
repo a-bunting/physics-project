@@ -5,13 +5,17 @@ export class Controls {
   right: boolean;
   reverse: boolean;
 
-    constructor() {
+    constructor(controlType: string) {
       this.forward = false;
       this.left = false;
       this.right = false;
       this.reverse = false;
 
-      this.#addKeyboardListeners();
+      switch(controlType) {
+        case "KEYS": this.#addKeyboardListeners(); break;
+        case "DUMMY": this.forward = true; break;
+      }
+
     }
 
     #addKeyboardListeners(): void {

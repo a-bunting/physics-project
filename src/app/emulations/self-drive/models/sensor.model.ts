@@ -13,7 +13,7 @@ export class Sensor {
   utilities: Utilities;
 
   constructor(car: Car) {
-    this.rayCount = 10;
+    this.rayCount = 5;
     this.rayLength = 150;
     this.raySpread = Math.PI / 2;
 
@@ -23,14 +23,14 @@ export class Sensor {
     this.utilities = new Utilities();
   }
 
-  update(roadBorders: coordinates[][]): void {
+  update(roadBorders: coordinates[][], traffic: Car[]): void {
     this.#castRays();
 
     this.readings = [];
 
     for(let i = 0 ; i < this.rays.length ; i++) {
       this.readings.push(
-        this.#getReading(this.rays[i], roadBorders)
+        this.#getReading(this.rays[i], roadBorders, traffic)
       )
     }
   }
@@ -39,7 +39,7 @@ export class Sensor {
     this.rays = [];
 
     for(let i = 0 ; i < this.rayCount ; i++) {
-      const rayAngle: number = -this.car.angle + this.utilities.lerp(this.raySpread / 2, - this.raySpread / 2, this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1));
+      const rayAngle: number = this.car.angle + this.utilities.lerp(this.raySpread / 2, - this.raySpread / 2, this.rayCount === 1 ? 0.5 : i / (this.rayCount - 1));
 
       const start: coordinates = { x: this.car.x, y: this.car.y};
       const end: coordinates = { x: this.car.x - Math.sin(rayAngle) * this.rayLength, y: this.car.y - Math.cos(rayAngle)  * this.rayLength};
@@ -48,15 +48,25 @@ export class Sensor {
     }
   }
 
-  #getReading(ray: coordinates[], borders: coordinates[][]) : void {
+  #getReading(ray: coordinates[], borders: coordinates[][], traffic: Car[]) : void {
     let touches = [];
 
     for(let i = 0 ; i < borders.length ; i++) {
-      const touch = this.utilities.getIntersection(ray[0].x, ray[0].y, borders[i][0].x, borders[i][1].y);
+      const touch = this.utilities.getIntersection(ray[0], ray[1], borders[i][0], borders[i][1]);
       if(touch) { touches.push(touch); }
     }
 
-    if(touches.length) {
+    for(let i = 0 ; i < traffic.length ; i++) {
+      const polygon: coordinates[] = traffic[i].polygon;
+
+      for(let o = 0 ; o < polygon.length ; o++) {
+        const touch = this.utilities.getIntersection(ray[0], ray[1], polygon[o], polygon[(o+1)%polygon.length]);
+        if(touch) { touches.push(touch); }
+      }
+
+    }
+
+    if(!touches.length) {
       // no intersections, so return null;
       return null;
     } else {
@@ -76,7 +86,7 @@ export class Sensor {
 
       let end = this.rays[i][1];
 
-      if(this.readings) { end = this.readings[i]; }
+      if(this.readings[i]) { end = this.readings[i]; }
 
       ctx.strokeStyle = 'Yellow';
       ctx.beginPath();
