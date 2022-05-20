@@ -1,5 +1,6 @@
-canvas {
-  background-color: gray;
+
+.page {
+  position: relative;
 }
 
 .cars {
@@ -7,5 +8,23 @@ canvas {
   position: relative;
   height: 100vh;
   width: 30rem;
+  canvas { background-color: gray; }
+
+}
+
+.network {
+
+  position: absolute;
+  top: 3rem;
+  right: 3rem;
+  width: 70rem;
+  height: 50rem;
+  padding: 1rem;
+  background-color: white;
+  box-shadow: 0 .3rem .6rem rgba(black, .5);
+
+  canvas {
+    background-color: black;
+  }
 
 }

@@ -14,6 +14,7 @@ export class Controls {
       switch(controlType) {
         case "KEYS": this.#addKeyboardListeners(); break;
         case "DUMMY": this.forward = true; break;
+        case "AI": break;
       }
 
     }

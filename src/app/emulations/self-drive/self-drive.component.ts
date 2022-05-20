@@ -1,9 +1,11 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { generate } from 'rxjs';
 import { Car } from './models/car.model';
 import { Road } from './models/road.model';
+import { Visualizer } from './neuralnetwork/vizualizer.model';
 
 // https://www.freecodecamp.org/news/self-driving-car-javascript
-// up to 1 hour 10 mins (coliison detection)
+// up to 2 hour 11 mins 30 seconds (parrelization)
 
 // DO THIS ONE FIRST: https://www.youtube.com/watch?v=fHOLQJo0FjQ
 // Line intersection!
@@ -19,8 +21,10 @@ import { Road } from './models/road.model';
 export class SelfDriveComponent implements OnInit {
 
   // canvas and mouse position variables
-  @ViewChild('myCanvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-  ctx: CanvasRenderingContext2D;
+  @ViewChild('carsCanvas', { static: true }) carsCanvas: ElementRef<HTMLCanvasElement>;
+  @ViewChild('networkCanvas', { static: true }) networkCanvas: ElementRef<HTMLCanvasElement>;
+  carsContext: CanvasRenderingContext2D;
+  networkContext: CanvasRenderingContext2D;
   requestId: number;
 
   // resize listener
@@ -28,7 +32,7 @@ export class SelfDriveComponent implements OnInit {
   resizeElement: HTMLElement;
 
   // car stuff
-  car: Car;
+  car: Car[];
   traffic: Car[];
 
   // road stuff
@@ -38,13 +42,18 @@ export class SelfDriveComponent implements OnInit {
 
   ngOnInit(): void {
     // define the canvas...
-    this.ctx = this.canvas.nativeElement.getContext('2d');
+    this.carsContext = this.carsCanvas.nativeElement.getContext('2d');
+    this.networkContext = this.networkCanvas.nativeElement.getContext('2d');
+
+    this.networkCanvas.nativeElement.width = document.getElementById('network').offsetWidth - 20;
+    this.networkCanvas.nativeElement.height = document.getElementById('network').offsetHeight - 20;
+
     // set up the resize observer
     this.observeSizeChange();
     // define the road.
-    this.road = new Road(this.canvas.nativeElement.width / 2, this.canvas.nativeElement.width);
+    this.road = new Road(this.carsCanvas.nativeElement.width / 2, this.carsCanvas.nativeElement.width);
     // define the car
-    this.car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3);
+    this.car = this.generateCars(200);
     // define the traffic
     this.traffic = [
       new Car(this.road.getLaneCenter(1), -100, 40, 60, "DUMMY", 2)
@@ -54,38 +63,72 @@ export class SelfDriveComponent implements OnInit {
   }
 
   updates(): void {
-
     for(let i = 0 ; i < this.traffic.length ; i++) {
       this.traffic[i].update(this.road.borders, []);
     }
-    this.car.update(this.road.borders, this.traffic);
+
+    for(let i = 0 ; i < this.car.length ; i++) {
+      this.car[i].update(this.road.borders, this.traffic);
+    }
   }
 
   drawToCanvas(): void {
-    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    // cars
+    // select the best car
+    const bestCar: Car = this.car.find((car: Car) => car.y === Math.min(...this.car.map(c=>c.y)));
+    this.carsContext.clearRect(0, 0, this.carsCanvas.nativeElement.width, this.carsCanvas.nativeElement.height);
     // this bit makes the road scroll, not the car!
-    this.ctx.save();
-    this.ctx.translate(0, -this.car.y + this.canvas.nativeElement.height * 0.7);
+    this.carsContext.save();
+    this.carsContext.translate(0, -bestCar.y + this.carsCanvas.nativeElement.height * 0.7);
 
     for(let i = 0 ; i < this.traffic.length ; i++) {
-      this.traffic[i].draw(this.ctx, "red");
+      this.traffic[i].draw(this.carsContext, "red");
     }
 
-    this.road.draw(this.ctx);
-    this.car.draw(this.ctx, "blue");
+    this.road.draw(this.carsContext);
 
-    this.ctx.restore();
+    this.carsContext.globalAlpha = 0.2;
+    for(let i = 0 ; i < this.car.length ; i++) {
+      this.car[i].draw(this.carsContext, "blue");
+    }
+    this.carsContext.globalAlpha = 1;
+    bestCar.draw(this.carsContext, "yellow", true);
+
+    this.carsContext.restore();
+
+    // network
+    this.networkContext.clearRect(0, 0, this.networkCanvas.nativeElement.width, this.networkCanvas.nativeElement.height);
+    this.networkContext.lineDashOffset = this.time * 10;
+    // visualise the first cars brain
+    Visualizer.drawNetwork(this.networkContext, bestCar.brain);
   }
 
   /**
    * The function that calls everything that needs to happen, and then
    * recalls the animate frame - controls the flow!
    */
+  time: number = 0;
   animate(): void {
     this.updates();
     this.drawToCanvas();
+
+    // time...
+    let timeTaken: number = performance.now() - this.time;
+    this.time += (timeTaken / 100000);
+
     requestAnimationFrame(() => this.animate());
   };
+
+  generateCars(n: number): Car[] {
+    const cars: Car[] = [];
+
+    for(let i = 0 ; i < n ; i++) {
+      const newCar: Car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3);
+      cars.push(newCar);
+    }
+
+    return cars;
+  }
 
 
 
@@ -111,13 +154,13 @@ export class SelfDriveComponent implements OnInit {
         this.resizeElement = document.getElementById('cars');
 
         this.resizeObserver = new ResizeObserver(() => {
-            this.canvas.nativeElement.width = this.resizeElement.offsetWidth;
-            this.canvas.nativeElement.height = this.resizeElement.offsetHeight;
+            this.carsCanvas.nativeElement.width = this.resizeElement.offsetWidth;
+            this.carsCanvas.nativeElement.height = this.resizeElement.offsetHeight;
 
-            this.road.modifyWidth(this.canvas.nativeElement.width / 2, this.canvas.nativeElement.width);
+            this.road.modifyWidth(this.carsCanvas.nativeElement.width / 2, this.carsCanvas.nativeElement.width);
 
             if(this.resizeElement.offsetHeight > window.innerHeight) {
-                this.canvas.nativeElement.height = window.innerHeight;
+                this.carsCanvas.nativeElement.height = window.innerHeight;
             }
         });
 

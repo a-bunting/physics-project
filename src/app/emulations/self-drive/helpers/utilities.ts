@@ -53,4 +53,12 @@ export class Utilities {
     return false;
   }
 
+  getRGBAOfValue(value: number): string {
+      const alpha = Math.abs(value);
+      const R = value < 0 ? 0 : 255;
+      const G = value < 0 ? 0 : 255;
+      const B = value > 0 ? 0 : 255;
+      return 'rgba('+R+','+G+','+B+','+alpha+')';
+  }
+
 }

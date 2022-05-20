@@ -57,14 +57,13 @@ export class Car {
         const outputs = NeuralNetwork.feedForward(offsets, this.brain);
 
         if(this.useBrain) {
+          // ste the outputs to the controls.
           this.controls.forward = outputs[0];
           this.controls.left = outputs[1];
           this.controls.right = outputs[2];
           this.controls.reverse = outputs[3];
         }
     }
-
-    console.table(this.brain);
   }
 
   #assessDamage(roadBorders: coordinates[][], traffic: Car[]): boolean {
@@ -111,10 +110,10 @@ export class Car {
      this.y -= Math.cos(this.angle) * this.speed;
   }
 
-  draw(ctx: CanvasRenderingContext2D, colour: string): void {
+  draw(ctx: CanvasRenderingContext2D, colour: string, displaySensors: boolean = false): void {
 
     // draw sensors
-    if(this.sensor) this.sensor.draw(ctx);
+    if(this.sensor && displaySensors) this.sensor.draw(ctx);
 
     // now draw the car
     ctx.fillStyle = this.damaged ? 'red' : colour;
