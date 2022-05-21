@@ -1,4 +1,3 @@
-import { boolean } from "mathjs";
 import { Controls } from "../helpers/controls";
 import { coordinates, Utilities } from "../helpers/utilities";
 import { NeuralNetwork } from "../neuralnetwork/network.model";
@@ -116,7 +115,7 @@ export class Car {
     if(this.sensor && displaySensors) this.sensor.draw(ctx);
 
     // now draw the car
-    ctx.fillStyle = this.damaged ? 'red' : colour;
+    ctx.fillStyle = this.damaged ? 'red' : this.colour ? this.colour : colour;
 
     ctx.beginPath();
     ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
@@ -128,6 +127,12 @@ export class Car {
     ctx.lineTo(this.polygon[0].x, this.polygon[0].y);
     ctx.fill();
 
+  }
+
+  colour: string;
+
+  setColour(colour: string): void {
+    this.colour = colour;
   }
 
   #createPolygon(): { x: number, y: number }[] {

@@ -1,3 +1,5 @@
+import { Utilities } from "../helpers/utilities";
+
 export class NeuralNetwork {
 
   levels: Level[] = [];
@@ -17,6 +19,27 @@ export class NeuralNetwork {
     }
 
     return outputs;
+  }
+
+  static mutate(network: NeuralNetwork, amount: number = 1): NeuralNetwork {
+
+    const utility: Utilities = new Utilities();
+
+    network.levels.forEach(level => {
+      console.log("mutating level " + amount);
+
+      for(let i = 0 ; i < level.biases.length ; i++) {
+        level.biases[i] = utility.lerp(level.biases[i], (Math.random() * 2) - 1, amount);
+      }
+
+      for(let i = 0 ; i < level.weights.length ; i++) {
+        for(let o = 0 ; o < level.weights[i].length ; o++) {
+          level.weights[i][o] = utility.lerp(level.weights[i][o], (Math.random() * 2) - 1, amount);
+        }
+      }
+    });
+
+    return network;
   }
 }
 

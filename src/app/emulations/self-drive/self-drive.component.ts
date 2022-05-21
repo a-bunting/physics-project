@@ -2,6 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { generate } from 'rxjs';
 import { Car } from './models/car.model';
 import { Road } from './models/road.model';
+import { NeuralNetwork } from './neuralnetwork/network.model';
 import { Visualizer } from './neuralnetwork/vizualizer.model';
 
 // https://www.freecodecamp.org/news/self-driving-car-javascript
@@ -38,6 +39,10 @@ export class SelfDriveComponent implements OnInit {
   // road stuff
   road: Road;
 
+  bestCar: Car;
+  numberOfCars: number = 200;
+  fitnessFunction: string = "GREATESTY";
+
   constructor() { }
 
   ngOnInit(): void {
@@ -52,12 +57,32 @@ export class SelfDriveComponent implements OnInit {
     this.observeSizeChange();
     // define the road.
     this.road = new Road(this.carsCanvas.nativeElement.width / 2, this.carsCanvas.nativeElement.width);
+
     // define the car
-    this.car = this.generateCars(200);
+    this.car = this.generateCars(this.numberOfCars);
+    this.bestCar = this.car[0];
+
+    // if a best car exists in storage, use that instead!
+    if(localStorage.getItem("bestBrain")) {
+      for(let i = 0 ; i < this.car.length ; i++) {
+        this.car[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
+
+        if(i !== 0) {
+          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, 0.2);
+        } else {
+          this.car[i].setColour("green");
+        }
+      }
+    }
+
     // define the traffic
-    this.traffic = [
-      new Car(this.road.getLaneCenter(1), -100, 40, 60, "DUMMY", 2)
-    ]
+    this.traffic = []
+
+    // make a randoms et of traffic
+    for(let i = 0 ; i < 100 ; i++) {
+      const newCar: Car = new Car(this.road.getLaneCenter(Math.floor((Math.random()*3))), -(i*150)+((Math.random()*2)-1)*100, 40, 60, "DUMMY", 2)
+      this.traffic.push(newCar);
+    }
     // animate
     this.animate();
   }
@@ -75,11 +100,11 @@ export class SelfDriveComponent implements OnInit {
   drawToCanvas(): void {
     // cars
     // select the best car
-    const bestCar: Car = this.car.find((car: Car) => car.y === Math.min(...this.car.map(c=>c.y)));
+    this.bestCar = this.getBestCar(this.fitnessFunction);
     this.carsContext.clearRect(0, 0, this.carsCanvas.nativeElement.width, this.carsCanvas.nativeElement.height);
     // this bit makes the road scroll, not the car!
     this.carsContext.save();
-    this.carsContext.translate(0, -bestCar.y + this.carsCanvas.nativeElement.height * 0.7);
+    this.carsContext.translate(0, -this.bestCar.y + this.carsCanvas.nativeElement.height * 0.7);
 
     for(let i = 0 ; i < this.traffic.length ; i++) {
       this.traffic[i].draw(this.carsContext, "red");
@@ -92,7 +117,7 @@ export class SelfDriveComponent implements OnInit {
       this.car[i].draw(this.carsContext, "blue");
     }
     this.carsContext.globalAlpha = 1;
-    bestCar.draw(this.carsContext, "yellow", true);
+    this.bestCar.draw(this.carsContext, "yellow", true);
 
     this.carsContext.restore();
 
@@ -100,7 +125,27 @@ export class SelfDriveComponent implements OnInit {
     this.networkContext.clearRect(0, 0, this.networkCanvas.nativeElement.width, this.networkCanvas.nativeElement.height);
     this.networkContext.lineDashOffset = this.time * 10;
     // visualise the first cars brain
-    Visualizer.drawNetwork(this.networkContext, bestCar.brain);
+    Visualizer.drawNetwork(this.networkContext, this.bestCar.brain);
+  }
+
+  /**
+   * Selects the best car in the sim based upon the fitness function required.
+   * @param fitnessFunction
+   * @returns
+   */
+  getBestCar(fitnessFunction: string = "GREATESTY"): Car {
+    let bestCar: Car;
+
+    switch(fitnessFunction) {
+      case "GREATESTY":
+        bestCar = this.car.find((car: Car) => car.y === Math.min(...this.car.map(c=>c.y)));
+        break;
+    }
+
+    // put hte best car to the front...
+    this.car = this.car.sort((a: Car, b: Car) => a.y === bestCar.y ? -1 : b.y === bestCar.y ? 1 : 0);
+
+    return bestCar;
   }
 
   /**
@@ -118,6 +163,10 @@ export class SelfDriveComponent implements OnInit {
 
     requestAnimationFrame(() => this.animate());
   };
+
+  // save the best brain...
+  save(): void { localStorage.setItem("bestBrain", JSON.stringify(this.bestCar.brain)); }
+  discard(): void { localStorage.removeItem("bestBrain"); }
 
   generateCars(n: number): Car[] {
     const cars: Car[] = [];
