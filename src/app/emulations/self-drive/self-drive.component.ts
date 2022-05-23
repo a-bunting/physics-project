@@ -188,7 +188,7 @@ export class SelfDriveComponent implements OnInit {
   }
 
   mutationModifier(value: number): void {
-
+    this.mutationFactor = value;
   }
 
 
