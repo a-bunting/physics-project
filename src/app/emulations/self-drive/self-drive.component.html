@@ -8,5 +8,8 @@
   <div class="self-drive__controls" id="controls">
     <button class="self-drive__button" (click)="save()">Save Best Car</button>
     <button class="self-drive__button" (click)="discard()">Delete Local</button>
+    <button class="self-drive__button" (click)="initializeNewSim()">Restart Sim</button>
+    <input type="range" class="self-drive__range" min="0" step="0.01" (change)="mutationModifier($event.target.value)" value="{{ mutationFactor }}">
+    <p>{{ mutationFactor }}</p>
   </div>
 </div>

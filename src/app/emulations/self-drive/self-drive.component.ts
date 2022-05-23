@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { APP_INITIALIZER, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { generate } from 'rxjs';
 import { Car } from './models/car.model';
 import { Road } from './models/road.model';
@@ -43,6 +43,8 @@ export class SelfDriveComponent implements OnInit {
   numberOfCars: number = 200;
   fitnessFunction: string = "GREATESTY";
 
+  mutationFactor: number = 0.2;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -58,6 +60,14 @@ export class SelfDriveComponent implements OnInit {
     // define the road.
     this.road = new Road(this.carsCanvas.nativeElement.width / 2, this.carsCanvas.nativeElement.width);
 
+    // init
+    this.initializeNewSim();
+
+    // animate
+    this.animate();
+  }
+
+  initializeNewSim(): void {
     // define the car
     this.car = this.generateCars(this.numberOfCars);
     this.bestCar = this.car[0];
@@ -68,7 +78,7 @@ export class SelfDriveComponent implements OnInit {
         this.car[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
 
         if(i !== 0) {
-          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, 0.1);
+          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, this.mutationFactor);
         } else {
           this.car[i].setColour("green");
         }
@@ -83,8 +93,6 @@ export class SelfDriveComponent implements OnInit {
       const newCar: Car = new Car(this.road.getLaneCenter(Math.floor((Math.random()*3))), -(i*150)+((Math.random()*2)-1)*100, 40, 60, "DUMMY", 2)
       this.traffic.push(newCar);
     }
-    // animate
-    this.animate();
   }
 
   updates(): void {
@@ -177,6 +185,10 @@ export class SelfDriveComponent implements OnInit {
     }
 
     return cars;
+  }
+
+  mutationModifier(value: number): void {
+
   }
 
 
