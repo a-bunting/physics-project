@@ -68,7 +68,7 @@ export class SelfDriveComponent implements OnInit {
         this.car[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
 
         if(i !== 0) {
-          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, 0.2);
+          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, 0.1);
         } else {
           this.car[i].setColour("green");
         }
