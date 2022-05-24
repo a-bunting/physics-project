@@ -44,6 +44,9 @@ export class SelfDriveComponent implements OnInit {
   fitnessFunction: string = "GREATESTY";
 
   mutationFactor: number = 0.2;
+  sensorCount: number = 5;
+  sensorAngle: number = 45;
+  sensorLength: number = 150;
 
   constructor() { }
 
@@ -70,7 +73,6 @@ export class SelfDriveComponent implements OnInit {
   initializeNewSim(): void {
     // define the car
     this.car = this.generateCars(this.numberOfCars);
-    this.bestCar = this.car[0];
 
     // if a best car exists in storage, use that instead!
     if(localStorage.getItem("bestBrain")) {
@@ -84,6 +86,8 @@ export class SelfDriveComponent implements OnInit {
         }
       }
     }
+
+    this.bestCar = this.car[0];
 
     // define the traffic
     this.traffic = []
@@ -180,7 +184,7 @@ export class SelfDriveComponent implements OnInit {
     const cars: Car[] = [];
 
     for(let i = 0 ; i < n ; i++) {
-      const newCar: Car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3);
+      const newCar: Car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3, this.sensorCount, this.sensorAngle, this.sensorLength);
       cars.push(newCar);
     }
 
@@ -189,6 +193,27 @@ export class SelfDriveComponent implements OnInit {
 
   mutationModifier(value: number): void {
     this.mutationFactor = value;
+  }
+
+  carsModifier(value: number): void {
+    this.numberOfCars = value;
+  }
+
+  modifySensorCountModify(value: number): void {
+    this.sensorCount = value;
+    this.discard();
+    this.initializeNewSim();
+  }
+
+  modifySensorRange(value: number): void {
+    this.sensorAngle = value;
+    this.discard();
+    this.initializeNewSim();
+  }
+
+  modifySensorLength(value: number): void {
+    this.sensorLength = value;
+    this.initializeNewSim();
   }
 
 
