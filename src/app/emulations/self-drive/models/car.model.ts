@@ -21,6 +21,7 @@ export class Car {
   utilities: Utilities;
   brain: NeuralNetwork;
   useBrain: boolean;
+  image: HTMLImageElement;
 
   constructor(x: number, y: number, width: number, height: number, controlType: string, maxspeed: number, rayCount: number = 5, rayAngle: number = 45, rayLength: number = 150) {
     this.x = x;
@@ -41,6 +42,9 @@ export class Car {
     }
     this.controls = new Controls(controlType);
     this.utilities = new Utilities();
+
+    this.image = new Image();
+    this.image.src = "assets/cars/white-blue.png";
   }
 
   update(roadBorders: coordinates[][], traffic: Car[]): void {
@@ -115,18 +119,24 @@ export class Car {
     // draw sensors
     if(this.sensor && displaySensors) this.sensor.draw(ctx);
 
-    // now draw the car
-    ctx.fillStyle = this.damaged ? 'red' : this.colour ? this.colour : colour;
+    // // now draw the car
+    // ctx.fillStyle = this.damaged ? 'red' : this.colour ? this.colour : colour;
 
-    ctx.beginPath();
-    ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+    // ctx.beginPath();
+    // ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
 
-    for(let i = 0 ; i < this.polygon.length ; i++) {
-      ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
-    }
+    // for(let i = 0 ; i < this.polygon.length ; i++) {
+    //   ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+    // }
 
-    ctx.lineTo(this.polygon[0].x, this.polygon[0].y);
-    ctx.fill();
+    // ctx.lineTo(this.polygon[0].x, this.polygon[0].y);
+    // ctx.fill();
+
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(-this.angle);
+    ctx.drawImage(this.image, -this.width/2, -this.height/2, this.width, this.height);
+    ctx.restore();
 
   }
 
