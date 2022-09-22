@@ -4,7 +4,7 @@ This website is a playground for testing algorithms and simulations for use by s
 
 ## Tech
 
-The Physics Project was made in Angular2 only, with only local persistence through localstorage. There is no backend or databasing involved currently. 
+The Physics Project was made in Angular2, with the only persistence through localstorage. There is no backend or databasing involved and unlikely to be in the near future. 
 
 ## Video Demo
 
