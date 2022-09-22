@@ -21,3 +21,10 @@ This site is a persistent work in progress as its where I try fun new things, ho
 
 But these are low priority goals, and if more intreresting things come along I will focus on them first!
 
+## Thanks
+
+Note that whilst the majority of the work on this site is made just by me, some features below have leaned heavily on other resources for learning, the main being:
+
+- The neural network self driving simulator was a <a href="https://www.youtube.com/watch?v=Rs_rAxEsAvI">tutorial</a> learned via FreeCodeCamp and written by <a href="https://www.youtube.com/channel/UC3XGlNq8O5hZlZBJlSFB4jg">Dr. Radu Mariescu-Istodor</a>.
+- The maze algorithms were all adapted from pseudocode on <a href="https://www.jamisbuck.org/mazes/">Jamisbuck</a>, which is the goto place for mazes info!
+
