@@ -2,6 +2,8 @@
 
 This website is a playground for testing algorithms and simulations for use by students who need simulated data matching real world data. The simulations are real life physical phenomina which allow students to collect data in a more real world sense (i.e. error is usually inherent!) than what many simulations provide. This site also is a playground for other creations, such as my random data generator, random questions generators, maze and pathfinding algorithms, and my practices at neural networks (following tutorials).
 
+## Tech
+
 The Physics Project was made in Angular2 only, with only local persistence through localstorage. There is no backend or databasing involved currently. 
 
 ## Video Demo
