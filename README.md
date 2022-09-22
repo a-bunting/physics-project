@@ -1,27 +1,21 @@
-# QuestionsGenerator
+# The Physics Project (<a href="https://physics.sweeto.co.uk/#/">Live Site</a>!)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 10.0.7.
+This website is a playground for testing algorithms and simulations for use by students who need simulated data matching real world data. The simulations are real life physical phenomina which allow students to collect data in a more real world sense (i.e. error is usually inherent!) than what many simulations provide. This site also is a playground for other creations, such as my random data generator, random questions generators, maze and pathfinding algorithms, and my practices at neural networks (following tutorials).
 
-## Development server
+The Physics Project was made in Angular2 only, with only local persistence through localstorage. There is no backend or databasing involved currently. 
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Video Demo
 
-## Code scaffolding
+https://user-images.githubusercontent.com/763952/191715741-8042ccdc-6f1d-427b-a710-e6506da12469.mp4
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Future Plans
 
-## Build
+This site is a persistent work in progress as its where I try fun new things, however a few plans I have include:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+- [ ] A new random question generator format
+- [ ] Finalising the Alpha and Beta simulations
+- [ ] Building the neural network road simulation
+- [ ] Using the mapping and pathfinding packages to create a game
 
-## Running unit tests
+But these are low priority goals, and if more intreresting things come along I will focus on them first!
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
