@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import * as math from 'mathjs';
-import { evaluate } from 'mathjs';
 
 interface EquationVariable {
 	letter: string;
@@ -13,7 +12,7 @@ interface EquationVariable {
 
 interface GeneratedData {
   iv: number;
-  data: number;
+  data: number[];
 }
 
 @Component({
@@ -21,6 +20,7 @@ interface GeneratedData {
 	templateUrl: './data-gen.component.html',
 	styleUrls: ['./data-gen.component.scss']
 })
+
 export class DataGenComponent implements OnInit {
 
 	// equation elements.
@@ -37,6 +37,7 @@ export class DataGenComponent implements OnInit {
 
   // data
   generatedData: GeneratedData[] = [];
+  presentAsTable: boolean = true;
 
 	constructor() { }
 
@@ -70,23 +71,28 @@ export class DataGenComponent implements OnInit {
 		let experimentData: GeneratedData[] = [];
 
 		// conduct the experiment 'trials' amount of times.
-		for(let t = 0 ; t < this.trials ; t++) {
-			const range: number = iv.max - iv.min;
-			const division: number = range / this.ivRange;
+		for(let t = 0 ; t < +this.trials ; t++) {
+			const range: number = +iv.max - +iv.min;
+			const division: number = +range / +this.ivRange;
 
-			for(let i = 0 ; i < this.ivRange + 1 ; i++) {
+			for(let i = 0 ; i < +this.ivRange + 1 ; i++) {
 				const ivValue: number = iv.min + i * division;
 				const calculatedValue: number = this.evaluateEquation(this.equation, { ...this.testData, [iv.letter]: ivValue });
 				let errorValue: number = 1 + ((-this.error + Math.random() * 2 * this.error) / 100);
 
-				experimentData.push({
-					iv: ivValue,
-					data: calculatedValue * errorValue
-				})
+        let ivFound: number = experimentData.findIndex((a: GeneratedData) => a.iv === ivValue);
+
+        if(ivFound !== -1) {
+          experimentData[ivFound].data.push(calculatedValue * errorValue);
+        } else {
+          experimentData.push({ iv: ivValue, data: [ calculatedValue * errorValue ]})
+        }
+
 			}
 		}
 
 		this.generatedData = experimentData;
+    // this.genSigFig();
 
 	}
 
@@ -143,10 +149,12 @@ export class DataGenComponent implements OnInit {
 		try {
 			math.evaluate(equation, testData);
 			this.equationIncorrect = false;
+      this.generateConstants();
 		} catch(e) {
 			// if it fails throw an error message
 			this.errorMessage = e.message;
 			this.equationIncorrect = true;
+      this.equationComponents = []; // reset
 		}
 
 	}
@@ -168,9 +176,30 @@ export class DataGenComponent implements OnInit {
 
 	}
 
-  getIVData(iv: number): GeneratedData[] {
-    const data: { iv: number, data: number }[] = this.generatedData.filter((temp: { iv: number, data: number }) => temp.iv === iv);
-    return data;
+  // getIVData(iv: number): GeneratedData[] {
+  //   const data: { iv: number, data: number }[] = this.generatedData.filter((temp: { iv: number, data: number }) => temp.iv === iv);
+  //   return data;
+  // }
+
+  toggleLinearDataView(): void {
+    this.presentAsTable = !this.presentAsTable;
   }
+
+  // genSigFig(): void {
+  //   let sfString: string = '';
+
+  //   if(this.generatedData.length > 0) {
+  //     if(this.generatedData[0].data.length > 0) {
+  //       let split: string[] = ('' + this.generatedData[0].data[0]).split('.');
+  //       let beforeSplit: number = split[0].length;
+  //       let remainder: number = Math.max(this.sigfig - beforeSplit, 0);
+  //       sfString = beforeSplit+'.'+remainder+'-'+remainder;
+  //       this.sfString = sfString;
+  //     }
+  //   }
+  // }
+
+  // sfString: string = '.2-2';
+  // sigFig(): string { return this.sfString; }
 
 }

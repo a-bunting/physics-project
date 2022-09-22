@@ -12,12 +12,12 @@
             </div>
             <div class="question-data">
                 <div class="question-image-data">
-                    <p *ngIf="display.time" class="question-timer"><b>Current Time</b>: {{ currentTime | number:'1.2-2' }} seconds</p>
-                    <p *ngIf="display.distance" class="question-timer"><b>Distance Moved</b>: {{ currentDistance | number:'1.2-2' }} meters</p>
-                    <p *ngIf="display.speed" class="question-timer"><b>Speed</b>: {{ valueSpeed | number:'1.2-2' }} m/s</p>
-                    <p *ngIf="display.acceleration" class="question-timer"><b>Acceleration</b>: {{ valueAcceleration | number:'1.2-2' }} m/s<sup>2</sup></p>
-                    <p *ngIf="display.totalDistance" class="question-timer"><b>Final Distance</b>: {{ valueDistance | number:'1.2-2' }} m</p>
-                    <p *ngIf="display.totalTime" class="question-timer"><b>Final Time</b>: {{ valueTime | number:'1.2-2' }} s</p>
+                    <p *ngIf="display.time" class="question-timer"><b>Current Time</b>{{ currentTime | number:'1.2-2' }} seconds</p>
+                    <p *ngIf="display.distance" class="question-timer"><b>Distance Moved</b>{{ currentDistance | number:'1.2-2' }} meters</p>
+                    <p *ngIf="display.speed" class="question-timer"><b>Speed</b>{{ valueSpeed | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.acceleration" class="question-timer"><b>Acceleration</b>{{ valueAcceleration | number:'1.2-2' }} m/s<sup>2</sup></p>
+                    <p *ngIf="display.totalDistance" class="question-timer"><b>Final Distance</b>{{ valueDistance | number:'1.2-2' }} m</p>
+                    <p *ngIf="display.totalTime" class="question-timer"><b>Final Time</b>{{ valueTime | number:'1.2-2' }} s</p>
                 </div>
                 <div class="question-image-buttons">
                     <button class="button-control" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
@@ -33,13 +33,15 @@
             </div>
 
         </div>
-        
+
         <div class="question-question-container">
+
+          <div class="questions-title">Speed Distance Time</div>
 
             <div class="question-buttons">
                 <button (click)="newQuestion()">New Question</button>
                 <button (click)="submitResults()" *ngIf="loggedIn && resultsToAdd" [disabled]="lastUpdatedRecently">{{ !lastUpdatedRecently ? 'Put Results in Database' : 'You cannot submit data more than once every two minutes' }}</button>
-            
+
                 <select (change)="loadNewQuestion($event.target.value)" class="question-select">
                     <option *ngFor="let question of questionBank; let i = index" value="{{ i }}">[{{ question.difficulty }}] {{ question.questionName }}</option>
                     <option selected disabled hidden>Choose a new question</option>

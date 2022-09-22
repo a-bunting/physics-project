@@ -71,11 +71,11 @@ export class DirectoryService {
       }
 
       practiceItems: menuCategory = {
-          title: 'Emulators',
+          title: 'Etc...',
           route: '/',
           items: [
             {
-              name: "Mazes", version: "0.1", tags: ["Mazes"],
+              name: "Mazes and Pathfinding", version: "0.1", tags: ["Mazes"],
               description: "Making Mazes!",
               route: "/mazes", parameters: null, background: "motion-ramp.jpg",
               subItems: [
@@ -83,9 +83,17 @@ export class DirectoryService {
               ]
            },
            {
-              name: "Cars",  version: "0.01 PrePreAlpha", tags: ["Fun"],
+              name: "AI Cars",  version: "0.01 PrePreAlpha", tags: ["Fun"],
               description: "Car simulator y'all!.",
               route: "/cars/", parameters: null, background: "",
+              subItems: [
+                 {name: "Fully Enabled", parameters: ""}
+              ]
+           },
+           {
+              name: "Data Generator",  version: "1", tags: ["Fun", "Data"],
+              description: "Its a data generator, for generating data!",
+              route: "/datagen/", parameters: null, background: "",
               subItems: [
                  {name: "Fully Enabled", parameters: ""}
               ]

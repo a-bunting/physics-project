@@ -13,35 +13,35 @@
             <div class="question-data">
                 <div class="question-image-data">
 
-                    <p *ngIf="display.initialTemperature" class="question-timer"><b>Initial Temperature (K)</b>: {{ temperature.start | number:'1.0-2' }}</p>
-                    <p *ngIf="display.finalTemperature" class="question-timer"><b>Final Temperature (K)</b>: {{ temperature.end | number:'1.0-2' }}</p>
+                    <p *ngIf="display.initialTemperature" class="question-timer"><b>Initial Temperature (K)</b>{{ temperature.start | number:'1.0-2' }}</p>
+                    <p *ngIf="display.finalTemperature" class="question-timer"><b>Final Temperature (K)</b>{{ temperature.end | number:'1.0-2' }}</p>
 
-                    <p *ngIf="display.initialPressure" class="question-timer"><b>Initial Pressure (Pa)</b>: {{ pressure.start | number:'1.0-2' }}</p>
-                    <p *ngIf="display.finalPressure" class="question-timer"><b>Final Pressure (Pa)</b>: {{ pressure.end | number:'1.0-2' }}</p>
+                    <p *ngIf="display.initialPressure" class="question-timer"><b>Initial Pressure (Pa)</b>{{ pressure.start | number:'1.0-2' }}</p>
+                    <p *ngIf="display.finalPressure" class="question-timer"><b>Final Pressure (Pa)</b>{{ pressure.end | number:'1.0-2' }}</p>
 
-                    <p *ngIf="display.initialVolume" class="question-timer"><b>Initial Volume (m<sup>3</sup>)</b>: {{ volume.start | number:'1.2-4' }}</p>
-                    <p *ngIf="display.finalVolume" class="question-timer"><b>Final Volume (m<sup>3</sup>)</b>: {{ volume.end | number:'1.2-4' }}</p>
+                    <p *ngIf="display.initialVolume" class="question-timer"><b>Initial Volume (m<sup>3</sup>)</b>{{ volume.start | number:'1.2-4' }}</p>
+                    <p *ngIf="display.finalVolume" class="question-timer"><b>Final Volume (m<sup>3</sup>)</b>{{ volume.end | number:'1.2-4' }}</p>
 
-                    <p *ngIf="display.initialMolecules" class="question-timer"><b>Initial Moles (mol)</b>: {{ molecules.start | number:'1.1-6' }}</p>
-                    <p *ngIf="display.finalMolecules" class="question-timer"><b>Final Moles (mol)</b>: {{ molecules.end | number:'1.1-6' }}</p>
+                    <p *ngIf="display.initialMolecules" class="question-timer"><b>Initial Moles (mol)</b>{{ molecules.start | number:'1.1-6' }}</p>
+                    <p *ngIf="display.finalMolecules" class="question-timer"><b>Final Moles (mol)</b>{{ molecules.end | number:'1.1-6' }}</p>
 
-                    <p *ngIf="display.constants" class="question-timer"><b>Constants</b>: {{ constantsString }}</p>
-                    <p *ngIf="display.moleculeName" class="question-timer"><b>Molecule Name</b>: {{ moleculeName  }}</p>
-                    <p *ngIf="display.moleculeMass" class="question-timer"><b>Molecule Mass</b>: {{ moleculeMass | number:'1.2-2' }}</p>
+                    <p *ngIf="display.constants" class="question-timer"><b>Constants</b>{{ constantsString }}</p>
+                    <p *ngIf="display.moleculeName" class="question-timer"><b>Molecule Name</b>{{ moleculeName  }}</p>
+                    <p *ngIf="display.moleculeMass" class="question-timer"><b>Molecule Mass</b>{{ moleculeMass | number:'1.2-2' }}</p>
 
-                    <p *ngIf="display.initialEk" class="question-timer"><b>Starting E<sub>k</sub> of gas (kJ)</b>: {{ kineticEnergy.start | number:'1.0-5'}}</p>
-                    <p *ngIf="display.finalEk" class="question-timer"><b>Final E<sub>k</sub> of gas (kJ)</b>: {{ kineticEnergy.end | number:'1.0-5' }}</p>
+                    <p *ngIf="display.initialEk" class="question-timer"><b>Starting E<sub>k</sub> of gas (kJ)</b>{{ kineticEnergy.start | number:'1.0-5'}}</p>
+                    <p *ngIf="display.finalEk" class="question-timer"><b>Final E<sub>k</sub> of gas (kJ)</b>{{ kineticEnergy.end | number:'1.0-5' }}</p>
 
-                    <p *ngIf="display.initialEkPM" class="question-timer"><b>Starting E<sub>k</sub> per molecule (eV)</b>: {{ kineticEnergyPM.start | number:'1.3-3'}}</p>
-                    <p *ngIf="display.finalEkPM" class="question-timer"><b>Final E<sub>k</sub> per molecule (eV)</b>: {{ kineticEnergyPM.end | number:'1.3-3' }}</p>
+                    <p *ngIf="display.initialEkPM" class="question-timer"><b>Starting E<sub>k</sub> per molecule (eV)</b>{{ kineticEnergyPM.start | number:'1.3-3'}}</p>
+                    <p *ngIf="display.finalEkPM" class="question-timer"><b>Final E<sub>k</sub> per molecule (eV)</b>{{ kineticEnergyPM.end | number:'1.3-3' }}</p>
 
-                    <p *ngIf="display.initialVelocity" class="question-timer"><b>Start Average Velocity (m/s)</b>: {{ averageVelocity.start | number:'1.2-2'}}</p>
-                    <p *ngIf="display.finalVelocity" class="question-timer"><b>Final Average Velocity (m/s)</b>: {{ averageVelocity.end | number:'1.2-2' }}</p>       
+                    <p *ngIf="display.initialVelocity" class="question-timer"><b>Start Average Velocity (m/s)</b>{{ averageVelocity.start | number:'1.2-2'}}</p>
+                    <p *ngIf="display.finalVelocity" class="question-timer"><b>Final Average Velocity (m/s)</b>{{ averageVelocity.end | number:'1.2-2' }}</p>
 
-                     <p *ngIf="display.initialMoleculeCount" class="question-timer"><b>Initial Molecule Count (# <sub>x</sub>10<sup>23</sup>)</b>: {{ moleculeCount.start | number:'1.0-0'}}</p>
-                     <p *ngIf="display.finalMoleculeCount" class="question-timer"><b>Final Molecule Count (#<sub>x</sub>10<sup>23</sup>)</b>: {{ moleculeCount.end | number:'1.0-0' }}</p>
+                     <p *ngIf="display.initialMoleculeCount" class="question-timer"><b>Initial Molecule Count (# <sub>x</sub>10<sup>23</sup>)</b>{{ moleculeCount.start | number:'1.0-0'}}</p>
+                     <p *ngIf="display.finalMoleculeCount" class="question-timer"><b>Final Molecule Count (#<sub>x</sub>10<sup>23</sup>)</b>{{ moleculeCount.end | number:'1.0-0' }}</p>
 
-                     <p *ngIf="display.workDone" class="question-timer"><b>Work Done (kJ)</b>: {{ workDone | number:'1.0-0' }}</p>
+                     <p *ngIf="display.workDone" class="question-timer"><b>Work Done (kJ)</b>{{ workDone | number:'1.0-0' }}</p>
 
                 </div>
                 <div class="question-image-buttons">
@@ -49,20 +49,22 @@
                     <button class="button-control" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
                     <button class="button-control" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart Emulation</button>
                 </div>
-            </div> 
+            </div>
             <div class="question-changespeedscale">
                 <div class="question-changespeedscale-button"><b>Speed</b></div>
                 <div class="question-changespeedscale-button"><input type="range" class="custom-speed-range" min="0" max="0.05" step="0.001" [(ngModel)]='speedscale'></div>
                 <div class="question-changespeedscale-button"><input type="text" class="custom-speed-input" [(ngModel)]='speedscale' alt="tip"></div>
             </div>
         </div>
-        
+
         <div class="question-question-container">
+
+          <div class="questions-title">Ideal Gasses</div>
 
             <div class="question-buttons">
                 <button (click)="newQuestion()">New Question</button>
                 <button (click)="submitResults()" *ngIf="loggedIn && resultsToAdd" [disabled]="lastUpdatedRecently">{{ !lastUpdatedRecently ? 'Put Results in Database' : 'You cannot submit data more than once every two minutes' }}</button>
-            
+
                 <select (change)="loadNewQuestion($event.target.value)" class="question-select">
                     <option *ngFor="let question of questionBank; let i = index" value="{{ i }}">[{{ question.difficulty }}] {{ question.questionName }}</option>
                     <option selected disabled hidden>Choose a new question</option>
