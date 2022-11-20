@@ -44,10 +44,10 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
     fullpath = '#/simulations/motion-ramp';
     componentId: string = 'motion_sim';
     simulationId: string = 'Motion Ramp';
-  
+
     // values
     valueTime: number; valueAcceleration: number;
-    currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;    
+    currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;
     frictionKineticCoefficient = 0; frictionStaticCoefficient = 0; frictionValue: number = 0;
     netAppliedForce: number = 0; angleOfRamp:number = -30; rampLengthPixels:number = 750;
     gravity: number = 7.5; mass: number = 10; rampLength: number = 2;
@@ -101,7 +101,7 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
 
     simulationParameters: Array<simParamArray> = [
         {
-            id: 0, name: 'Simulation Speed', unit: '',    
+            id: 0, name: 'Simulation Speed', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
@@ -109,81 +109,81 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
             controlType: 'range', fineControl: {available: false, value: null }
         },
         {
-            id: 1, name: 'Angle of Slope', unit: 'deg',    
+            id: 1, name: 'Angle of Slope', unit: 'deg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.angleOfRamp = newValue; this.recalculateSimulation(); },
             get: () => { return this.angleOfRamp; }, displayModifier: -1, dp: 2,
             default: -30, min: -30, max: 0, divisions: 0.1,
             controlType: 'range', fineControl: {available: true, value: 0.10 }
-        }, 
+        },
         {
-            id: 2, name: 'Ramp length', unit: 'm',     
+            id: 2, name: 'Ramp length', unit: 'm',
             iv: true, dv: false,  dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.rampLength = newValue; this.pixelsPerMeter = this.rampLengthPixels / this.rampLength; },
             get: () => { return this.rampLength; }, displayModifier: 1, dp: 2,
             default: 2, min: 1, max: 10, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
-        }, 
+        },
         {
-            id: 3, name: 'Gravity', unit: 'm/s2',    
+            id: 3, name: 'Gravity', unit: 'm/s2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.gravity = newValue; },
-            get: () => { return this.gravity; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity; }, displayModifier: 1, dp: 2,
             default: 9.81, min: 0, max: 20.0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
-        },  
+        },
         {
-            id: 4, name: 'Mass', unit: 'kg',     
+            id: 4, name: 'Mass', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.mass = newValue; },
             get: () => { return this.mass; }, displayModifier: 1, dp: 2,
             default: 10, min: 1, max: 100, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 0.50 }
-        }, 
+        },
         {
-            id: 5, name: 'Static Frictional Coefficient', unit: '',    
+            id: 5, name: 'Static Frictional Coefficient', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true,  visible: false,
             modify: newValue => { this.frictionStaticCoefficient = newValue; var kinFrcId = this.getSimulationParameterIDFromName("Kinetic Frictional Coefficient"); this.simulationParameters[kinFrcId].max = newValue; (this.simulationParameters[kinFrcId].get() > newValue ? this.simulationParameters[kinFrcId].modify(newValue) : '') },
-            get: () => { return this.frictionStaticCoefficient; }, displayModifier: 1, dp: 3, 
+            get: () => { return this.frictionStaticCoefficient; }, displayModifier: 1, dp: 3,
             default: 0, min: 0, max: 1.5, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
-        },   
+        },
         {
-            id: 6, name: 'Kinetic Frictional Coefficient', unit: '',    
+            id: 6, name: 'Kinetic Frictional Coefficient', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true,  visible: false,
             modify: newValue => { this.frictionKineticCoefficient = newValue; },
             get: () => { return this.frictionKineticCoefficient; }, displayModifier: 1, dp: 3,
             default: 0, min: 0, max: 0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
-        }, 
+        },
         {
-            id: 7, name: 'Applied Force Down Slope', unit: 'N',   
+            id: 7, name: 'Applied Force Down Slope', unit: 'N',
             iv: true, dv: false,  dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.netAppliedForce = newValue; },
             get: () => { return this.netAppliedForce; }, displayModifier: 1, dp: 2,
             default: 0, min: 0, max: 100, divisions: 0.50,
             controlType: 'range', fineControl: {available: true, value: 0.50 }
-        }, 
+        },
         {
-            id: 8,  name: 'Time Elapsed', unit: 's', 
+            id: 8,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 9,  name: 'Current Velocity', unit: 'm/s', 
+            id: 9,  name: 'Current Velocity', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentSpeed; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 10, name: 'Frictional Force', unit: 'N', 
+            id: 10, name: 'Frictional Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.forceDueToFriction; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 11, name: 'NET Force', unit: 'N', 
+            id: 11, name: 'NET Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.forceDueToGravity + this.netAppliedForce - this.forceDueToFriction; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
@@ -268,7 +268,7 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
         var forceArrowUp = Math.floor(this.forceDueToFriction) + 10;
       //   var forceArrowDown = Math.floor(totalArrowLength * ((this.forceDueToGravity + this.netAppliedForce) / totalForce));
       //   var forceArrowUp = Math.floor(totalArrowLength * (this.forceDueToFriction / totalForce));
-        
+
         // force down arrow
         this.canvas_arrow(this.ctx, this.rampLengthPixels - this.motionPositionStart, -25, this.rampLengthPixels - this.motionPositionStart - forceArrowDown, -25);
 
@@ -299,26 +299,26 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
            this.elapsedSinceFrame = Date.now() - this.startTime - this.elapsed;
            this.elapsed = Date.now() - this.startTime;
        }
-        
-       this.calculationsProcess();           
-       
+
+       this.calculationsProcess();
+
        if(this.paused === false && this.animationStarted === true && this.animationEnded === false) {
 
 
             this.currentTime += (this.elapsedSinceFrame/1000)  * this.simulationSpeed;
             this.currentDistance += this.currentSpeed * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
             this.currentSpeed += this.valueAcceleration * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
-    
-            
+
+
             this.motionPositionStart += this.currentSpeed * (this.elapsedSinceFrame / 1000) * this.pixelsPerMeter * this.simulationSpeed;
-            
+
          }
-         
+
          if(this.currentDistance > this.rampLength) {
             this.animationEnded = true;
             this.dataCollectionEnabled = true;
          }
-         
+
          this.frame();
          this.requestId = requestAnimationFrame(() => this.animate());
 
@@ -342,5 +342,5 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
 
         this.frame();
     }
-    
+
 }
