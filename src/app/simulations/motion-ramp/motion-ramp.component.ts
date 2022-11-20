@@ -187,6 +187,12 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.forceDueToGravity + this.netAppliedForce - this.forceDueToFriction; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 12, name: 'Distance Travelled', unit: 'm',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.currentDistance; }, displayModifier: 1, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
 

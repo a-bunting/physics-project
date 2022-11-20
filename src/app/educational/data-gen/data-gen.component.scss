@@ -1,9 +1,120 @@
 .data-gen {
+  position: relative;
 	padding: 2rem;
 	font-size: 1.4rem;
 
+  display: grid;
+  grid-template-columns: max-content 1fr;
+
+  &__out {
+    grid-column: 2 / 3;
+    flex: 1;
+  }
+
+  &__setup {
+    grid-column: 1 / 2;
+    margin-right: 2rem;
+
+    &--wrapper {
+      position: sticky;
+      top: 1rem;
+      box-shadow: .2rem 0 .4rem rgba(black, .5);
+      border-radius: 1rem;
+      padding: .5rem 1rem;
+      background-color: var(--color-main-light);
+    }
+  }
+
+  &__header {
+    margin: 2rem;
+    margin-bottom: 0;
+    padding-bottom: 2rem;
+
+    &--title {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    &--description {
+      font-size: 1.2rem;
+      letter-spacing: .15rem;
+      line-height: 2rem;
+    }
+
+    border-bottom: .2rem solid rgba(black, .5);
+  }
+
+  &__validation {
+    padding: 1rem 0 1rem 0;
+
+    &--invalid {
+      color: whitesmoke;
+      font-weight: bold;
+    }
+  }
+
+  &__properties, &__boundaries, &__equation, &__buttons, &__constants {
+    width: 30rem;
+    margin-bottom: 2rem;
+  }
+
 	&__properties {
+    &--title {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
 	}
+
+  &__boundaries {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    &:not(:last-of-type) { margin-bottom: .5rem; }
+  }
+
+  &__equation {
+
+
+    &--text {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    &--input {
+      display: flex;
+      justify-content: space-between;
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 2rem;
+  }
+
+  &__constants {
+    border-radius: 1rem;
+    background-color: var(--color-main);
+    box-shadow: .2rem 0 .4rem rgba(black, .5);
+    border: .1rem solid rgba(black, .5);
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    padding: 1rem 2rem;
+    row-gap: .8rem;
+    margin-bottom: .5rem;
+
+    button {
+      margin-left: 0rem;
+    }
+
+    &--title {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+  }
+
 
 	&__property {
 		display: flex;
@@ -11,24 +122,77 @@
     align-items: center;
     margin-bottom: .5rem;
 
+    &--letter {
+
+    }
+
 		&--text {
       flex-basis: clamp(5rem, 8rem, 10rem);
 			font-weight: bold;
       display: flex;
       justify-content: space-between;
+      margin-right: 3rem;
 		}
 
 		&--input {
 			flex: 1;
+      display: flex;
+      justify-content: space-between;
       align-items: baseline;
+      text-align: center;
+
+      input { margin-left: 1rem; }
 		}
+
 	}
+
+  &__boundary {
+
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    flex: 1;
+
+    &--text {
+      font-weight: bold;
+      margin-right: 1rem;
+    }
+
+    &:not(:last-of-type) { margin-right: 2rem; }
+
+    &--input {
+      display: flex;
+      text-align: right;
+
+
+      input {
+        text-align: center;
+      }
+    }
+  }
+
+  &__constant {
+    display: flex;
+    justify-content: stretch;
+    align-items: baseline;
+    flex-basis: 8rem;
+
+    &--letter {
+      margin-right: 2rem;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    &--value {
+      text-align: left;
+    }
+  }
 
 	&__input {
 		padding: .4rem .8rem;
 		border-radius: .7rem;
 		box-shadow: 0 .2rem .4rem rgba(black, .5);
-    margin-right: .5rem;
 
     &--small {
       width: 5rem;
@@ -39,7 +203,8 @@
 		padding: .4rem .8rem;
 		border-radius: .7rem;
 		box-shadow: 0 .2rem .4rem rgba(black, .5);
-    margin-left: 1rem;
+
+    &:not(:last-of-type) { margin-right: 1rem; }
   }
 
   &__label {
@@ -87,6 +252,8 @@
   &__output {
     display: flex;
     flex-direction: column;
+    // border-left: .2rem solid rgba(black, .5);
+    padding-left: 1rem;
 
     &--iv {
       flex-basis: 10rem;
@@ -102,6 +269,53 @@
     &--item {
       flex: 1;
       padding: .5rem 1rem;
+    }
+
+    button {
+      margin-bottom: 1rem;
+      width: 20rem;
+    }
+  }
+
+  &__list {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+
+    &--title {
+      font-weight: bold;
+    }
+
+    &--item {
+
+    }
+  }
+
+  &__table {
+
+    border-collapse: collapse;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: .2rem 0 .4rem rgba(black, .5);
+
+    &--iv {
+      font-weight: bold;
+      text-align: center;
+    }
+
+    &--headerrow {
+      background-color: var(--color-juxtapose-dark);
+      color: white
+    }
+
+    &--row {
+      &:nth-of-type(odd) { background-color: var(--color-main-main); }
+      &:nth-of-type(even) { background-color: var(--color-main-light);}
+    }
+
+    &--data, &--head {
+      padding: .5rem 1rem;
+      text-align: center;
     }
   }
 

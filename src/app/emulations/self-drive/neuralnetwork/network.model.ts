@@ -9,6 +9,8 @@ export class NeuralNetwork {
       const nextLevel: Level = new Level(neuronCounts[i], neuronCounts[i+1]);
       this.levels.push(nextLevel)
     }
+
+    console.log(`New brain created with ${neuronCounts} levels.`)
   }
 
   static feedForward(givenInputs, network) {
@@ -26,7 +28,6 @@ export class NeuralNetwork {
     const utility: Utilities = new Utilities();
 
     network.levels.forEach(level => {
-      console.log("mutating level " + amount);
 
       for(let i = 0 ; i < level.biases.length ; i++) {
         level.biases[i] = utility.lerp(level.biases[i], (Math.random() * 2) - 1, amount);

@@ -21,8 +21,9 @@ export class Car {
   utilities: Utilities;
   brain: NeuralNetwork;
   useBrain: boolean;
+  image: HTMLImageElement;
 
-  constructor(x: number, y: number, width: number, height: number, controlType: string, maxspeed: number) {
+  constructor(x: number, y: number, width: number, height: number, controlType: string, maxspeed: number, rayCount: number = 5, rayAngle: number = 45, rayLength: number = 150) {
     this.x = x;
     this.y = y;
     this.width = width;
@@ -36,31 +37,35 @@ export class Car {
     this.useBrain = controlType === "AI";
 
     if(controlType !== "DUMMY") {
-      this.sensor = new Sensor(this);
+      this.sensor = new Sensor(this, rayCount, rayAngle, rayLength);
       this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
     }
     this.controls = new Controls(controlType);
-
     this.utilities = new Utilities();
+
+    this.image = new Image();
+    this.image.src = "assets/cars/white-blue.png";
   }
 
   update(roadBorders: coordinates[][], traffic: Car[]): void {
+
     if(!this.damaged) {
         this.#move();
         this.polygon = this.#createPolygon();
         this.damaged = this.#assessDamage(roadBorders, traffic);
-    }
-    if(this.sensor) {
-        this.sensor.update(roadBorders, traffic);
-        const offsets = this.sensor.readings.map(s => s === null ? 0 : 1-s.offset);
-        const outputs = NeuralNetwork.feedForward(offsets, this.brain);
 
-        if(this.useBrain) {
-          // ste the outputs to the controls.
-          this.controls.forward = outputs[0];
-          this.controls.left = outputs[1];
-          this.controls.right = outputs[2];
-          this.controls.reverse = outputs[3];
+        if(this.sensor) {
+            this.sensor.update(roadBorders, traffic);
+            const offsets = this.sensor.readings.map(s => s === null ? 0 : 1-s.offset);
+            const outputs = NeuralNetwork.feedForward(offsets, this.brain);
+
+            if(this.useBrain) {
+              // ste the outputs to the controls.
+              this.controls.forward = outputs[0];
+              this.controls.left = outputs[1];
+              this.controls.right = outputs[2];
+              this.controls.reverse = outputs[3];
+            }
         }
     }
   }
@@ -114,18 +119,24 @@ export class Car {
     // draw sensors
     if(this.sensor && displaySensors) this.sensor.draw(ctx);
 
-    // now draw the car
-    ctx.fillStyle = this.damaged ? 'red' : this.colour ? this.colour : colour;
+    // // now draw the car
+    // ctx.fillStyle = this.damaged ? 'red' : this.colour ? this.colour : colour;
 
-    ctx.beginPath();
-    ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+    // ctx.beginPath();
+    // ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
 
-    for(let i = 0 ; i < this.polygon.length ; i++) {
-      ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
-    }
+    // for(let i = 0 ; i < this.polygon.length ; i++) {
+    //   ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+    // }
 
-    ctx.lineTo(this.polygon[0].x, this.polygon[0].y);
-    ctx.fill();
+    // ctx.lineTo(this.polygon[0].x, this.polygon[0].y);
+    // ctx.fill();
+
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(-this.angle);
+    ctx.drawImage(this.image, -this.width/2, -this.height/2, this.width, this.height);
+    ctx.restore();
 
   }
 

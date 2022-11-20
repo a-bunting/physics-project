@@ -5,6 +5,12 @@
     font-size: 1.5rem;
 }
 
+.questions-title {
+  font-size: 3rem;
+  padding: 1rem 1rem;
+  margin-bottom: 2rem;
+}
+
 .questions-row {
     display: flex;
     flex-direction: row;
@@ -16,7 +22,7 @@
 
 .question-select {
     flex-grow: 1;
-    padding: 15px;
+    padding: 1.5rem;
     cursor: pointer;
 }
 
@@ -37,112 +43,143 @@
 }
 
 .question-image-container {
-    position: relative;
-}
+    position: sticky;
+    top: 1rem;
+    padding: 1rem 2rem;
+    background-color: var(--color-main-light);
+    border-radius: 1rem;
+    box-shadow: .3rem 0 .6rem var(--color-main-dark);
+    margin-right: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border: .1rem solid rgba(black, .5);
+
+    align-self: start;
+  }
 
 .question-question-container {
-    padding: 10px;
+    padding: 1rem;
 }
 
 .question-image {
     height: auto;
-    padding: 5px;
+    padding: .5rem;
 }
 
-.question-data { 
-    background-color: rgba(70, 130, 180, 0.60);
-    border: dotted black 1px;
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    right: 20px;
-    padding: 5px;
+.question-data {
+    background-color: var(--color-main);
+    border: dotted black .1rem;
+    padding: 1rem 2rem;
     overflow: auto;
-}
-
-.question-data:hover {
-    background-color: rgba(70, 130, 180, 0.95);
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    box-shadow: .3rem 0 .6rem var(--color-juxtapose-light);
 }
 
 .question-image-data {
-    float: left;
+
+}
+
+.question-timer {
+  margin-bottom: .5rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .question-image-buttons {
-    padding-right: 5px;
-    float: right;
+  padding-right: .5rem;
+  position: absolute;
+  top: 2rem;
+  right: 3rem;
+  display: flex;
+  flex-direction: column;
+
+  &:not(:last-of-type) { margin-bottom: .5rem; }
 }
 
 .button-control {
     display: block;
-    margin-top: 8px;
+    margin-top: .8rem;
+    border-radius: 1rem;
+    transition: all .2s;
 }
 
 .question-buttons {
-    background-color: steelblue;
-    padding: 10px;
-    border-radius: 7px;
+    background-color: var(--color-main-light);
+    padding: 1rem;
+    border-radius: .7rem;
     overflow: auto;
+
+    button {
+      border-radius: 1rem;
+      transition: all .2s;
+    }
 }
 
 .question-text {
-    border-bottom: 3px solid black;
-    padding: 15px;
+    border-bottom: .3rem solid black;
+    padding: 1.5rem;
     line-height: 1.6;
 }
 
 .question-container {
     display: grid;
-    grid-template-columns: auto 140px 40px;
+    grid-template-columns: 1fr 10rem auto;
     grid-template-rows: 3;
-    padding: 10px;
-    line-height: 1.6;
+    padding: 1rem;
+    line-height: 1.6rem;
 }
 
 .question-question {
-    padding: 5px;
+    padding: .5rem;
     grid-column: 1;
 }
 
 .question-input {
-    padding: 5px;
+    padding: .5rem;
     grid-column: 2;
 }
 
 .question-grade {
-    padding: 5px;
+    padding: .5rem;
     grid-column: 3;
+    margin-left: 2rem;
+    align-self: center;
 }
 
 .question-hint {
-    background-color: #5b7e9b;
-    padding: 10px;
+    background-color: var(--color-juxtapose-dark);
+    padding: 1rem 2rem;
     grid-column-start: 1;
     grid-column-end: 4;
-    font-size: 14px;
+    font-size: 1.4rem;
+    border-radius: 1rem;
+    line-height: 2.4rem;
+    letter-spacing: .05rem;
+    margin-top: 1rem;
 }
 
 button {
-    padding: 5px;
+    padding: .5rem;
     width: 140px;
 }
 
 button:hover {
     cursor: pointer;
     fill-opacity: 0.7;
-    box-shadow: 2px 2px 2px black;
+    box-shadow: .2rem .2rem .2rem black;
 }
 
 .question-container input {
-    padding: 5px;
-    border-radius: 7px;
-    width: 100px;
-    letter-spacing: 4px;
+    padding: .5rem;
+    border-radius: .7rem;
+    width: 10rem;
+    letter-spacing: .4rem;
     text-align: center;
 }
 
 .hot-streak {
-    border: 2px red solid;
+    border: .2rem red solid;
 }
 
 
@@ -157,8 +194,8 @@ button:hover {
 
 .question-select {
     float: right;
-    padding: 5px;
-    border-radius: 7px;
+    padding: .5rem;
+    border-radius: .7rem;
 }
 
 .question-select:hover {
@@ -170,12 +207,12 @@ button:hover {
    grid-template: auto / auto 1fr auto;
    justify-content: center;
    align-content: center;
-   margin: 0px;
-   border: 0px;
+   margin: 0;
+   border: 0;
 }
 
 .question-changespeedscale-button {
-   padding: 15px;
+   padding: 1.5rem;
 }
 
 .question-changespeedscale-button:hover {
@@ -187,11 +224,11 @@ button:hover {
 }
 
 .custom-speed-input {
-   padding: 5px;
-   margin: -5px 5px -5px 0px;
-   border-radius: 7px;
-   width: 60px;
-   letter-spacing: 2px;
+   padding: .5rem;
+   margin: -.5rem .5rem -.5rem 0px;
+   border-radius: .7rem;
+   width: 6rem;
+   letter-spacing: .2rem;
    text-align: center;
 }
 
@@ -206,7 +243,7 @@ button:hover {
 .custom-speed-range::-webkit-slider-thumb {
    appearance: none;
    background: white;
-   height: 25px;
+   height: 2.5rem;
 }
 
 .custom-speed-range:hover {

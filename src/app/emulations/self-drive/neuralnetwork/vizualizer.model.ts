@@ -11,7 +11,6 @@ export class Visualizer {
     const height = ctx.canvas.height - margin * 2;
     const utilities: Utilities = new Utilities();
 
-
     const levelHeight: number = height / network.levels.length;
 
     for(let i = network.levels.length - 1 ; i >=0  ; i--) {

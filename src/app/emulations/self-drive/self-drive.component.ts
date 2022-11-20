@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { APP_INITIALIZER, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { generate } from 'rxjs';
 import { Car } from './models/car.model';
 import { Road } from './models/road.model';
@@ -43,6 +43,11 @@ export class SelfDriveComponent implements OnInit {
   numberOfCars: number = 200;
   fitnessFunction: string = "GREATESTY";
 
+  mutationFactor: number = 0.2;
+  sensorCount: number = 5;
+  sensorAngle: number = 45;
+  sensorLength: number = 150;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -58,9 +63,16 @@ export class SelfDriveComponent implements OnInit {
     // define the road.
     this.road = new Road(this.carsCanvas.nativeElement.width / 2, this.carsCanvas.nativeElement.width);
 
+    // init
+    this.initializeNewSim();
+
+    // animate
+    this.animate();
+  }
+
+  initializeNewSim(): void {
     // define the car
     this.car = this.generateCars(this.numberOfCars);
-    this.bestCar = this.car[0];
 
     // if a best car exists in storage, use that instead!
     if(localStorage.getItem("bestBrain")) {
@@ -68,12 +80,14 @@ export class SelfDriveComponent implements OnInit {
         this.car[i].brain = JSON.parse(localStorage.getItem("bestBrain"));
 
         if(i !== 0) {
-          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, 0.2);
+          this.car[i].brain = NeuralNetwork.mutate(this.car[i].brain, this.mutationFactor);
         } else {
           this.car[i].setColour("green");
         }
       }
     }
+
+    this.bestCar = this.car[0];
 
     // define the traffic
     this.traffic = []
@@ -83,8 +97,6 @@ export class SelfDriveComponent implements OnInit {
       const newCar: Car = new Car(this.road.getLaneCenter(Math.floor((Math.random()*3))), -(i*150)+((Math.random()*2)-1)*100, 40, 60, "DUMMY", 2)
       this.traffic.push(newCar);
     }
-    // animate
-    this.animate();
   }
 
   updates(): void {
@@ -172,11 +184,36 @@ export class SelfDriveComponent implements OnInit {
     const cars: Car[] = [];
 
     for(let i = 0 ; i < n ; i++) {
-      const newCar: Car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3);
+      const newCar: Car = new Car(this.road.getLaneCenter(1), 100, 40, 60, "AI", 3, this.sensorCount, this.sensorAngle, this.sensorLength);
       cars.push(newCar);
     }
 
     return cars;
+  }
+
+  mutationModifier(value: number): void {
+    this.mutationFactor = value;
+  }
+
+  carsModifier(value: number): void {
+    this.numberOfCars = value;
+  }
+
+  modifySensorCountModify(value: number): void {
+    this.sensorCount = value;
+    this.discard();
+    this.initializeNewSim();
+  }
+
+  modifySensorRange(value: number): void {
+    this.sensorAngle = value;
+    this.discard();
+    this.initializeNewSim();
+  }
+
+  modifySensorLength(value: number): void {
+    this.sensorLength = value;
+    this.initializeNewSim();
   }
 
 

@@ -393,13 +393,17 @@
     @media print { display: none; }
 
     font-size: 1.4rem;
+    padding: 1rem 2rem;
+    line-height: 2rem;
 
     &--title, &--subtitle {
       font-weight: bold;
     }
 
     &--title {
-      font-size: 1.6rem;
+      font-size: 2.5rem;
+      padding: 2rem;
+      padding-bottom: 0rem;
     }
 
     &--subtitle {
@@ -414,10 +418,18 @@
       display: flex;
       flex-direction: column;
       margin-top: 1rem;
+
+      a {
+        text-decoration: none;
+        color: var(--color-juxtapose-light);
+      }
     }
 
     &--package {
       font-weight: bold;
+      margin-left: 2rem;
+      line-height: 2.5rem;
+      &:first-of-type { margin-top: 1rem; }
     }
 
     &--applications {
@@ -426,7 +438,16 @@
       flex-direction: column;
     }
 
+    &--application {
+      font-weight: bold;
+      margin-left: 2rem;
+      line-height: 2.5rem;
+      &:first-of-type { margin-top: 1rem; }
+    }
+
     &--notes {
+
+      margin-top: 3rem;
 
       ul {
         li {

@@ -15,33 +15,33 @@
 
 
 
-                    <p *ngIf="display.velocity" class="question-timer"><b>Initial Velocity</b>: {{ velocityFired | number:'1.2-2' }} m/s</p>
-                    <p *ngIf="display.time" class="question-timer"><b>Current Time</b>: {{ currentTime | number:'1.2-2' }} seconds</p>
-                    <p *ngIf="display.xInitSpeed" class="question-timer"><b>Initial Velocity (x)</b>: {{ valueInitialSpeed.x | number:'1.2-2' }} m/s</p>
-                    <p *ngIf="display.yInitSpeed" class="question-timer"><b>Initial Velocity (y)</b>: {{ valueInitialSpeed.y | number:'1.2-2' }} m/s</p>
-                    <p *ngIf="display.xCurrentSpeed" class="question-timer"><b>Current Velocity [x]</b>: {{ currentSpeed.x | number:'1.2-2' }} m/s</p>
-                    <p *ngIf="display.yCurrentSpeed" class="question-timer"><b>Current Velocity [y]</b>: {{ currentSpeed.y | number:'1.2-2' }} m/s</p>
-                    <p *ngIf="display.angleFired" class="question-timer"><b>Angle of Velocity</b>: {{ angleFired | number:'1.2-2' }} degrees</p>
-                    <p *ngIf="display.gravity" class="question-timer"><b>Gravitational Acceleration</b>: {{ gravity | number:'1.2-2' }} m/s2</p>
+                    <p *ngIf="display.velocity" class="question-timer"><b>Initial Velocity</b>{{ velocityFired | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.time" class="question-timer"><b>Current Time</b>{{ currentTime | number:'1.2-2' }} seconds</p>
+                    <p *ngIf="display.xInitSpeed" class="question-timer"><b>Initial Velocity (x)</b>{{ valueInitialSpeed.x | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.yInitSpeed" class="question-timer"><b>Initial Velocity (y)</b>{{ valueInitialSpeed.y | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.xCurrentSpeed" class="question-timer"><b>Current Velocity [x]</b>{{ currentSpeed.x | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.yCurrentSpeed" class="question-timer"><b>Current Velocity [y]</b>{{ currentSpeed.y | number:'1.2-2' }} m/s</p>
+                    <p *ngIf="display.angleFired" class="question-timer"><b>Angle of Velocity</b>{{ angleFired | number:'1.2-2' }} degrees</p>
+                    <p *ngIf="display.gravity" class="question-timer"><b>Gravitational Acceleration</b>{{ gravity | number:'1.2-2' }} m/s2</p>
 
 
-                    <p *ngIf="display.xAcceleration" class="question-timer"><b>Acceleration [x]</b>: {{ currentAcceleration.x | number:'1.2-2' }} m/s2</p>
-                    <p *ngIf="display.yAcceleration" class="question-timer"><b>Acceleration [y]</b>: {{ currentAcceleration.y | number:'1.2-2' }} m/s2</p>
-                    <p *ngIf="display.current_range" class="question-timer"><b>Current Distance [x]</b>: {{ currentRange | number:'1.2-2' }} meters</p>
-                    <p *ngIf="display.current_height" class="question-timer"><b>Current Height [y]</b>: {{ currentHeight | number:'1.2-2' }} meters</p>
+                    <p *ngIf="display.xAcceleration" class="question-timer"><b>Acceleration [x]</b>{{ currentAcceleration.x | number:'1.2-2' }} m/s2</p>
+                    <p *ngIf="display.yAcceleration" class="question-timer"><b>Acceleration [y]</b>{{ currentAcceleration.y | number:'1.2-2' }} m/s2</p>
+                    <p *ngIf="display.current_range" class="question-timer"><b>Current Distance [x]</b>{{ currentRange | number:'1.2-2' }} meters</p>
+                    <p *ngIf="display.current_height" class="question-timer"><b>Current Height [y]</b>{{ currentHeight | number:'1.2-2' }} meters</p>
 
-                    <p *ngIf="display.maxHeight" class="question-timer"><b>Max Height</b>: {{ valueDistance.height | number:'1.2-2' }} meters</p>
-                    <p *ngIf="display.totalRange" class="question-timer"><b>Total Range</b>: {{ valueDistance.range | number:'1.2-2' }} meters</p>
-                    <p *ngIf="display.totalTime" class="question-timer"><b>Time to Land</b>: {{ valueTime.final | number:'1.2-2' }} seconds</p>
-                    <p *ngIf="display.maxHeightTime" class="question-timer"><b>Time to Max Height</b>: {{ valueTime.maxHeight | number:'1.2-2' }} seconds</p>
+                    <p *ngIf="display.maxHeight" class="question-timer"><b>Max Height</b>{{ valueDistance.height | number:'1.2-2' }} meters</p>
+                    <p *ngIf="display.totalRange" class="question-timer"><b>Total Range</b>{{ valueDistance.range | number:'1.2-2' }} meters</p>
+                    <p *ngIf="display.totalTime" class="question-timer"><b>Time to Land</b>{{ valueTime.final | number:'1.2-2' }} seconds</p>
+                    <p *ngIf="display.maxHeightTime" class="question-timer"><b>Time to Max Height</b>{{ valueTime.maxHeight | number:'1.2-2' }} seconds</p>
                 </div>
                 <div class="question-image-buttons">
                     <button class="button-control" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
                     <button class="button-control" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
                     <button class="button-control" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart Simulation</button>
                 </div>
-            </div> 
-            
+            </div>
+
             <div class="question-changespeedscale-projectiles">
 
                <div class="question-changespeedscale-button"><b>Speed</b></div>
@@ -63,15 +63,17 @@
                  </select>
                </div>
            </div>
-            
+
         </div>
-        
+
         <div class="question-question-container">
+
+            <div class="questions-title">Projectile Motion</div>
 
             <div class="question-buttons">
                 <button (click)="newQuestion()">New Question</button>
                 <button (click)="submitResults()" *ngIf="loggedIn && resultsToAdd" [disabled]="lastUpdatedRecently">{{ !lastUpdatedRecently ? 'Put Results in Database' : 'You cannot submit data more than once every two minutes' }}</button>
-                
+
                 <select (change)="loadNewQuestion($event.target.value)" class="question-select">
                     <option selected disabled hidden>Choose a new question</option>
                     <option *ngFor="let question of questionBank; let i = index" value="{{ i }}">[{{ question.difficulty }}] {{ question.questionName }}</option>

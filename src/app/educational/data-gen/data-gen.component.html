@@ -1,79 +1,130 @@
+<div class="data-gen__header">
+  <div class="data-gen__header--title">Data Generator</div>
+  <div class="data-gen__header--description">Use the random data generator to create a set of data for a particular function. You can have error, specific sig figs, do multiple trials and specify constants within ranges.</div>
+</div>
+
 <div class="data-gen">
 
-	{{ equationIncorrect ? 'You have an incorrect equation format: ' + errorMessage : 'Equation Valid' }}
+  <div class="data-gen__setup">
+    <div class="data-gen__setup--wrapper">
+      <div class="data-gen__equation">
+        <div class="data-gen__equation--text">
+          Equation
+        </div>
+        <div class="data-gen__equation--input">
+          <input type="text" class="data-gen__input" [(ngModel)]="equation">
+          <button class="data-gen__button" (click)="breakEquation()">Process Equation</button>
+        </div>
+      </div>
 
-	<div class="data-gen__properties">
-		<div class="data-gen__property">
-			<div class="data-gen__property--text">
-				Equation
-			</div>
-			<div class="data-gen__property--input">
-				<input type="text" class="data-gen__input" [(ngModel)]="equation">
-				<button class="data-gen__button" (click)="breakEquation()">Process Equation</button>
-			</div>
-		</div>
+      <div class="data-gen__validation" [class.data-gen__validation--invalid]="equationIncorrect" *ngIf="equationIncorrect">
+        {{ errorMessage }}
+      </div>
 
-		<div class="data-gen__property" *ngFor="let variable of equationComponents">
-			<div class="data-gen__property--text">
-				{{ variable.letter }}
-        <input type="checkbox" name="iv" class="data-gen__checkbox" [(ngModel)]="variable.iv">
-        <label for="iv" class="data-gen__label" [class.data-gen__label--checked]="variable.iv" (click)="checkIV(variable.letter)"></label>
-			</div>
-			<div class="data-gen__property--input">
-				Min <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="variable.min">
-				Max <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="variable.max">
-			</div>
-		</div>
+      <div class="data-gen__properties" *ngIf="equationComponents.length > 0">
 
-		<div class="data-gen__generation" *ngIf="equationComponents.length > 0">
-			<div class="data-gen__property">
-				<div class="data-gen__property--text">
-					Trials
-				</div>
-				<div class="data-gen__property--input">
-					<input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="trials">
-				</div>
-			</div>
+        <div class="data-gen__properties--title">Variables</div>
 
-			<div class="data-gen__property">
-				<div class="data-gen__property--text">
-					IV Values
-				</div>
-				<div class="data-gen__property--input">
-					<input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="ivRange">
-				</div>
-			</div>
+        <div class="data-gen__property" *ngFor="let variable of equationComponents">
+          <div class="data-gen__property--text">
+            <div class="data-gen__letter">{{ variable.letter }}</div>
+            <input type="checkbox" name="iv" class="data-gen__checkbox" [(ngModel)]="variable.iv">
+            <label for="iv" class="data-gen__label" [class.data-gen__label--checked]="variable.iv" (click)="checkIV(variable.letter)"></label>
+          </div>
+          <div class="data-gen__property--input">
+            <div class="data-gen__property--min">Min <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="variable.min"></div>
+            <div class="data-gen__property--max">Max <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="variable.max"></div>
+          </div>
+        </div>
+      </div>
 
-			<div class="data-gen__property">
-				<div class="data-gen__property--text">
-					Error
-				</div>
-				<div class="data-gen__property--input">
-					<input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="error">
-				</div>
-			</div>
+      <div class="data-gen__boundaries" *ngIf="equationComponents.length > 0">
+        <div class="data-gen__boundary">
+          <div class="data-gen__boundary--text">
+            Trials
+          </div>
+          <div class="data-gen__boundary--input">
+            <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="trials">
+          </div>
+        </div>
 
-      <div class="data-gen__property">
-				<div class="data-gen__property--text">
-					Sig Figs (not yet, write pipe)
-				</div>
-				<div class="data-gen__property--input">
-					<input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="sigfig">
-				</div>
-			</div>
+        <div class="data-gen__boundary">
+          <div class="data-gen__boundary--text">
+            IV Values
+          </div>
+          <div class="data-gen__boundary--input">
+            <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="ivRange">
+          </div>
+        </div>
+      </div>
+      <div class="data-gen__boundaries" *ngIf="equationComponents.length > 0">
+        <div class="data-gen__boundary">
+          <div class="data-gen__boundary--text">
+            Error
+          </div>
+          <div class="data-gen__boundary--input">
+            <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="error">
+          </div>
+        </div>
+
+        <div class="data-gen__boundary">
+          <div class="data-gen__boundary--text">
+            Sig Figs
+          </div>
+          <div class="data-gen__boundary--input">
+            <input type="text" class="data-gen__input data-gen__input--small" [(ngModel)]="sigfig">
+          </div>
+        </div>
+      </div>
+
+      <div class="data-gen__buttons">
+        <button class="data-gen__button" (click)="generateConstants()" *ngIf="equationComponents.length > 0">Generate New Constants</button>
+        <button class="data-gen__button" (click)="generateData()" *ngIf="constants.length > 0">Generate Data</button>
+      </div>
+
+      <div class="data-gen__constants--title" *ngIf="constants.length > 0">
+        Current Constant Values
+      </div>
+
+      <div class="data-gen__constants" *ngIf="constants.length > 0">
+        <div class="data-gen__constant" *ngFor="let const of constants">
+          <div class="data-gen__constant--letter">{{ const.letter }}</div>
+          <div class="data-gen__constant--value">{{ const.value | number:'.0-2' }}</div>
+        </div>
+      </div>
+
     </div>
-
-
-    <button class="data-gen__button" (click)="generateConstants()">Generate New Constants</button>
-    <button class="data-gen__button" (click)="generateData()" *ngIf="constants.length > 0">Generate Data</button>
   </div>
 
-  <div class="data-gen__output">
-    <div class="data-gen__output--row" *ngFor="let experiment of generatedData">
-      <div class="data-gen__output--iv">{{ experiment.iv }}</div>
-      <div class="data-gen__output--item" *ngFor="let data of getIVData(experiment.iv)">
-        {{ data.data | number:'.0-2' }}
+  <div class="data-gen__out">
+
+    <div class="data-gen__output" *ngIf="!presentAsTable && generatedData.length > 0">
+      <button class="data-gen__button" (click)="toggleLinearDataView()" *ngIf="constants.length > 0">{{ presentAsTable ? 'Switch to Linear Data View' : 'Switch to Tabular Data View' }}</button>
+      <div class="data-gen__list" *ngFor="let experiment of generatedData">
+        <div class="data-gen__list--title">{{ experiment.iv }}</div>
+        <div class="data-gen__list--item" *ngFor="let data of experiment.data">
+          {{ data | SigFigPipe:sigfig }}
+        </div>
       </div>
     </div>
+
+    <div class="data-gen__output" *ngIf="presentAsTable && generatedData.length > 0">
+      <button class="data-gen__button" (click)="toggleLinearDataView()" *ngIf="constants.length > 0">{{ presentAsTable ? 'Switch to Linear Data View' : 'Switch to Tabular Data View' }}</button>
+      <table class="data-gen__table">
+        <tr class="data-gen__table--headerrow">
+          <th class="data-gen__table--head">IV</th>
+          <th class="data-gen__table--head" *ngFor="let data of generatedData[0].data; let i = index">
+            Trial {{ i + 1 }}
+          </th>
+        </tr>
+        <tr class="data-gen__table--row" *ngFor="let experiment of generatedData">
+          <td class="data-gen__table--iv">{{ experiment.iv }}</td>
+          <td  class="data-gen__table--data" *ngFor="let data of experiment.data">
+            {{ data | SigFigPipe:sigfig }}
+          </td>
+        </tr>
+      </table>
+    </div>
+
   </div>
 </div>

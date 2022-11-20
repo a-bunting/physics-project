@@ -33,6 +33,7 @@ import { CarsComponent } from './cars/cars.component';
 import { DataGenComponent } from './educational/data-gen/data-gen.component';
 import { MazesComponent } from './emulations/mazes/mazes.component';
 import { SelfDriveComponent } from './emulations/self-drive/self-drive.component';
+import { SigFigPipePipe } from './sig-fig-pipe.pipe';
 
 const appRoutes: Routes = [
     { path: 'feedback', component: DisplayAllFeedbackComponent },
@@ -91,7 +92,7 @@ const appRoutes: Routes = [
     GravityComponent,
     HeatTransferComponent,
     FrictionAndMotionComponent,
-    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent
+    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe
    ],
   imports: [
     BrowserModule,

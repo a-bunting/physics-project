@@ -12,10 +12,10 @@ export class Sensor {
 
   utilities: Utilities;
 
-  constructor(car: Car) {
-    this.rayCount = 5;
-    this.rayLength = 150;
-    this.raySpread = Math.PI / 2;
+  constructor(car: Car, rayCount: number, rayAngle: number, rayLength: number) {
+    this.rayCount = rayCount;
+    this.rayLength = rayLength;
+    this.raySpread = rayAngle *  (Math.PI / 180);
 
     this.car = car;
     this.rays = [];
