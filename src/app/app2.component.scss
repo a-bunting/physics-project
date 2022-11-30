@@ -306,6 +306,8 @@ main {
     grid-row: 1 / span 2;
     grid-column: 2 / 3;
 
+    position: relative;
+
     @media print { grid-column: 1 / 3; }
 }
 

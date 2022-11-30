@@ -34,8 +34,10 @@ import { DataGenComponent } from './educational/data-gen/data-gen.component';
 import { MazesComponent } from './emulations/mazes/mazes.component';
 import { SelfDriveComponent } from './emulations/self-drive/self-drive.component';
 import { SigFigPipePipe } from './sig-fig-pipe.pipe';
+import { WelcomeComponent } from './welcome/welcome.component';
 
 const appRoutes: Routes = [
+    { path: '', component: WelcomeComponent },
     { path: 'feedback', component: DisplayAllFeedbackComponent },
     { path: 'cars', component: SelfDriveComponent },
     { path: 'mazes', component: MazesComponent },

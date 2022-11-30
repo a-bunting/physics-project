@@ -40,7 +40,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
       componentId: string = 'freefall_sim';
 
       // specific variables for this simulation.
-      currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;    
+      currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;
       valueAcceleration: number; gravity:number = 7.5; mass: number = 10;
       densityOfFluid: number = 0; areaOfObject: number = 0; heightOfObject: number = 0; dragCoefficient: number = 0;
       dropHeight: number = 0; simulationSpeed: number = 1;
@@ -60,7 +60,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
             {name: "IB"},
             {name: "AP"}
          ]
-      }, 
+      },
       {
          path: "https://docs.google.com/document/d/1yug7Z3MbGEcchPKZYsYPx0_ofuiEO2PmqGMow7lQSCs/copy",
          type: "gdocs",
@@ -73,7 +73,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
             {name: "AP"},
             {name: "HS"}
          ]
-      }, 
+      },
       {
          path: "https://docs.google.com/document/d/1Y4W1zWqmnmphDgfSR3nnIE_Xq1SNRrVC2zKSAULRDL8/copy",
          type: "gdocs",
@@ -88,16 +88,16 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
       }
     ];
 
-    constructor(protected simulationsService: SimulationsService, protected directoryService: DirectoryService, protected http: HttpClient, protected httpService: HttpService, protected usersService: UsersService, protected route: ActivatedRoute, protected dataService: DataService) { 
+    constructor(protected simulationsService: SimulationsService, protected directoryService: DirectoryService, protected http: HttpClient, protected httpService: HttpService, protected usersService: UsersService, protected route: ActivatedRoute, protected dataService: DataService) {
          super(usersService, dataService, route, httpService);
         directoryService.simulationMenuChange("Freefall");
     }
-    
-    
+
+
     ngOnInit(): void {
         this.simulationsService.loadNewLab(this.simulationDocuments);
         this.ctx = this.canvas.nativeElement.getContext('2d');
-        
+
         this.observeSimulationSizeChange(); // change canvas size based upon size of the simulation div
         this.commonSimulationFunctionality();
         this.setQuestion();
@@ -105,7 +105,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
         this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters
         this.animate();
     }
-    
+
     onCanvasResize(): void {
         this.launchCanvas();
     }
@@ -115,23 +115,23 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
     /**
      * May be able to go into the common JS with a link to it from here when complete....
      */
-    
+
     // private observeSimulationSizeChange(): void {
     //     try {
     //         this.resizeElement =  document.getElementById('simulation');
-    
-    //         this.resizeObserver = new ResizeObserver(() => { 
+
+    //         this.resizeObserver = new ResizeObserver(() => {
     //             this.canvas.nativeElement.width = this.resizeElement.offsetWidth;
     //             this.canvas.nativeElement.height = this.resizeElement.offsetHeight;
-    
+
     //             if(this.resizeElement.offsetHeight > window.innerHeight) {
     //                 this.canvas.nativeElement.height = window.innerHeight;
     //             }
-    
+
     //             this.launchCanvas(); // needs changing for this as it relaunches the values.
     //         });
     //         this.resizeObserver.observe(this.resizeElement);
-    //     } 
+    //     }
     //     catch (error) {
     //         // if an error is thrown the page have be unloading, so do nothing.
     //     }
@@ -147,121 +147,121 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
          this.setControls();
     }
 
-     
+
     simulationParameters = [
         {
-            id: 0, name: 'Simulation Speed', unit: '',    
+            id: 0, name: 'Simulation Speed', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
-            get: () => { return this.simulationSpeed; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            get: () => { return this.simulationSpeed; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: 1, min: 0, max: 3, divisions: 0.01,
             controlType: 'range', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 1, name: 'Scale Density', unit: 'm/div',     
+            id: 1, name: 'Scale Density', unit: 'm/div',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.linesQuantity = newValue; this.infiniteBackdropCalculations(); this.recalculateSimulation(); this.resetQuestion(); },
-            get: () => { return this.linesQuantity; }, displayModifier: 1, infMode: true, finMode: false, dp: 0, 
+            get: () => { return this.linesQuantity; }, displayModifier: 1, infMode: true, finMode: false, dp: 0,
             default: 10, min: 0, max: 20, divisions: 2,
             controlType: 'range', fineControl: {available: false, value: 2 }
         },
         {
-            id: 2, name: 'Gravity', unit: 'm/s2',    
+            id: 2, name: 'Gravity', unit: 'm/s2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.gravity = newValue; },
-            get: () => { return this.gravity; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            get: () => { return this.gravity; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: 9.81, min: 0, max: 20.0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
         },
         {
-            id: 3, name: 'Drop Height', unit: 'm',    
+            id: 3, name: 'Drop Height', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.dropHeight = newValue; this.recalculateSimulation(); this.launchCanvas();  },
-            get: () => { return this.dropHeight; }, displayModifier: 1, infMode: false, finMode: true, dp: 0, 
+            get: () => { return this.dropHeight; }, displayModifier: 1, infMode: false, finMode: true, dp: 0,
             default: 2000, min: 100, max: 20000, divisions: 100,
             controlType: 'range', fineControl: {available: true, value: 100 }
         },
         {
-            id: 4, name: 'Mass', unit: 'kg',     
+            id: 4, name: 'Mass', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.mass = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); },
-            get: () => { return this.mass; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            get: () => { return this.mass; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: 1, min: 0.01, max: 3, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
-        }, 
+        },
         {
-            id: 5, name: 'Fluid Density', unit: 'kg/m3',     
+            id: 5, name: 'Fluid Density', unit: 'kg/m3',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.densityOfFluid = newValue; },
-            get: () => { return this.densityOfFluid; }, displayModifier: 1, infMode: true, finMode: true, dp: 3, 
+            get: () => { return this.densityOfFluid; }, displayModifier: 1, infMode: true, finMode: true, dp: 3,
             default: 1.225, min: 0, max: 20, divisions: 0.25,
             controlType: 'range', fineControl: {available: true, value: 0.005 }
-        }, 
+        },
         {
-            id: 6, name: 'Area of Object', unit: 'm2',     
+            id: 6, name: 'Area of Object', unit: 'm2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.areaOfObject = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); },
-            get: () => { return this.areaOfObject; }, displayModifier: 1, infMode: true, finMode: true, dp: 3, 
+            get: () => { return this.areaOfObject; }, displayModifier: 1, infMode: true, finMode: true, dp: 3,
             default: 1, min: 0.05, max: 2.5, divisions: 0.05,
             controlType: 'range', fineControl: {available: true, value: 0.025 }
-        }, 
+        },
         {
-            id: 7, name: 'Height of Object', unit: 'm',     
+            id: 7, name: 'Height of Object', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.heightOfObject = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); this.setBlockHeight(newValue, this.simulationParameters[this.getSimulationParameterIDFromName("Height of Object")].min, this.simulationParameters[this.getSimulationParameterIDFromName("Height of Object")].max); this.frame(); },
-            get: () => { return this.heightOfObject; }, displayModifier: 1, infMode: true, finMode: true, dp: 3, 
+            get: () => { return this.heightOfObject; }, displayModifier: 1, infMode: true, finMode: true, dp: 3,
             default: 0.50, min: 0.001, max: 2, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.001 }
-        }, 
+        },
         {
-            id: 8, name: 'Drag Coefficient', unit: '',     
+            id: 8, name: 'Drag Coefficient', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.dragCoefficient = newValue; },
-            get: () => { return this.dragCoefficient; }, displayModifier: 1, infMode: true, finMode: true, dp: 3, 
+            get: () => { return this.dragCoefficient; }, displayModifier: 1, infMode: true, finMode: true, dp: 3,
             default: 1.05, min: 0, max: 2, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.005 }
-        },    
+        },
         {
-            id: 9,  name: 'Time Elapsed', unit: 's', 
+            id: 9,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 10,  name: 'Current Velocity', unit: 'm/s', 
+            id: 10,  name: 'Current Velocity', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentSpeed; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
-        {
-            id: 11,  name: 'Drag Force', unit: 'N', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.forceDueToDrag; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
-        {
-            id: 12,  name: 'Distance Fallen', unit: 'm', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentDistance; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
-        {
-            id: 13,  name: 'Apparent Weight', unit: 'N', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: newValue => { this.apparentWeight = newValue; }, 
-            get: () => { return this.apparentWeight; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
-        {
-            id: 14,  name: 'Buoyant Force', unit: 'N', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.forceBuoyant; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: null, get: () => { return this.currentSpeed; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 15,  name: 'Object Density', unit: 'kg/m3', 
+            id: 11,  name: 'Drag Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.objectDensity; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: null, get: () => { return this.forceDueToDrag; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 12,  name: 'Distance Fallen', unit: 'm',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.currentDistance; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 13,  name: 'Apparent Weight', unit: 'N',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: newValue => { this.apparentWeight = newValue; },
+            get: () => { return this.apparentWeight; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 14,  name: 'Buoyant Force', unit: 'N',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.forceBuoyant; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 15,  name: 'Object Density', unit: 'kg/m3',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.objectDensity; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
@@ -298,12 +298,12 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
 
     finiteBackdrop = [
         {
-            images: { 
-                backdrop: {file: new Image(), filename: 'anime-backdrop.png', loaded: false, y: 0}, 
+            images: {
+                backdrop: {file: new Image(), filename: 'anime-backdrop.jpg', loaded: false, y: 0},
                 front:  {file: new Image(), filename: 'anime-front.png', loaded: false, y: 0},
                 ground: {file: new Image(), filename: '', loaded: false, y: 0},
-            }, 
-            maxHeight: 20000, 
+            },
+            maxHeight: 20000,
             ppm: 0
         }
     ];
@@ -316,7 +316,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
 
-    private launchCanvas() {      
+    private launchCanvas() {
         if(this.simulationInfinite) {
             this.infiniteBackdropCalculations();
         } else {
@@ -328,7 +328,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
         if(this.finiteBackdrop[this.backdropId].images.backdrop.loaded === false || this.finiteBackdrop[this.backdropId].images.ground.loaded === false || this.finiteBackdrop[this.backdropId].images.front.loaded === false) {
             this.finiteBackdrop[this.backdropId].images.backdrop.file.src = this.assetsDirectory + this.finiteBackdrop[this.backdropId].images.backdrop.filename;
             this.finiteBackdrop[this.backdropId].images.front.file.src = this.assetsDirectory + this.finiteBackdrop[this.backdropId].images.front.filename;
-    
+
             this.finiteBackdrop[this.backdropId].images.backdrop.file.onload = ()=>{
                 this.finiteBackdrop[this.backdropId].images.backdrop.loaded = true;
 
@@ -358,7 +358,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
     finiteBackdropCalculations() {
         this.finiteBackdrop[this.backdropId].ppm = (this.finiteBackdrop[this.backdropId].images.backdrop.file.height - this.ctx.canvas.height) / this.finiteBackdrop[this.backdropId].maxHeight;
         this.finiteBackdrop[this.backdropId].images.backdrop.y = this.finiteBackdrop[this.backdropId].images.backdrop.file.height - (this.dropHeight * this.finiteBackdrop[this.backdropId].ppm);
-        this.finiteBackdrop[this.backdropId].images.front.y = this.finiteBackdrop[this.backdropId].images.front.file.height - (this.dropHeight * this.finiteBackdrop[this.backdropId].ppm * 2);    
+        this.finiteBackdrop[this.backdropId].images.front.y = this.finiteBackdrop[this.backdropId].images.front.file.height - (this.dropHeight * this.finiteBackdrop[this.backdropId].ppm * 2);
     }
 
     horizontalPositionOfObject: number = 160;
@@ -366,7 +366,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
     frame() {
         // clear the canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-            
+
         this.ctx.globalCompositeOperation = 'source-over';
 
         // draw on the moving parts
@@ -419,14 +419,26 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
         this.ctx.fillRect(0,0,this.ctx.canvas.width, this.ctx.canvas.height);
 
         // draw on any images (all static for now)
-        this.ctx.drawImage(this.finiteBackdrop[this.backdropId].images.backdrop.file, 
-            0, 
-            this.finiteBackdrop[this.backdropId].images.backdrop.y - this.ctx.canvas.height, 
-            this.ctx.canvas.width, 
-            this.ctx.canvas.height, 
-            this.ctx.canvas.width - this.finiteBackdrop[this.backdropId].images.backdrop.file.width, 
-            0, 
-            this.ctx.canvas.width, 
+        // COMMENTED BELOW IS THE CODE FOR THE UNSTRETCHED IMAGE
+        // this.ctx.drawImage(this.finiteBackdrop[this.backdropId].images.backdrop.file,
+        //     0,
+        //     this.finiteBackdrop[this.backdropId].images.backdrop.y - this.ctx.canvas.height,
+        //     this.ctx.canvas.width,
+        //     this.ctx.canvas.height,
+        //     this.ctx.canvas.width - this.finiteBackdrop[this.backdropId].images.backdrop.file.width,
+        //     0,
+        //     this.ctx.canvas.width,
+        //     this.ctx.canvas.height);
+        // THIS IS THE STRETCHED IMAGE
+        this.ctx.drawImage(
+            this.finiteBackdrop[this.backdropId].images.backdrop.file,
+            0,
+            this.finiteBackdrop[this.backdropId].images.backdrop.y - this.ctx.canvas.height,
+            this.finiteBackdrop[this.backdropId].images.backdrop.file.width,
+            this.ctx.canvas.height,
+            0,
+            0,
+            this.ctx.canvas.width,
             this.ctx.canvas.height);
 
         // our block...
@@ -435,14 +447,28 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
 
         this.drawForceArrows();
 
-        this.ctx.drawImage(this.finiteBackdrop[this.backdropId].images.front.file, 
-            0, 
-            this.finiteBackdrop[this.backdropId].images.front.y - 0.2 * this.ctx.canvas.height, 
-            this.ctx.canvas.width, 
-            this.ctx.canvas.height, 
-            this.ctx.canvas.width - this.finiteBackdrop[this.backdropId].images.backdrop.file.width, 
-            0, 
-            this.ctx.canvas.width, 
+        // COMMENTED BELOW IS THE CODE FOR THE UNSTRETCHED IMAGE
+        // this.ctx.drawImage(
+        //     this.finiteBackdrop[this.backdropId].images.front.file,
+        //     0,
+        //     this.finiteBackdrop[this.backdropId].images.front.y - 0.2 * this.ctx.canvas.height,
+        //     this.ctx.canvas.width,
+        //     this.ctx.canvas.height,
+        //     this.ctx.canvas.width - this.finiteBackdrop[this.backdropId].images.backdrop.file.width,
+        //     0,
+        //     this.ctx.canvas.width,
+        //     this.ctx.canvas.height);
+
+        // THIS IS THE STRETCHED IMAGE
+        this.ctx.drawImage(
+            this.finiteBackdrop[this.backdropId].images.front.file,
+            0,
+            this.finiteBackdrop[this.backdropId].images.front.y - 0.2 * this.ctx.canvas.height,
+            this.finiteBackdrop[this.backdropId].images.front.file.width,
+            this.ctx.canvas.height,
+            0,
+            0,
+            this.ctx.canvas.width,
             this.ctx.canvas.height);
     }
 
@@ -486,7 +512,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
             this.forceDueToGravity = this.gravity * this.mass;
             this.forceBuoyant = this.gravity * this.densityOfFluid * this.areaOfObject * this.heightOfObject;
             this.forceDueToDrag = 0.5 * this.densityOfFluid * this.areaOfObject * this.currentSpeed * this.currentSpeed * this.dragCoefficient;
-            
+
             if(this.forceBuoyant + this.forceDueToDrag <= this.forceDueToGravity || this.currentSpeed >= 0) {
                if(this.mass > 0) {
                   this.valueAcceleration = (this.forceDueToGravity - this.forceDueToDrag - this.forceBuoyant) / this.mass;
@@ -501,10 +527,10 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
             this.currentDistance += this.currentSpeed * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
             this.currentSpeed += this.valueAcceleration * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
             this.apparentWeight = this.forceDueToGravity - this.forceDueToDrag - this.forceBuoyant;
-    
+
             if(this.simulationInfinite) {
                 for(var i=0; i < this.markers.length; i++) {
-                    this.markers[i].y = this.markers[i].y - this.currentSpeed * (this.elapsedSinceFrame / 1000) * this.pixelsPerMeter * this.simulationSpeed; 
+                    this.markers[i].y = this.markers[i].y - this.currentSpeed * (this.elapsedSinceFrame / 1000) * this.pixelsPerMeter * this.simulationSpeed;
 
                         if(this.markers[i].y < 0) {
                            var canavsLengths = Math.abs(Math.floor(this.markers[i].y / this.ctx.canvas.height));
@@ -516,7 +542,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
                            this.markers[i].y = -canavsLengths * this.ctx.canvas.height + Math.abs(this.markers[i].y);
                            this.markers[i].value -= canavsLengths * this.linesQuantity;
                         }
-                    
+
                 }
             } else {
                 this.finiteBackdrop[this.backdropId].images.backdrop.y += this.currentSpeed * (this.elapsedSinceFrame / 1000) * this.finiteBackdrop[this.backdropId].ppm * this.simulationSpeed;
@@ -531,7 +557,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
 
         this.frame();
         this.requestId = requestAnimationFrame(() => this.animate());
-        
+
     }
 
     startAnimation() {
@@ -566,6 +592,6 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
 
         this.recalculateSimulation();
     }
-    
+
 }
 
