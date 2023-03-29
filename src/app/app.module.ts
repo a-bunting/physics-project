@@ -34,6 +34,7 @@ import { DataGenComponent } from './educational/data-gen/data-gen.component';
 import { MazesComponent } from './emulations/mazes/mazes.component';
 import { SelfDriveComponent } from './emulations/self-drive/self-drive.component';
 import { SigFigPipePipe } from './sig-fig-pipe.pipe';
+import { NuclearCoreComponent } from './simulations/nuclear-core/nuclear-core.component';
 
 const appRoutes: Routes = [
     { path: 'feedback', component: DisplayAllFeedbackComponent },
@@ -56,6 +57,7 @@ const appRoutes: Routes = [
       { path: 'forces-basic', component: ForcesBasicComponent},
       { path: 'freefall', component: FreefallComponent},
       { path: 'electromagnetic-fields', component: ElectromagneticFieldsComponent},
+      { path: 'nuclear-core', component: NuclearCoreComponent},
       { path: 'kinematics', component: KinematicsComponent},
       { path: 'halflife', component: HalflifeComponent},
       { path: 'momentum', component: MomentumComponent},
@@ -82,6 +84,7 @@ const appRoutes: Routes = [
     SimulationsComponent,
     FreefallComponent,
     ElectromagneticFieldsComponent,
+    NuclearCoreComponent,
     ForcesBasicComponent,
     KinematicsComponent,
     SimLabsComponent,

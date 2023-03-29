@@ -135,6 +135,14 @@ export class DirectoryService {
                         ]
                      },
                      {
+                        name: "Nuclear Core",  version: "1.0", tags: ["IB", "AP", "HS", "Simulation"],
+                        description: "Nuclear Core Descriptions",
+                        route: "/simulations/nuclear-core", parameters: null, background: "electromagnetism.jpg",
+                        subItems: [
+                           {name: "Fully Enabled", parameters: ""}
+                        ]
+                     },
+                     {
                         name: "Forces", version: "1.2", tags: ["IB", "AP", "HS", "Simulation"],
                         description: "A full and complex forces simulator. Weight, Buoyancy, Applied Forces and Drag all apply here.",
                         route: "/simulations/forces-basic/", parameters: null, background: "forces.jpg",
