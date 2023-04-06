@@ -136,9 +136,9 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
             id: 4, name: 'Mass', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.mass = newValue; },
-            get: () => { return this.mass; }, displayModifier: 1, dp: 2,
-            default: 10, min: 1, max: 100, divisions: 1,
-            controlType: 'range', fineControl: {available: true, value: 0.50 }
+            get: () => { return this.mass; }, displayModifier: 1, dp: 1,
+            default: 10, min: 0.1, max: 100, divisions: 0.1,
+            controlType: 'range', fineControl: {available: true, value: 0.10 }
         },
         {
             id: 5, name: 'Static Frictional Coefficient', unit: '',
@@ -161,8 +161,8 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
             iv: true, dv: false,  dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.netAppliedForce = newValue; },
             get: () => { return this.netAppliedForce; }, displayModifier: 1, dp: 2,
-            default: 0, min: 0, max: 100, divisions: 0.50,
-            controlType: 'range', fineControl: {available: true, value: 0.50 }
+            default: 0, min: 0, max: 100, divisions: 0.10,
+            controlType: 'range', fineControl: {available: true, value: 0.10 }
         },
         {
             id: 8,  name: 'Time Elapsed', unit: 's',

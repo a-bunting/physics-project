@@ -52,7 +52,7 @@ export abstract class SimCommon implements OnInit {
     abstract resetQuestion(): void;
     abstract commonSimulationFunctionality(): void;
 
-    constructor(protected usersService: UsersService, protected dataService: DataService,  protected route: ActivatedRoute, protected httpService: HttpService)  { 
+    constructor(protected usersService: UsersService, protected dataService: DataService,  protected route: ActivatedRoute, protected httpService: HttpService)  {
 
     }
 
@@ -69,21 +69,21 @@ export abstract class SimCommon implements OnInit {
     observeSimulationSizeChange(callback?: Function): void {
         try {
             this.resizeElement =  document.getElementById('simulation');
-    
-            this.resizeObserver = new ResizeObserver(() => { 
+
+            this.resizeObserver = new ResizeObserver(() => {
                 this.canvas.nativeElement.width = this.resizeElement.offsetWidth;
                 this.canvas.nativeElement.height = this.resizeElement.offsetHeight;
-    
+
                 if(this.resizeElement.offsetHeight > window.innerHeight) {
                     this.canvas.nativeElement.height = window.innerHeight;
                 }
-    
+
                 this.onCanvasResize(); // needs changing for this as it relaunches the values.
             });
 
             this.resizeObserver.observe(this.resizeElement);
             callback();
-        } 
+        }
         catch (error) {
             console.log("Size change algorithm corrupted - simulation will be small. Reload required.")
         }
@@ -98,7 +98,7 @@ export abstract class SimCommon implements OnInit {
                 if(simParam.controlType === 'range') {
                     this.simulationControls.addControl(simParam.id.toString()+"range", new FormControl(null, [Validators.required]));
                     this.simulationControls.get(simParam.id.toString()+"range").patchValue(simParam.get() * simParam.displayModifier);
-    
+
                     this.subscriptions.add(this.simulationControls.get(simParam.id.toString()+"range").valueChanges.subscribe(newVal => {
                         this.simulationControlsParameterModification(simParam.id);
                     }));
@@ -110,7 +110,7 @@ export abstract class SimCommon implements OnInit {
                 }
             }
         });
-    
+
         this.simulationParameters.forEach(parameter => {
             this.simulationSetup.addControl(parameter.id.toString() + "checkbox", new FormControl(null, [Validators.required]));
             if(parameter.iv === true) {
@@ -120,9 +120,9 @@ export abstract class SimCommon implements OnInit {
         this.simulationParameters.forEach(param => {
             this.setupVariableList.push({id: param.id, iv: param.iv, display: 'f', value: param.get()});
         });
-        this.setupVariableList.push({id: 'ds', iv: null, display: 'f', value: null});
+        this.setupVariableList.push({id: 'ds', iv: null, display: 't', value: null});
     }
-    
+
     simulationControlsParameterModification(id: number, quantity?: number) {
       var newValue = 0;
       if(quantity) {
@@ -132,7 +132,7 @@ export abstract class SimCommon implements OnInit {
       }
       this.simulationParameterModification(id, newValue);
     }
-    
+
     simulationParameterModification(id: number, value: number) {
         if(value > this.simulationParameters[id].max) {
             this.simulationParameters[id].modify(+this.simulationParameters[id].max);
@@ -181,11 +181,11 @@ export abstract class SimCommon implements OnInit {
                 this.variablesIV = +id;
             } else if(parameter[0].dv === true) {
                 this.variablesDV = +id;
-            } 
+            }
             this.dataCollectionServiceLaunch();
         } else {
             console.log("not an option for us");
-        }       
+        }
     }
 
     setDefaultValues() {
@@ -198,7 +198,7 @@ export abstract class SimCommon implements OnInit {
 
     setQueryParameters() {
         this.simulationParameters.forEach(param => {
-            this.parametersDisplayed = {...this.parametersDisplayed, [param.id]: true}; 
+            this.parametersDisplayed = {...this.parametersDisplayed, [param.id]: true};
             if(this.route.snapshot.queryParams[param.id.toString()] !== undefined) {
                 var paraArray = this.route.snapshot.queryParams[param.id.toString()].split("!");
                 for(var v = 0; v < paraArray.length; v++) {
@@ -212,8 +212,8 @@ export abstract class SimCommon implements OnInit {
                 }
             }
         })
-        this.parametersDisplayed = {...this.parametersDisplayed, 'ds': true}; 
-         
+        this.parametersDisplayed = {...this.parametersDisplayed, 'ds': true};
+
         if(this.route.snapshot.queryParams['ds'] !== undefined) {
             this.parametersDisplayed['ds'] = (this.route.snapshot.queryParams['ds'] == 't');
         }

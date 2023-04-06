@@ -11,11 +11,11 @@ import { DirectoryService } from 'src/app/services/directory.service';
 
 /**
  * TO DO
- * 
+ *
  * Replace numbers with bigints where the numbers re enormous (molecules, half lives etc)
  * finish animations
  * make controls smoother
- * 
+ *
  */
 
 
@@ -41,7 +41,7 @@ export interface simParamArray {
  export interface nuclearData {
      z: number; symbol: string; a: number, n: number;
      halflife: number; decaymodes: string[]; mass: number;
-     decayConst: number; 
+     decayConst: number;
  }
 
 @Component({
@@ -60,10 +60,10 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
    paused: boolean = false; animationStarted: boolean = false; animationEnded: boolean = false;
 
    // pathing for files etc
-   assetsDirectory = 'assets/simulators/motion-ramp/';
-   fullpath = '#/simulations/motion-ramp';
-   componentId: string = 'motion_sim';
-   simulationId: string = 'Motion Ramp';
+   assetsDirectory = 'assets/simulators/halflife/';
+   fullpath = '#/simulations/halflife';
+   componentId: string = 'halflife';
+   simulationId: string = 'Half Life';
 
    // values
    currentTime: number = 0.00; simulationSpeed: number = 1; simulationSpeedMultiplier = 1;
@@ -96,10 +96,10 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
         super(usersService, dataService, route, httpService);
         directoryService.simulationMenuChange("Half Life");
     }
-    
+
     ngOnInit(): void {
         this.simulationsService.loadNewLab(this.simulationDocuments);
-        this.ctx = this.canvas.nativeElement.getContext('2d');        
+        this.ctx = this.canvas.nativeElement.getContext('2d');
         this.loadCSVFile();
     }
 
@@ -136,14 +136,14 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
 
 
     loadCSVFile() {
-        this.loaded = new Promise((resolve, reject) => { 
+        this.loaded = new Promise((resolve, reject) => {
             this.httpService.getCSVFile('/assets/database/NuclearDataFinal.csv').subscribe(data => {
                 this.parseCSVFile(data);
-                this.loadNumberArrays();  
+                this.loadNumberArrays();
                 this.zValueSet();
                 this.observeSimulationSizeChange(); // change canvas size based upon size of the simulation div
                 this.commonSimulationFunctionality();
-                this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters      
+                this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters
                 this.animate();
                 resolve(true);
             }, error => { console.log("this didnt work"); });
@@ -161,7 +161,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
         this.dataLength = this.nuclearData.length; // count once.
         this.zRange = { min: this.nuclearData[0].z, max: this.nuclearData[this.dataLength-1].z };
     }
-    
+
     commonSimulationFunctionality() {
         this.setControls();
         this.setDefaultValues();
@@ -169,7 +169,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
 
     simulationParameters: Array<simParamArray> = [
         {
-            id: 0, name: 'Simulation Speed', unit: '',    
+            id: 0, name: 'Simulation Speed', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, dp: 2,
@@ -177,7 +177,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: false, value: null }
         },
         {
-            id: 1, name: 'Speed Multiplier', unit: 'power 10',    
+            id: 1, name: 'Speed Multiplier', unit: 'power 10',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: newValue => { this.simulationSpeedMultiplier = newValue; },
             get: () => { return this.simulationSpeedMultiplier; }, dp: 0,
@@ -185,21 +185,21 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 2, name: 'Simulation Speed', unit: 'x',    
+            id: 2, name: 'Simulation Speed', unit: 'x',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: null, get: () => { return this.simulationSpeed * Math.pow(10, this.simulationSpeedMultiplier); }, dp: 8,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 3, name: 'Sample Mass', unit: 'g',    
+            id: 3, name: 'Sample Mass', unit: 'g',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
-            modify: newValue => { this.sampleMass = newValue; this.generateSample(this.sample[0].element); }, 
+            modify: newValue => { this.sampleMass = newValue; this.generateSample(this.sample[0].element); },
             get: () => { return this.sampleMass; }, dp: 0,
             default: 30, min: 1, max: 100, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 4, name: 'Proton Number (Z)', unit: '',    
+            id: 4, name: 'Proton Number (Z)', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, displayModifier: 1,
             modify: newValue => { this.zValue = newValue; this.zValueSet(); },
             get: () => { return this.zValue; }, dp: 0,
@@ -207,7 +207,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 5, name: 'Mass Number (A)', unit: '',    
+            id: 5, name: 'Mass Number (A)', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, displayModifier: 1,
             modify: newValue => { this.aValue = newValue; this.aValueSet(); },
             get: () => { return this.aValue; }, dp: 0,
@@ -215,55 +215,55 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 6, name: 'Number of Molecules', unit: '',    
+            id: 6, name: 'Number of Molecules', unit: '',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].totalQuantityAtoms; }, dp: 4,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 7, name: 'Symbol', unit: '',    
+            id: 7, name: 'Symbol', unit: '',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: true, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].element.symbol; }, dp: 0,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 8, name: 'Half Life', unit: 's',    
+            id: 8, name: 'Half Life', unit: 's',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: true, displayModifier: 1,
             modify: null, get: () => { return this.getAppropriateTimeFormat("Half Life", this.sample[0].element.halflife); }, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 9, name: 'Element Mass', unit: 'amu',    
+            id: 9, name: 'Element Mass', unit: 'amu',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: true, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].element.mass; }, dp: 8,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 10, name: 'Decay Modes', unit: '',    
+            id: 10, name: 'Decay Modes', unit: '',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: true, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].element.decaymodes; }, dp: 0,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 11, name: 'Decayed Particles', unit: '%',    
+            id: 11, name: 'Decayed Particles', unit: '%',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].now; }, dp: 4,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 12, name: 'Decay Constant', unit: '',    
+            id: 12, name: 'Decay Constant', unit: '',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].element.decayConst; }, dp: 6,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 13, name: 'Time', unit: 's',    
+            id: 13, name: 'Time', unit: 's',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: true, displayModifier: 1,
             modify: null, get: () => { return this.getAppropriateTimeFormat("Time", this.currentTime); }, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
         {
-            id: 14, name: 'Activity', unit: '%',    
+            id: 14, name: 'Activity', unit: '%',
             iv: false, dv: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: null, get: () => { return this.sample[0].difference; }, dp: 4,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
@@ -327,9 +327,9 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
         var element: nuclearData[] = this.nuclearData.filter(data => (data.z === this.zValue && data.a === this.aValue));
 
         if(element.length > 0) {
-            this.generateSample(element[0]);       
+            this.generateSample(element[0]);
         } else {
-            this.generateSample(this.sampleNoData.element);       
+            this.generateSample(this.sampleNoData.element);
         }
     }
 
@@ -364,10 +364,10 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
         // draw a background
         this.ctx.fillStyle = '#6599FF';
         this.ctx.fillRect(0,0,this.ctx.canvas.width, this.ctx.canvas.height);
-        
+
         // draw on the samples
         this.ctx.fillStyle = '#000000';
-        
+
         var xpos = 60;
         var ypos = 65;
         var infobox = {x: 0, y: 0, key: 0};
@@ -460,12 +460,12 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
                      this.sample[i].previous = this.sample[i].now;
 
                      var atomsPerDecayMode = decayedQuantity / this.sample[i].element.decaymodes.length; // all decay modes treated equally, unless it is an unknown decay mode..
-                    
+
                      for(var o = 0; o < this.sample[i].element.decaymodes.length; o++) {
 
                         var newElement: nuclearData = this.getNewElement(this.sample[i].element.decaymodes[o], this.sample[i]);
                         var sampleAlreadyFound: boolean = false;
-                        
+
                         if(newElement !== null) {
                               for(var t = 0; t < this.sample.length; t++) {
                                  if(this.sample[t].element.a === newElement.a && this.sample[t].element.z === newElement.z && this.sample[t].element.n === newElement.n) {
@@ -516,10 +516,10 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
             this.numbersArray = this.shuffleArray(this.numbersArray);
 
         }
-        
+
         this.frame();
         this.requestId = requestAnimationFrame(() => this.animate());
-    
+
     }
 
     increaseGeneration() {
@@ -587,7 +587,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
       } else {
          this.sample[this.neutronFoundIndex].totalQuantityAtoms += quantity;
          this.sample[this.neutronFoundIndex].initialQuantityAtoms += quantity;
-      }  
+      }
     }
 
     searchElementDatabase(z: number, a: number, n: number): nuclearData {
@@ -600,7 +600,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     resetQuestion() {
-        
+
         this.generateNewSample();
         this.currentGeneration = 0;
         this.elapsed = 0;

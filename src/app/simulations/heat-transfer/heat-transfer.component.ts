@@ -40,14 +40,14 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
     private motionPositionStart = 35; private pixelsPerMeter: number;
 
     // pathing for files etc
-    assetsDirectory = 'assets/simulators/motion-ramp/';
-    fullpath = '#/simulations/motion-ramp';
-    componentId: string = 'motion_sim';
-    simulationId: string = 'Motion Ramp';
-  
+    assetsDirectory = 'assets/simulators/heat-transfer/';
+    fullpath = '#/simulations/heat-transfer';
+    componentId: string = 'heat-transfer';
+    simulationId: string = 'Heat Conduction';
+
     // values
     valueTime: number; valueAcceleration: number;
-    currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;    
+    currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;
     simulationSpeed: number = 1;
 
     // simulation data collection setup
@@ -70,7 +70,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
         this.animate();
         this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters
     }
-    
+
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
     }
@@ -89,7 +89,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
 
     simulationParameters: Array<simParamArray> = [
         {
-            id: 0, name: 'Simulation Speed', unit: '',    
+            id: 0, name: 'Simulation Speed', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
@@ -97,7 +97,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             controlType: 'range', fineControl: {available: false, value: null }
         },
         {
-            id: 1, name: 'Resolution', unit: 'px',    
+            id: 1, name: 'Resolution', unit: 'px',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.granularity = newValue; this.generateHeatMap(); },
             get: () => { return this.granularity; }, displayModifier: 1, dp: 0,
@@ -105,7 +105,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             controlType: 'range', fineControl: {available: false, value: null }
          },
          {
-            id: 2, name: 'Scale', unit: 'm',    
+            id: 2, name: 'Scale', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.canvasScale = newValue; this.pixelsPerMeter = this.ctx.canvas.height / this.canvasScale; },
             get: () => { return this.canvasScale; }, displayModifier: 1, dp: 1,
@@ -113,7 +113,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             controlType: 'range', fineControl: {available: false, value: null }
          },
          {
-            id: 3, name: 'Contrast', unit: '',    
+            id: 3, name: 'Contrast', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.contrast = newValue; },
             get: () => { return this.contrast; }, displayModifier: 1, dp: 1,
@@ -121,7 +121,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             controlType: 'range', fineControl: {available: false, value: null }
          },
          {
-            id: 4, name: 'Ambient Temperature', unit: 'K',    
+            id: 4, name: 'Ambient Temperature', unit: 'K',
             iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.baseTemp = newValue; this.generateHeatMap(); },
             get: () => { return this.baseTemp; }, displayModifier: 1, dp: 0,
@@ -129,7 +129,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             controlType: 'range', fineControl: {available: true, value: 1 }
          },
          {
-            id: 5,  name: 'Time Elapsed', unit: 's', 
+            id: 5,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
@@ -153,7 +153,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
     toggleHeatMap() {
         this.heatMapEnabled = !this.heatMapEnabled;
     }
-   
+
     frame() {
 
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
@@ -162,13 +162,13 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
         // draw a background
         this.ctx.fillStyle = '#6599FF';
         this.ctx.fillRect(0,0,this.ctx.canvas.width, this.ctx.canvas.height);
-        
+
         // draw the conductors
         this.conductors.forEach(conductor => {
            this.ctx.fillStyle = conductor.colour;
            this.ctx.fillRect(conductor.x, conductor.y, conductor.width, conductor.height);
          })
-         
+
          // draw the heatmap
          var curx = 0;
          var cury = 0;
@@ -185,9 +185,9 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
                 curx = 0;
             }
         }
-        
+
          // any boxes being currently drawn
-         
+
          if(this.mousePressed) {
              // draw the box
              var dx = this.mousePosition.x - this.mousePressedPosition.x;
@@ -237,16 +237,16 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
     tempColour(temperature: number) {
       var alpha = ((temperature / this.contrast) > 0.5 ? 0.5 : (temperature / this.contrast));
       var red = 255 * ((temperature / this.contrast) > 1.0 ? 1.0 : (temperature / this.contrast));
-      return "rgba("+red+",0,0,1)";  
-    //   return "rgba(255,0,0,"+alpha+")";  
+      return "rgba("+red+",0,0,1)";
+    //   return "rgba(255,0,0,"+alpha+")";
     }
 
     getRandomColour(){ // noise
       var red = Math.floor(Math.random()* 255);
       var green = Math.floor(Math.random() * 255);
       var blue = Math.floor(Math.random() * 255);
-    
-      return "rgb("+red+","+green+"," +blue+" )";  
+
+      return "rgb("+red+","+green+"," +blue+" )";
     }
 
     animate() {
@@ -257,13 +257,13 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
            this.elapsedSinceFrame = Date.now() - this.startTime - this.elapsed;
            this.elapsed = Date.now() - this.startTime;
        }
-        
-       
+
+
        if(this.paused === false && this.animationStarted === true && this.animationEnded === false) {
             this.currentTime += (this.elapsedSinceFrame/1000)  * this.simulationSpeed;
             this.recalculateHeat((this.elapsedSinceFrame/1000)  * this.simulationSpeed);
          }
-         
+
          this.frame();
          this.requestId = requestAnimationFrame(() => this.animate());
     }
@@ -277,16 +277,16 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
 
                 if(this.heatMap[i][o].src === false) {
                     var neighbors = [];
-  
+
                     if(i > 0) { neighbors.push(this.heatMap[i-1][o])};
                     if(i < (this.heatMap.length - 2)) { neighbors.push(this.heatMap[i+1][o])};
                     if(o > 0) { neighbors.push(this.heatMap[i][o-1])};
                     if(o < (this.heatMap[i].length - 2)) { neighbors.push(this.heatMap[i][o+1])};
-  
+
                     var q = 0;
                     var area = length * length;
                     var mass = length * length * length * this.heatMap[i][o].d;
-  
+
                     neighbors.forEach(tile => {
                        var t1 = this.heatMap[i][o].t;
                        var t2 = tile.t;
@@ -294,7 +294,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
                           q += this.heatMap[i][o].k * area * (t2 - t1) * time;
                        }
                     })
-  
+
                     this.heatMap[i][o].t += q / (mass * this.heatMap[i][o].sh);
                 }
 
@@ -367,9 +367,9 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
          var dymod = dy % this.granularity;
 
          if(Math.abs(dx - dxmod) > 0 && Math.abs(dy - dymod) > 0) {
-            var newConductor = { 
-               x: this.mousePressedPosition.x - posmodx, y: this.mousePressedPosition.y - posmody, 
-               width: dx - dxmod, height: dy - dymod, colour: "#ffffff"                               
+            var newConductor = {
+               x: this.mousePressedPosition.x - posmodx, y: this.mousePressedPosition.y - posmody,
+               width: dx - dxmod, height: dy - dymod, colour: "#ffffff"
             };
 
             // set all heatmap squares below this to this material
@@ -377,7 +377,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             var xe = ((this.mousePressedPosition.x - posmodx) + (dx - dxmod)) / this.granularity;
             var ys = (this.mousePressedPosition.y - posmody) / this.granularity;
             var ye = ((this.mousePressedPosition.y - posmody) + (dy - dymod)) / this.granularity;
-   
+
             if(xs > xe) {
                var xstart = xe, xend = xs;
             } else {
@@ -437,5 +437,5 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
 
         this.animate();
     }
-    
+
 }

@@ -35,8 +35,10 @@ import { MazesComponent } from './emulations/mazes/mazes.component';
 import { SelfDriveComponent } from './emulations/self-drive/self-drive.component';
 import { SigFigPipePipe } from './sig-fig-pipe.pipe';
 import { NuclearCoreComponent } from './simulations/nuclear-core/nuclear-core.component';
+import { WelcomeComponent } from './welcome/welcome.component';
 
 const appRoutes: Routes = [
+    { path: '', component: WelcomeComponent },
     { path: 'feedback', component: DisplayAllFeedbackComponent },
     { path: 'cars', component: SelfDriveComponent },
     { path: 'mazes', component: MazesComponent },

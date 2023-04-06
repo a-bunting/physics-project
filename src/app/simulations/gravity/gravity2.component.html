@@ -1,3 +1,56 @@
+<div class="setup__overlay" *ngIf="setupMode">
+
+  <form [formGroup]="simulationSetup">
+      <div class="setup__independent-variables">
+        <div class="setup__variable--label">Independent Variables</div>
+
+          <div class="setup__variable">
+            <div class="setup__variable--name setup__variable--header">Name</div>
+            <div class="setup__variable--value setup__variable--header">Value</div>
+            <div class="setup__variable--checkbox setup__variable--header">Show</div>
+          </div>
+
+          <div class="setup__variable" *ngFor="let iv of getDisplayedIndependentProperties; let i = index">
+              <div class="setup__variable--name">{{ iv.name | slice:0:20 }}</div>
+              <div class="setup__variable--value"><input type="text" class="setup__textbox" formControlName="{{ iv.id }}value" (change)="setupVariableValueChange(iv.id)" title="Minimum Value: {{ iv.min }} {{ iv.unit }}, Maximum Value: {{ iv.max }} {{ iv.unit }}"></div>
+              <div class="setup__variable--checkbox"><input type="checkbox" class="setup__checkbox" formControlName="{{ iv.id }}checkbox" (change)="setupVariableCheckboxChange(iv.id)"></div>
+          </div>
+        </div>
+
+        <div class="setup__dependent-variables">
+          <div class="setup__variable--label">Dependent Variables</div>
+
+          <div class="setup__variable" *ngFor="let dv of getDisplayedDependentProperties; let i = index">
+            <div class="setup__variable--name">{{ dv.name | slice:0:20 }}</div>
+            <div class="setup__variable--checkbox"><input type="checkbox" class="setup__checkbox" formControlName="{{ dv.id }}checkbox" (change)="setupVariableCheckboxChange(dv.id)"></div>
+          </div>
+
+          <div class="setup__variable setup__variable--margintop">
+              <input type="button" class="setup__button" (click)='toggleShowSetupButton()' value="Disable Setup Button ({{ setupVariableList[setupVariableList.length-1].display === 'f' ? 'Enabled' : 'Disabled' }})">
+          </div>
+      </div>
+
+      <div class="setup__information">
+          <p>For variables you want to display, click the check box by the name of the variable.</p>
+          <p>Any values you set for independent variables but do not display will be a constant value. All values must be defined.</p>
+          <p>To see the range of allowed values for the independent variables, hover over the text box.</p>
+      </div>
+
+      <div class="setup__urloutput" *ngIf="customUrl !== undefined || notice_minmax">
+        <div class="setup__error" *ngIf="notice_minmax">
+            Note, minimum and maximum values are auto-enforced.
+        </div>
+        <div class="setup__notice" *ngIf="customUrl !== undefined">
+          <div class="setup__link">
+            <a href="{{ customUrl }}">Here is your custom link</a>
+            <p>{{ customUrl }}</p>
+          </div>
+          <input type="button" class="setup__button" (click)="enableSetupMode()" style="margin-left: 5px" value="Finish Setup Mode">
+        </div>
+      </div>
+  </form>
+</div>
+
 <div class="simulation-container">
     <!-- where do the presets go? -->
     <div id="simulation" class="simulation">
@@ -26,34 +79,34 @@
         <!-- classnames incomplete -->
         <form [formGroup]="simulationControls">
             <div class="independent-variables__iv" *ngFor="let control of getDisplayedIndependentProperties; let i = index" [class.hidden-control]='!parametersDisplayed[control.id]' [class.simulation-iv]='variablesIV===control.id&&dataCollectionMode' [class.simulation-dv]='variablesDV===control.id&&dataCollectionMode'>
-                
+
                 <!-- the top row - never hidden -->
                 <div class="independent-variables__label">
                     <div class="independent-variables__hide" style="transform: rotate(90deg)" (click)="toggleIVVisibility(control.id)">&#xbb;</div>
                     <div class="independent-variables__name">{{ control.name }}</div>
-                    
+
                     <!-- check this isnt in the ts before changing -->
                     <div *ngIf="dataCollectionMode && control.dataCollectionAppropriate">
                         (<span class="variable-select-button" (click)="setIDVariable(control.id)">IV</span>)
                     </div>
                 </div>
-                
+
                 <!-- this might  be in the ts and will need modifying -->
                 <div class="independent-variables__value">{{ control.displayModifier * control.get() | number:'1.'+control.dp+'-'+control.dp }} {{ control.unit }}</div>
 
-                <div class="independent-variables__control" *ngIf="(!dataCollectionMode || (variablesIV === control.id || variablesDV === control.id)) && control.visible">                        
-                    <input 
-                        *ngIf="control.controlType==='range'" 
-                        formControlName="{{ control.id }}range" 
-                        type="range" 
-                        class="independent-variables__slider" 
-                        min="{{ control.min * control.displayModifier > control.max * control.displayModifier ? control.max * control.displayModifier : control.min*control.displayModifier }}" 
-                        max="{{ control.max * control.displayModifier < control.min * control.displayModifier ? control.min * control.displayModifier : control.max * control.displayModifier }}" 
-                        step="{{ control.divisions }}" 
+                <div class="independent-variables__control" *ngIf="(!dataCollectionMode || (variablesIV === control.id || variablesDV === control.id)) && control.visible">
+                    <input
+                        *ngIf="control.controlType==='range'"
+                        formControlName="{{ control.id }}range"
+                        type="range"
+                        class="independent-variables__slider"
+                        min="{{ control.min * control.displayModifier > control.max * control.displayModifier ? control.max * control.displayModifier : control.min*control.displayModifier }}"
+                        max="{{ control.max * control.displayModifier < control.min * control.displayModifier ? control.min * control.displayModifier : control.max * control.displayModifier }}"
+                        step="{{ control.divisions }}"
                         value="{{ control.displayModifier * control.get() }}">
                     <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finel" type="button" class="independent-variables__fine-button" (click)="simulationControlsParameterModification(control.id, -control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
                     <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finer" type="button" class="independent-variables__fine-button" (click)="simulationControlsParameterModification(control.id, control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
-                
+
                 </div>
             </div>
         </form>
@@ -72,11 +125,11 @@
             <!-- <div class="dependent-variables__view" *ngIf="parametersDisplayed[dv.id]" [class.dependent-variables__dv]="variablesDV===dv.id"> -->
             <div class="dependent-variables__dv" *ngIf="parametersDisplayed[dv.id]">
                 <div class="dependent-variables__label">
-                    <div class="dependent-variables__hide" (click)="unVisibilityVariable(dv.id)">&#xd7;</div> 
+                    <div class="dependent-variables__hide" (click)="unVisibilityVariable(dv.id)">&#xd7;</div>
                     <div class="dependent-variables__name">{{ dv.name }}</div>
-                    <div class="dependent-variables__select-button" *ngIf="dataCollectionMode" (click)="setIDVariable(dv.id)"> [DV] </div> 
+                    <div class="dependent-variables__select-button" *ngIf="dataCollectionMode" (click)="setIDVariable(dv.id)"> [DV] </div>
                 </div>
-                
+
                 <div class="dependent-variables__value">{{ isNumber(dv.get()) ? (dv.get() | number:'1.0-'+dv.dp) : (dv.get()) }} {{ dv.unit }}</div>
             </div>
         </span>
@@ -86,42 +139,42 @@
             <h3 class="bodies__header-text">Bodies</h3>
 
             <div class="simulation-body simulation-body__header">
-                <div class="simulation-body__name simulation-body__header-cell" (mousedown)="sortProjectiles('name')">Name</div> 
-                <div class="simulation-body__mass simulation-body__header-cell" (mousedown)="sortProjectiles('mass')">Mass (M<sub>earth</sub>)</div> 
-                <div class="simulation-body__radius simulation-body__header-cell" (mousedown)="sortProjectiles('radius')">Radius (r<sub>earth</sub>)</div> 
-                <div class="simulation-body__distance simulation-body__header-cell" (mousedown)="sortProjectiles('distance')">Distance (Mm)</div> 
-                <div class="simulation-body__destroy simulation-body__header-cell"></div> 
-                <div class="simulation-body__follow simulation-body__header-cell"></div> 
+                <div class="simulation-body__name simulation-body__header-cell" (mousedown)="sortProjectiles('name')">Name</div>
+                <div class="simulation-body__mass simulation-body__header-cell" (mousedown)="sortProjectiles('mass')">Mass (M<sub>earth</sub>)</div>
+                <div class="simulation-body__radius simulation-body__header-cell" (mousedown)="sortProjectiles('radius')">Radius (r<sub>earth</sub>)</div>
+                <div class="simulation-body__distance simulation-body__header-cell" (mousedown)="sortProjectiles('distance')">Distance (Mm)</div>
+                <div class="simulation-body__destroy simulation-body__header-cell"></div>
+                <div class="simulation-body__follow simulation-body__header-cell"></div>
             </div>
 
             <div class="simulation-body simulation-body__item" *ngFor="let body of projectiles; let i = index" (mouseup)="selectPlanet(i)">
-                <div class="simulation-body__name simulation-body__cell" contenteditable="true" (blur)="projectiles[i].name=$event.target.textContent">{{ body.name }}</div> 
-                <div class="simulation-body__mass simulation-body__cell" contenteditable="true" (blur)="projectiles[i].mass=$event.target.textContent">{{ body.mass | number:'1.0-5' }}</div> 
-                <div class="simulation-body__radius simulation-body__cell" contenteditable="true" (blur)="projectiles[i].radius=$event.target.textContent">{{ body.radius | number:'1.0-5' }}</div> 
-                <div class="simulation-body__distance simulation-body__cell">{{ (body.distance / 1000000) | number:'1.0-0' }}</div> 
-                <div class="simulation-body__destroy simulation-body__cell" (mouseup)="removeProjectile(i)">&#10006;</div> 
-                <div class="simulation-body__follow simulation-body__cell" (mouseup)="followProjectile(i)">&#10162;</div> 
+                <div class="simulation-body__name simulation-body__cell" contenteditable="true" (blur)="projectiles[i].name=$event.target.textContent">{{ body.name }}</div>
+                <div class="simulation-body__mass simulation-body__cell" contenteditable="true" (blur)="projectiles[i].mass=$event.target.textContent">{{ body.mass | number:'1.0-5' }}</div>
+                <div class="simulation-body__radius simulation-body__cell" contenteditable="true" (blur)="projectiles[i].radius=$event.target.textContent">{{ body.radius | number:'1.0-5' }}</div>
+                <div class="simulation-body__distance simulation-body__cell">{{ (body.distance / 1000000) | number:'1.0-0' }}</div>
+                <div class="simulation-body__destroy simulation-body__cell" (mouseup)="removeProjectile(i)">&#10006;</div>
+                <div class="simulation-body__follow simulation-body__cell" (mouseup)="followProjectile(i)">&#10162;</div>
             </div>
         </div>
 
-        
+
         <div *ngIf="deletedProjectiles.length > 0">
             <h3 class="bodies__header-text">Removed Bodies</h3>
 
             <div class="simulation-body__removed simulation-body__header">
-                <div class="simulation-body__name simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('name')">Name</div> 
-                <div class="simulation-body__mass simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('mass')">Mass (M<sub>earth</sub>)</div> 
-                <div class="simulation-body__radius simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('radius')">Radius (r<sub>earth</sub>)</div> 
-                <div class="simulation-body__add simulation-body__header-cell"></div> 
-                <div class="simulation-body__destroy simulation-body__header-cell"></div> 
+                <div class="simulation-body__name simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('name')">Name</div>
+                <div class="simulation-body__mass simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('mass')">Mass (M<sub>earth</sub>)</div>
+                <div class="simulation-body__radius simulation-body__header-cell" (mousedown)="sortRemovedProjectiles('radius')">Radius (r<sub>earth</sub>)</div>
+                <div class="simulation-body__add simulation-body__header-cell"></div>
+                <div class="simulation-body__destroy simulation-body__header-cell"></div>
             </div>
 
             <div class="simulation-body__removed simulation-body__item" *ngFor="let body of deletedProjectiles; let i = index">
-                <div class="simulation-body__name simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].name=$event.target.textContent">{{ body.name }}</div> 
-                <div class="simulation-body__mass simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].mass=$event.target.textContent">{{ body.mass | number:'1.0-5' }}</div> 
-                <div class="simulation-body__radius simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].radius=$event.target.textContent">{{ body.radius | number:'1.0-5' }}</div> 
-                <div class="simulation-body__add simulation-body__cell" (mouseup)="replaceProjectile(i)">&#10004;</div> 
-                <div class="simulation-body__destroy simulation-body__cell" (mouseup)="deleteProjectile(i)">&#10006;</div> 
+                <div class="simulation-body__name simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].name=$event.target.textContent">{{ body.name }}</div>
+                <div class="simulation-body__mass simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].mass=$event.target.textContent">{{ body.mass | number:'1.0-5' }}</div>
+                <div class="simulation-body__radius simulation-body__cell" contenteditable="true" (blur)="deletedProjectiles[i].radius=$event.target.textContent">{{ body.radius | number:'1.0-5' }}</div>
+                <div class="simulation-body__add simulation-body__cell" (mouseup)="replaceProjectile(i)">&#10004;</div>
+                <div class="simulation-body__destroy simulation-body__cell" (mouseup)="deleteProjectile(i)">&#10006;</div>
             </div>
         </div>
 
