@@ -133,8 +133,14 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
       controlType: 'range', fineControl: { available: true, value: 1 }
     }, {
       id: 6, name: 'Total Kinetic Energy', unit: 'J',
-      iv: false, dv: true, dataCollectionAppropriate: true, visible: true,
+      iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
       modify: null, get: () => { return this.getTotalKineticEnergy(); }, displayModifier: 1, dp: 0,
+      default: null, min: null, max: null, divisions: null,
+      controlType: 'none', fineControl: {available: false, value: null }
+    }, {
+      id: 7, name: 'Energy Generated', unit: 'MeV',
+      iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
+      modify: null, get: () => { return this.energyGenerated; }, displayModifier: 1, dp: 0,
       default: null, min: null, max: null, divisions: null,
       controlType: 'none', fineControl: {available: false, value: null }
     }
@@ -192,8 +198,6 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
           this.particleInteractions.push(newInt);
         }
       }
-
-      console.log(this.charges);
     }
 
 
@@ -216,6 +220,9 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         var y = (p1.y - p2.y) * this.simulationScale * (p1.y - p2.y) * this.simulationScale;
         return x + y;
     }
+
+    tunnelingRange: number = 0.1e-18; // tunnel range squared.
+    tunnelingProbability: number = 1; // modified from the true number 10 1 in 10^28 - see how the sim performs based upon this value.
 
     calculateForces(): void {
       // get the particle density
@@ -243,12 +250,40 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
                 pA.ay = (acceleration * Math.sin(angle));
                 pA.vx -= pA.ax * this.timeElapsed; // -ve for repulsive.
                 pA.vy -= pA.ay * this.timeElapsed; // -ve for repulsive
+
+                if(distSquare < this.tunnelingRange) {
+                  // the particles are close enough to make tunnelling a possibility;
+                  const tunnelChance: number = Math.random();
+
+                  if(tunnelChance < this.tunnelingProbability) {
+                    // FUSION!!
+                    this.generateFusion(i, o);
+                  }
+                }
               }
             }
           }
         }
       }
+    }
 
+    reactions: number = 0;
+    energyGenerated: number = 0;
+
+// generating fusion finish this :d
+
+    generateFusion(a: number, b: number): void {
+      this.reactions++;
+      this.energyGenerated += 28.4;
+
+      // remove the fused particles (assume not hot enough for additional reactions of helium and the quantity will be so low that they shouldnt appear in the sim)
+      if(a > b) {
+        this.charges.splice(a, 1);
+        this.charges.splice(b, 1);
+      } else {
+        this.charges.splice(b, 1);
+        this.charges.splice(a, 1);
+      }
     }
 
     showInteractions(ctx: CanvasRenderingContext2D): void {
@@ -293,7 +328,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
         for(var o = 0; o < this.charges.length; o++) {
             this.ctx.beginPath();
-            this.ctx.arc(this.charges[o].x * this.ctx.canvas.width, this.charges[o].y * this.ctx.canvas.height, 2, 0, 2*Math.PI);
+            this.ctx.arc(this.charges[o].x * this.ctx.canvas.width, this.charges[o].y * this.ctx.canvas.height, 5, 0, 2*Math.PI);
             this.ctx.fill();
         }
 
