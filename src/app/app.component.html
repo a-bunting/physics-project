@@ -8,69 +8,7 @@
    </head>
 
    <body>
-
-        <!-- svg courtesy of iconmoon -->
-        <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <defs>
-                <symbol id="icon-search" viewBox="0 0 32 32">
-                    <path d="M31.008 27.231l-7.58-6.447c-0.784-0.705-1.622-1.029-2.299-0.998 1.789-2.096 2.87-4.815 2.87-7.787 0-6.627-5.373-12-12-12s-12 5.373-12 12 5.373 12 12 12c2.972 0 5.691-1.081 7.787-2.87-0.031 0.677 0.293 1.515 0.998 2.299l6.447 7.58c1.104 1.226 2.907 1.33 4.007 0.23s0.997-2.903-0.23-4.007zM12 20c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8z"></path>
-                </symbol>
-            </defs>
-        </svg>
-       
-        <!-- Hide button -->
-        <input type="checkbox" name="header__hide--checkbox" id="header__hide--checkbox">
-        <label for="header__hide--checkbox" id="header__hide">
-            <span class="header__hide--icon">&#171;</span>
-        </label>
-
-        <div id="grid-container">
-
-            <header id="header" class="header">
-                <div class="header__logo">
-                    <!-- !This>#Phys -->
-                    <div class="header__logo--1">!</div><div class="header__logo--2">T</div><div class="header__logo--3">h</div><div class="header__logo--4">i</div><div class="header__logo--5">s</div><div class="header__logo--6">></div><div class="header__logo--7">#</div><div class="header__logo--8">P</div><div class="header__logo--9">h</div><div class="header__logo--10">y</div><div class="header__logo--11">s</div>
-                </div>
-                <div class="header__search">
-                    <input type="text" name="searchText" id="searchText" class="header__search--text" placeholder="Search key tags..." [(ngModel)]="searchTerms" (keyup)="searchButtonPush($event)">
-                    <button class="header__search--button" (click)="searchButtonPush()">
-                        <svg class="icon icon-search"><use xlink:href="#icon-search"></use></svg>
-                    </button>
-                    <div class="header__history">
-                        <div class="header__history--item" *ngFor="let searchTerm of pastSearches; let i = index">
-                            {{ searchTerm }}
-                        </div>
-                    </div>          
-                </div>
-                <nav class="header__nav">
-                    <div class="header_section" *ngFor="let section of menuList; let i = index">
-                        <input type="radio" name="menuitem" class="header__section--radio" id="{{i}}">
-                        <label class="header__submenu" for="{{i}}">
-                            <div class="header__submenu--label">{{ section.title }}</div>
-                            <div class="header__submenu--items">
-                                <div class="header__submenu--item" *ngFor="let item of section.items; let o = index" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" [routerLink]="[item.route]" [queryParams]="item.parameters">
-                                    <div></div>
-                                    <p>{{ item.name }}</p>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    
-                </nav>
-            </header>
-            
-            <main id="main">
-                <router-outlet></router-outlet>
-            </main>
-            
-            <footer id="footer">
-                <div class="footer">
-                    Website designed, developed, poked and prodded by <a href="http://www.sweeto.co.uk" class="footer__link">Alex Bunting</a>. &copy; 2021. Please use as you wish, but do not copy any of the code or design without permission :).
-                </div>
-            </footer>
-            
-        </div>
-         
+      <router-outlet></router-outlet>
    </body>
-      
+
 </html>

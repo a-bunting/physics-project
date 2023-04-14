@@ -36,25 +36,45 @@ import { SelfDriveComponent } from './emulations/self-drive/self-drive.component
 import { SigFigPipePipe } from './sig-fig-pipe.pipe';
 import { NuclearCoreComponent } from './simulations/nuclear-core/nuclear-core.component';
 import { WelcomeComponent } from './welcome/welcome.component';
+import { WebComponent } from './structure/web/web.component';
+import { IframeComponent } from './structure/iframe/iframe.component';
 
 const appRoutes: Routes = [
-    { path: '', component: WelcomeComponent },
-    { path: 'feedback', component: DisplayAllFeedbackComponent },
-    { path: 'cars', component: SelfDriveComponent },
-    { path: 'mazes', component: MazesComponent },
-    { path: 'datagen', component: DataGenComponent },
-    { path: 'problems', component: ProblemsComponent, children: [
-        { path: '', redirectTo: '/search/Problem', pathMatch: 'full'},
-        { path: 'friction-and-motion', component: FrictionAndMotionComponent}
+    { path: '', component: WebComponent, children: [
+      { path: '', component: WelcomeComponent },
+      { path: 'feedback', component: DisplayAllFeedbackComponent },
+      { path: 'cars', component: SelfDriveComponent },
+      { path: 'mazes', component: MazesComponent },
+      { path: 'datagen', component: DataGenComponent },
+      { path: 'problems', component: ProblemsComponent, children: [
+          { path: '', redirectTo: '/search/Problem', pathMatch: 'full'},
+          { path: 'friction-and-motion', component: FrictionAndMotionComponent}
+      ]},
+      { path: 'questions-generator', component: QuestionsGeneratorComponent, children: [
+          { path: '', redirectTo: '/search/Questions', pathMatch: 'full'},
+          { path: 'ideal-gasses', component: IdealGassesComponent},
+          { path: 'projectile-motion', component: ProjectileMotionComponent},
+          { path: 'speed-distance-time', component: SpeedDistanceTimeComponent}
+      ]},
+      { path: 'simulations', component: SimulationsComponent, children: [
+        { path: '', redirectTo: '/search/Simulations', pathMatch: 'full'},
+        { path: 'motion-ramp', component: MotionRampComponent},
+        { path: 'forces-basic', component: ForcesBasicComponent},
+        { path: 'freefall', component: FreefallComponent},
+        { path: 'electromagnetic-fields', component: ElectromagneticFieldsComponent},
+        { path: 'nuclear-core', component: NuclearCoreComponent},
+        { path: 'kinematics', component: KinematicsComponent},
+        { path: 'halflife', component: HalflifeComponent},
+        { path: 'momentum', component: MomentumComponent},
+        { path: 'circular-motion', component: CircularMotionComponent},
+        { path: 'gravity', component: GravityComponent},
+        { path: 'heat-transfer', component: HeatTransferComponent}
     ]},
-    { path: 'questions-generator', component: QuestionsGeneratorComponent, children: [
-        { path: '', redirectTo: '/search/Questions', pathMatch: 'full'},
-        { path: 'ideal-gasses', component: IdealGassesComponent},
-        { path: 'projectile-motion', component: ProjectileMotionComponent},
-        { path: 'speed-distance-time', component: SpeedDistanceTimeComponent}
-    ]},
-    { path: 'simulations', component: SimulationsComponent, children: [
-      { path: '', redirectTo: '/search/Simulations', pathMatch: 'full'},
+      { path: 'display-all-feedback', component: DisplayAllFeedbackComponent},
+      { path: 'search/:searchTags', component: SearchComponent}
+  ]},
+    // IFRAMEABLE THINGS
+    { path: 'iframe', component: IframeComponent, data: { iframe: true }, children: [
       { path: 'motion-ramp', component: MotionRampComponent},
       { path: 'forces-basic', component: ForcesBasicComponent},
       { path: 'freefall', component: FreefallComponent},
@@ -65,10 +85,16 @@ const appRoutes: Routes = [
       { path: 'momentum', component: MomentumComponent},
       { path: 'circular-motion', component: CircularMotionComponent},
       { path: 'gravity', component: GravityComponent},
-      { path: 'heat-transfer', component: HeatTransferComponent}
-   ]},
-    { path: 'display-all-feedback', component: DisplayAllFeedbackComponent},
-    { path: 'search/:searchTags', component: SearchComponent}
+      { path: 'heat-transfer', component: HeatTransferComponent},
+
+      { path: 'ideal-gasses', component: IdealGassesComponent},
+      { path: 'projectile-motion', component: ProjectileMotionComponent},
+      { path: 'speed-distance-time', component: SpeedDistanceTimeComponent},
+
+      { path: 'cars', component: SelfDriveComponent },
+      { path: 'mazes', component: MazesComponent },
+      { path: 'datagen', component: DataGenComponent }
+   ]}
 ]
 
 @NgModule({
@@ -97,7 +123,7 @@ const appRoutes: Routes = [
     GravityComponent,
     HeatTransferComponent,
     FrictionAndMotionComponent,
-    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe
+    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe, WebComponent, IframeComponent
    ],
   imports: [
     BrowserModule,

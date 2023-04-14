@@ -53,7 +53,9 @@ export abstract class SimCommon implements OnInit {
     abstract commonSimulationFunctionality(): void;
 
     constructor(protected usersService: UsersService, protected dataService: DataService,  protected route: ActivatedRoute, protected httpService: HttpService)  {
-
+      this.route.data.subscribe(data => {
+        console.log(data);
+      })
     }
 
     ngOnInit(): void {

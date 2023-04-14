@@ -92,22 +92,22 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
     simulationParameters = [
       {
           id: 0, name: 'Simulation Speed', unit: '% of 1s',
-          iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          iv: false, dv: false, dataCollectionAppropriate: false, visible: false,
           modify: newValue => { this.simulationSpeed = newValue; },
           get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 5,
-          default: 0.00000000001, min: 0.00000000001, max: 0.0000000010, divisions: 0.0000000001,
+          default: 0.00000001, min: 0.00000001, max: 0.000001, divisions: 0.0000001,
           controlType: 'range', fineControl: {available: true, value: 0.0000000001 }
       }, {
-           id: 1, name: 'Scale', unit: '',
-           iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+           id: 1, name: 'Scale', unit: 'm',
+           iv: false, dv: false, dataCollectionAppropriate: false, visible: false,
            modify: newValue => { this.simulationScale = newValue; },
            get: () => { return this.simulationScale; }, displayModifier: 1, dp: 15,
-           default: 0.0000000000001, min: 0.0000000000001, max: 0.0000000000001, divisions: 0.0000000000001,
-           controlType: 'range', fineControl: {available: false, value: null}
+           default: 0.00000001, min: 0.000000001, max: 0.0000001, divisions: 0.000000001,
+           controlType: 'range', fineControl: {available: true, value: 0.000000001 }
      }, {
           id: 2, name: 'Time Elapsed', unit: 's',
           iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
-          modify: null, get: () => { return this.timeElapsed; }, displayModifier: 1, dp: 11,
+          modify: null, get: () => { return this.timeElapsed; }, displayModifier: 1, dp: 9,
           default: null, min: null, max: null, divisions: null,
           controlType: 'none', fineControl: {available: false, value: null }
     }, {
@@ -125,34 +125,45 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
           default: 10, min: 1, max: 30, divisions: 1,
           controlType: 'range', fineControl: { available: true, value: 1 }
     }, {
-      id: 5, name: 'Accuracy', unit: '',
-      iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
-      modify: newValue => { this.accuracy = newValue; },
-      get: () => { return this.accuracy; }, displayModifier: 1, dp: 0,
-      default: 15, min: 1, max: 100, divisions: 1,
-      controlType: 'range', fineControl: { available: true, value: 1 }
+          id: 5, name: 'Accuracy', unit: '',
+          iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
+          modify: newValue => { this.accuracy = newValue; },
+          get: () => { return this.accuracy; }, displayModifier: 1, dp: 0,
+          default: 15, min: 1, max: 100, divisions: 1,
+          controlType: 'range', fineControl: { available: true, value: 1 }
     }, {
-      id: 6, name: 'Total Kinetic Energy', unit: 'J',
-      iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
-      modify: null, get: () => { return this.getTotalKineticEnergy(); }, displayModifier: 1, dp: 0,
-      default: null, min: null, max: null, divisions: null,
-      controlType: 'none', fineControl: {available: false, value: null }
+          id: 6, name: 'Total Kinetic Energy', unit: 'TeV',
+          iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
+          modify: null, get: () => { return this.getTotalKineticEnergy(); }, displayModifier: 1, dp: 0,
+          default: null, min: null, max: null, divisions: null,
+          controlType: 'none', fineControl: {available: false, value: null }
     }, {
-      id: 7, name: 'Energy Generated', unit: 'MeV',
-      iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
-      modify: null, get: () => { return this.energyGenerated; }, displayModifier: 1, dp: 0,
-      default: null, min: null, max: null, divisions: null,
-      controlType: 'none', fineControl: {available: false, value: null }
+          id: 7, name: 'Energy Generated', unit: 'MeV',
+          iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
+          modify: null, get: () => { return this.energyGenerated; }, displayModifier: 1, dp: 0,
+          default: null, min: null, max: null, divisions: null,
+          controlType: 'none', fineControl: {available: false, value: null }
+    }, {
+          id: 8, name: 'Particle Velocity', unit: 'km/s',
+          iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
+          modify: null, get: () => { return this.calculateParticleVelocity(); }, displayModifier: 1, dp: 0,
+          default: null, min: null, max: null, divisions: null,
+          controlType: 'none', fineControl: {available: false, value: null }
     }
 
 
   ]
 
+  calculateParticleVelocity(id: number = 0): number {
+    const p: ChargedParticle = {... this.charges[id] };
+    return Math.sqrt(Math.pow(p.vx, 2) + Math.pow(p.vy, 2)) / 1000;
+  }
+
   getTotalKineticEnergy(): number {
     let ek: number = 0;
     for(let i = 0 ; i < this.charges.length ; i++) {
       let vsq: number = this.charges[i].vx * this.charges[i].vx + this.charges[i].vy * this.charges[i].vy;
-      ek += (0.8e-27 * vsq);
+      ek += (0.8365 * 10e-20 * vsq); // in TeV
     }
     return ek;
   }
@@ -169,35 +180,44 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    particleInteractions: { a: ChargedParticle, b: ChargedParticle, tested: boolean }[];
+    fusionRange: number = 0.1; // value in nm
 
     generateChargeParticles(density: number, temperature: number) {
       // should give in the 30-180 particle range!
-      let particles: number = Math.ceil(density * 6.022 * 0.01); //100 for a nanometer, 10 for 0.1 nm, 1 for 0.01 nm, 0.1 for 0.001 nm (-12), 0.001 for -14nm (10 fm)
+      // rationale for particle count:
+      // assume a 3d volume of 10nm^3, and a density of 300 grams/cm2, we can convert to nm and get density = density (g/cm3) * (1cm^3 / 10^-21)
+      // we are however producing a 2d slice, so how thick should this be?
+      // the main thing is ensure the depth of the particles has no impact on the outcome, so the dpeth should always be within fusion range, which is 0.1nm
+      let particles: number = Math.ceil(density * 6.022 * 0.1);
       let temperatures: number[] = this.boltzmannDistributionTemperatures(particles, temperature);
 
       this.charges = [];
 
       for(let i = 0 ; i < particles ; i++) {
-        const kineticEnergy: number = (3/2) * 1.38e-23 * temperatures[i];
-        const v: number = Math.sqrt((2 * kineticEnergy)/(1.673e-27));
-        const randomDirection: number = Math.random() * 2 * Math.PI;
-        const vx: number =  v * Math.cos(randomDirection);
-        const vy: number =  v * Math.sin(randomDirection);
-        const x: number = Math.random();
-        const y: number = Math.random();
+        this.addSingleChargedParticle(temperatures[i]);
 
-        const newParticle: ChargedParticle = { x, y, vx, vy, ax:  0, ay: 0, angle: randomDirection, temperature: temperatures[i], charge: 1 };
-        this.charges.push(newParticle);
+        // // build the interaction table
+        // this.particleInteractions = [];
 
-        // build the interaction table
-        this.particleInteractions = [];
-
-        for(let o = 0 ; o < this.charges.length - 2 ; o++) {
-          let newInt: { a: ChargedParticle, b: ChargedParticle, tested: boolean } = { a: this.charges[this.charges.length-1], b: this.charges[o], tested: false };
-          this.particleInteractions.push(newInt);
-        }
+        // for(let o = 0 ; o < this.charges.length - 2 ; o++) {
+        //   let newInt: { a: ChargedParticle, b: ChargedParticle, tested: boolean } = { a: this.charges[this.charges.length-1], b: this.charges[o], tested: false };
+        //   this.particleInteractions.push(newInt);
+        // }
       }
+    }
+
+    addSingleChargedParticle(temperature?: number): void {
+      const temp: number = temperature ?? this.boltzmannDistributionTemperatures(1, this.temperature)[0];
+      const kineticEnergy: number = (3/2) * 1.38e-23 * temp;
+      const v: number = Math.sqrt((2 * kineticEnergy)/(1.673e-27));
+      const randomDirection: number = Math.random() * 2 * Math.PI;
+      const vx: number =  v * Math.cos(randomDirection);
+      const vy: number =  v * Math.sin(randomDirection);
+      const x: number = Math.random();
+      const y: number = Math.random();
+
+      const newParticle: ChargedParticle = { x, y, vx, vy, ax:  0, ay: 0, angle: randomDirection, temperature: temp, charge: 1 };
+      this.charges.push(newParticle);
     }
 
 
@@ -257,6 +277,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
                   if(tunnelChance < this.tunnelingProbability) {
                     // FUSION!!
+                    // console.log(`fused`, distSquare, this.tunnelingRange);
                     this.generateFusion(i, o);
                   }
                 }
@@ -284,7 +305,13 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         this.charges.splice(b, 1);
         this.charges.splice(a, 1);
       }
+
+      this.addSingleChargedParticle();
+      this.addSingleChargedParticle();
     }
+
+    showInteractionLines: boolean = true;
+    highlightInteraction: boolean = true;
 
     showInteractions(ctx: CanvasRenderingContext2D): void {
       // get the particle density
@@ -294,6 +321,12 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
       ctx.strokeStyle = 'rgba(255,0,0,.2)';
 
       for(let i = 0 ; i < this.charges.length ; i++) {
+
+        if(i === 0 && this.highlightInteraction) {
+          ctx.strokeStyle = 'rgba(255,255,0,.6)';
+          ctx.lineWidth = 2;
+        }
+
         let pA: ChargedParticle = this.charges[i];
         // iterate over all other particles and if its within the box, calculate the force...
         for(let o = 0 ; o < this.charges.length ; o++) {
@@ -313,8 +346,12 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
             }
           }
         }
-      }
 
+        if(i === 0) {
+          ctx.strokeStyle = 'rgba(255,0,0,.2)';
+          ctx.lineWidth = 1;
+        }
+      }
     }
 
     frame() {
@@ -324,6 +361,25 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
          this.ctx.fillStyle = 'black';
          this.ctx.fillRect(0,0,this.ctx.canvas.width, this.ctx.canvas.height);
 
+         // interaction lines go under everything.
+         this.showInteractions(this.ctx);
+
+         this.ctx.strokeStyle = "green";
+         // draw a scale;
+         this.ctx.beginPath();
+         this.ctx.moveTo(20, this.ctx.canvas.height - 30);
+         this.ctx.lineTo(20, this.ctx.canvas.height - 20);
+         this.ctx.moveTo(20, this.ctx.canvas.height - 25);
+         this.ctx.lineTo(20 + this.ctx.canvas.width / 10, this.ctx.canvas.height - 25);
+         this.ctx.moveTo(20 + this.ctx.canvas.width / 10, this.ctx.canvas.height - 30);
+         this.ctx.lineTo(20 + this.ctx.canvas.width / 10, this.ctx.canvas.height - 20);
+         this.ctx.stroke();
+         this.ctx.closePath();
+
+         this.ctx.fillStyle = "white";
+         this.ctx.textAlign = 'center';
+         this.ctx.fillText('1 nm', 20 + this.ctx.canvas.width / 20, this.ctx.canvas.height - 10);
+
         this.ctx.fillStyle = "red";
 
         for(var o = 0; o < this.charges.length; o++) {
@@ -332,7 +388,6 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
             this.ctx.fill();
         }
 
-        this.showInteractions(this.ctx);
 
     }
 
