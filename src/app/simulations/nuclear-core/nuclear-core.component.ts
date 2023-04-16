@@ -8,7 +8,6 @@ import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
 import { SimCommon } from '../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
-import * as math from 'mathjs';
 
 export interface ChargedParticle {
     x: number;
@@ -96,7 +95,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
           modify: newValue => { this.simulationSpeed = newValue; },
           get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 5,
           default: 0.00000001, min: 0.00000001, max: 0.000001, divisions: 0.0000001,
-          controlType: 'range', fineControl: {available: true, value: 0.0000000001 }
+          controlType: 'range', fineControl: {available: true, value: 0.000000001 }
       }, {
            id: 1, name: 'Scale', unit: 'm',
            iv: false, dv: false, dataCollectionAppropriate: false, visible: false,
@@ -180,8 +179,6 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    fusionRange: number = 0.1; // value in nm
-
     generateChargeParticles(density: number, temperature: number) {
       // should give in the 30-180 particle range!
       // rationale for particle count:
@@ -189,34 +186,43 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
       // we are however producing a 2d slice, so how thick should this be?
       // the main thing is ensure the depth of the particles has no impact on the outcome, so the dpeth should always be within fusion range, which is 0.1nm
       let particles: number = Math.ceil(density * 6.022 * 0.1);
-      let temperatures: number[] = this.boltzmannDistributionTemperatures(particles, temperature);
+      // let temperatures: number[] = this.boltzmannDistributionTemperatures(particles, temperature);
+      let temperatures: number[] = this.generateMaxwellBoltzmannDistribution(particles, temperature);
 
       this.charges = [];
 
       for(let i = 0 ; i < particles ; i++) {
         this.addSingleChargedParticle(temperatures[i]);
-
-        // // build the interaction table
-        // this.particleInteractions = [];
-
-        // for(let o = 0 ; o < this.charges.length - 2 ; o++) {
-        //   let newInt: { a: ChargedParticle, b: ChargedParticle, tested: boolean } = { a: this.charges[this.charges.length-1], b: this.charges[o], tested: false };
-        //   this.particleInteractions.push(newInt);
-        // }
       }
     }
 
-    addSingleChargedParticle(temperature?: number): void {
+    addSingleChargedParticle(temperature?: number, xinit?: number, yinit?: number): void {
       const temp: number = temperature ?? this.boltzmannDistributionTemperatures(1, this.temperature)[0];
       const kineticEnergy: number = (3/2) * 1.38e-23 * temp;
       const v: number = Math.sqrt((2 * kineticEnergy)/(1.673e-27));
-      const randomDirection: number = Math.random() * 2 * Math.PI;
-      const vx: number =  v * Math.cos(randomDirection);
-      const vy: number =  v * Math.sin(randomDirection);
-      const x: number = Math.random();
-      const y: number = Math.random();
+      let direction: number = 0;
 
-      const newParticle: ChargedParticle = { x, y, vx, vy, ax:  0, ay: 0, angle: randomDirection, temperature: temp, charge: 1 };
+
+      // if initial positions are given then its coming in on an edge, so point it inwards
+      if(xinit !== undefined && yinit !== undefined) {
+        if(xinit === 0) { direction = Math.random() * Math.PI; console.log(direction); }
+        if(xinit === 1) { direction = Math.PI + Math.random() * Math.PI; }
+        if(yinit === 0) { direction = (Math.random() - 0.5) * Math.PI }
+        if(yinit === 1) { direction = (Math.random() + 0.5) * Math.PI; }
+        // if(xinit === 0) { direction = (Math.random() - 0.5) * Math.PI; }
+        // if(xinit === 1) { direction = -1 * (Math.random() - 0.5) * Math.PI; }
+        // if(yinit === 0) { direction = Math.random() * Math.PI; }
+        // if(yinit === 1) { direction = -Math.random() * Math.PI; }
+      } else {
+        direction = Math.random() * 2 * Math.PI;
+      }
+
+      const vx: number =  v * Math.cos(direction);
+      const vy: number =  v * Math.sin(direction);
+      let x: number = xinit ?? Math.random();
+      let y: number = yinit ?? Math.random();
+
+      const newParticle: ChargedParticle = { x, y, vx, vy, ax:  0, ay: 0, angle: direction, temperature: temp, charge: 1 };
       this.charges.push(newParticle);
     }
 
@@ -228,6 +234,31 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
       // const temperatures = E.map((e) => (e / k_B) * T); // Convert the energies to temperatures using the Boltzmann distribution
       return E;
     }
+
+    generateMaxwellBoltzmannDistribution(n: number, T: number): number[] {
+      const kB = 1.380649e-23; // Boltzmann constant in J/K
+      const m = 1.6726219e-27; // Proton mass in kg
+      const T_kelvin = T * 1e6; // Convert temperature from millions of Kelvin to Kelvin
+
+      // Box-Muller transform for generating normally distributed random numbers
+      function boxMuller(): number {
+          const u1 = Math.random();
+          const u2 = Math.random();
+          return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      }
+
+      // Generate an array of speeds for 'n' particles
+      const speeds: number[] = [];
+      for (let i = 0; i < n; i++) {
+          const mean = Math.sqrt(2 * kB * T_kelvin / m);
+          const std_dev = Math.sqrt(kB * T_kelvin / m);
+          const speed = mean + std_dev * boxMuller();
+          speeds.push(Math.abs(speed));
+      }
+
+      return speeds;
+  }
+
 
     /**
      * Returns the distance between particles SQUARED
@@ -242,7 +273,8 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
     }
 
     tunnelingRange: number = 0.1e-18; // tunnel range squared.
-    tunnelingProbability: number = 1; // modified from the true number 10 1 in 10^28 - see how the sim performs based upon this value.
+    tunnelingProbability: number = 1e-28; // modified from the true number 10 1 in 10^28 - see how the sim performs based upon this value.
+    fusionRangeSquared: number = 4e-30; // value in nm
 
     calculateForces(): void {
       // get the particle density
@@ -251,6 +283,15 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
       for(let i = 0 ; i < this.charges.length ; i++) {
         let pA: ChargedParticle = this.charges[i];
+
+        // const kineticEnergy: number = (3/2) * 1.38e-23 * this.charges[i].temperature;
+        // const v: number = Math.sqrt((2 * kineticEnergy)/(1.673e-27));
+        // const angle: number = Math.atan2(this.charges[i].vy, this.charges[i].vx);
+        // pA.vx =  v * Math.cos(angle);
+        // pA.vy =  v * Math.sin(angle);
+
+        pA.vx = 0;
+        pA.vy = 0;
         // iterate over all other particles and if its within the box, calculate the force...
         for(let o = 0 ; o < this.charges.length ; o++) {
           if(i !== o) {
@@ -271,14 +312,20 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
                 pA.vx -= pA.ax * this.timeElapsed; // -ve for repulsive.
                 pA.vy -= pA.ay * this.timeElapsed; // -ve for repulsive
 
+                if(distSquare < this.fusionRangeSquared) {
+                  // proper fusion from touching!
+                  this.generateFusion(i, o);
+                  continue;
+                }
+
                 if(distSquare < this.tunnelingRange) {
                   // the particles are close enough to make tunnelling a possibility;
                   const tunnelChance: number = Math.random();
 
                   if(tunnelChance < this.tunnelingProbability) {
                     // FUSION!!
-                    // console.log(`fused`, distSquare, this.tunnelingRange);
                     this.generateFusion(i, o);
+                    continue;
                   }
                 }
               }
@@ -402,22 +449,33 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
         // keep them inside the box, elastic momentum
         // this is appropriate as we assume as one leaves another enters maintining the random velocities
-        if(this.charges[i].x > 1) {
-          this.charges[i].x = 1 - (1 - this.charges[i].x);
-          this.charges[i].vx = -this.charges[i].vx;
-        }
-        if(this.charges[i].x < 0) {
-          this.charges[i].x = -this.charges[i].x;
-          this.charges[i].vx = -this.charges[i].vx;
-        }
+        // if(this.charges[i].x > 1) {
+        //   this.charges[i].x = Math.min(1 - (1 - this.charges[i].x), 1);
+        //   this.charges[i].vx = this.charges[i].vx;
+        // }
+        // if(this.charges[i].x < 0) {
+        //   this.charges[i].x = -this.charges[i].x;
+        //   this.charges[i].vx = -this.charges[i].vx;
+        // }
 
-        if(this.charges[i].y > 1) {
-          this.charges[i].y = 1 - (1 - this.charges[i].y);
-          this.charges[i].vy = -this.charges[i].vy;
-        }
-        if(this.charges[i].y < 0) {
-          this.charges[i].y = -this.charges[i].y;
-          this.charges[i].vy = -this.charges[i].vy;
+        // if(this.charges[i].y > 1) {
+        //   this.charges[i].y = Math.min(1 - (1 - this.charges[i].y), 1);
+        //   this.charges[i].vy = -this.charges[i].vy;
+        // }
+        // if(this.charges[i].y < 0) {
+        //   this.charges[i].y = -this.charges[i].y;
+        //   this.charges[i].vy = -this.charges[i].vy;
+        // }
+
+        if(this.charges[i].x > 1 || this.charges[i].x < 0 || this.charges[i].y > 1 || this.charges[i].y < 0) {
+          // remove this particle and add a new one in
+          let x: boolean = Math.random() <= 0.5;
+          let pos: number = Math.random();
+          this.addSingleChargedParticle(this.charges[i].temperature,
+                                        x ? Math.random() <= 0.5 ? 0 : 1 : pos,
+                                        !x ? Math.random() <= 0.5 ? 0 : 1 : pos
+                                        ); // add a new one in at the same temperature
+          this.charges.splice(i, 1);
         }
       }
 
