@@ -130,7 +130,7 @@ const appRoutes: Routes = [
     ReactiveFormsModule,
     FormsModule,
     HttpClientModule,
-    RouterModule.forRoot(appRoutes, { useHash: true, relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(appRoutes, { useHash: true }),
     MathjaxModule.forRoot(),
 
   ],

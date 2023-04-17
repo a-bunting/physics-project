@@ -222,11 +222,43 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
 
     // doesnt work perfectly.
+    // boltzmannDistributionTemperatures(n: number, T: number): number[] {
+    //   const k_B = 1.38e-23; // Boltzmann constant in J/K
+    //   const E: number[] = new Array(n).fill(0).map(() => T * Math.pow(10, 6)); // Generate random energies from an exponential distribution
+    //   const temperatures = E.map((e) => (e / k_B) * T); // Convert the energies to temperatures using the Boltzmann distribution
+    //   console.log(temperatures);
+    //   return temperatures;
+    // }
+
     boltzmannDistributionTemperatures(n: number, T: number): number[] {
-      const k_B = 1.38e-23; // Boltzmann constant in J/K
-      const E: number[] = new Array(n).fill(0).map(() => T * Math.pow(10, 6)); // Generate random energies from an exponential distribution
-      // const temperatures = E.map((e) => (e / k_B) * T); // Convert the energies to temperatures using the Boltzmann distribution
-      return E;
+      const k = 1.38064852e-23; // Boltzmann's constant (J/K)
+
+      // Helper function to get a random number within a range
+      function getRandomNumberInRange(min: number, max: number): number {
+        return Math.random() * (max - min) + min;
+      }
+
+      // Helper function to calculate energy based on temperature
+      function energyFromTemperature(temperature: number): number {
+        return k * temperature;
+      }
+
+      // Generate an array of temperatures according to the Boltzmann distribution
+      const temperatureArray: number[] = [];
+      const scaleFactor = 10; // A scaling factor for the range of temperatures
+
+      while (temperatureArray.length < n) {
+        const randTemperature = getRandomNumberInRange(T - T * scaleFactor, T + T * scaleFactor);
+        const energy = energyFromTemperature(randTemperature);
+        const acceptProbability = Math.exp(-energy / (k * T));
+
+        if (Math.random() < acceptProbability) {
+          temperatureArray.push(randTemperature);
+        }
+      }
+
+      console.log(temperatureArray);
+      return temperatureArray;
     }
 
     /**

@@ -1,4 +1,3 @@
-import { stringify } from '@angular/compiler/src/util';
 import { Component, OnInit } from '@angular/core';
 import { HttpService } from 'src/app/services/http.service';
 
@@ -17,7 +16,7 @@ export class DisplayAllFeedbackComponent implements OnInit {
         this.httpService.takeFromApi('http://20ct.sweeto.co.uk/API/get-student-feedback.php').subscribe(data => {
 
             this.userData = data;
-            
+
             for(var i = 0 ; i < this.userData.length ; i++) {
                 var totalComments = 0;
 
@@ -40,8 +39,7 @@ export class DisplayAllFeedbackComponent implements OnInit {
 
                 this.userData[i].totalComments = totalComments;
             }
-        })                               
+        })
   }
 
 }
-   

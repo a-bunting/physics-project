@@ -115,7 +115,7 @@ export class DataGenComponent implements OnInit {
 	 */
 	breakEquation(): void {
 		const equation: string = this.equation;
-		let arr = equation.match(/\w{1,3}/g);
+		let arr: String[] = equation.match(/\w{1,3}/g);
     arr = arr.filter((temp: string) => !this.excludeFromEquations.find((t: string) => t === temp));
 
 		const oldEquationComponents: EquationVariable[] = this.equationComponents;
@@ -131,7 +131,7 @@ export class DataGenComponent implements OnInit {
 			// if it doesnt exist, add it
 			if(exists === -1 && isNaN(+arr[i])) {
 				// add some test data to envalue whether this will work or not
-				testData[arr[i]] = 5;
+				testData[''+arr[i]] = 5;
 
 				// if the old variable exists use it, if not make a new one.
 				if(oldVar) {
@@ -139,7 +139,7 @@ export class DataGenComponent implements OnInit {
 					this.equationComponents.push(oldVar);
 				} else {
 					// new variable, make new
-					let newVariable = { letter: arr[i], iv: i === 0, min: 0, max: 100, error: 1, value: 50 }
+					let newVariable = { letter: ''+arr[i], iv: i === 0, min: 0, max: 100, error: 1, value: 50 }
 					this.equationComponents.push(newVariable);
 				}
 			}
