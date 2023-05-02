@@ -57,6 +57,7 @@
         <canvas (mousemove)="updateCoordinates($event)" (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" #ImageCanvas></canvas>
     </div>
     <div class="controls">
+      <div class="controls__buttons">
         <div class="controls__simulation">
             <button class="controls__button" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
             <button class="controls__button" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
@@ -64,8 +65,15 @@
             <button class="controls__button" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button>
         </div>
         <div class="controls__specific">
-            <button class="controls__button" (click)="angleLockToggle()">{{ anglelock ? 'Angles Locked to 45 degrees' : 'Lock Angles to 45 degrees' }}</button>
+            <button class="controls__button" (click)="angleLockToggle()">{{ anglelock ? 'Angles Locked' : 'Lock Angles' }}</button>
             <button class="controls__button" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()">{{ !setupMode ? 'Setup Mode' : 'Close Setup Mode' }}</button>
+        </div>
+      </div>
+
+        <div class="controls__variables">
+          <div class="controls__variable" *ngFor="let control of getDisplayedControls; let i = index">
+            {{ control.name }}
+          </div>
         </div>
     </div>
 
@@ -76,8 +84,9 @@
             <div class="independent-variables__iv" *ngFor="let control of getDisplayedIndependentProperties; let i = index" [class.hidden-control]='!parametersDisplayed[control.id]' [class.simulation-iv]='variablesIV===control.id&&dataCollectionMode' [class.simulation-dv]='variablesDV===control.id&&dataCollectionMode'>
 
                 <!-- the top row - never hidden -->
-                <div class="independent-variables__label">
-                    <div class="independent-variables__hide" style="transform: rotate(90deg)" (click)="toggleIVVisibility(control.id)">&#xbb;</div>
+                <div class="independent-variables__label" (click)="toggleIVVisibility(control.id)">
+                  <!-- TODO DELETE THIS HIDE AND ADD THE CLICK ABOVE THE ALL SIMULATIONS IN THE RIGHT PLACE -->
+                    <!-- <div class="independent-variables__hide" style="transform: rotate(90deg)" (click)="toggleIVVisibility(control.id)"><span>&#xbb;</span></div> -->
                     <div class="independent-variables__name">{{ control.name }}</div>
 
                     <!-- check this isnt in the ts before changing -->

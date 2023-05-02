@@ -13,16 +13,16 @@ import { DirectoryService } from 'src/app/services/directory.service';
 export interface force {
    magnitude: {
        x: number,
-       y: number, 
+       y: number,
        total: number
-   }, 
+   },
    direction: number,
 }
 
 @Component({
   selector: 'app-forces-basic',
   templateUrl: './forces-basic2.component.html',
-  styleUrls: ['./forces-basic.component.scss', './../common-style2.scss']
+  styleUrls: ['./forces-basic.component.scss', './../common-style2-iframe.scss']
 })
 
 export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy {
@@ -78,7 +78,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
          }
       ];
 
-    constructor(protected simulationsService: SimulationsService, protected directoryService: DirectoryService,  protected http: HttpClient, protected httpService: HttpService, protected usersService: UsersService, protected route: ActivatedRoute, protected dataService: DataService) { 
+    constructor(protected simulationsService: SimulationsService, protected directoryService: DirectoryService,  protected http: HttpClient, protected httpService: HttpService, protected usersService: UsersService, protected route: ActivatedRoute, protected dataService: DataService) {
          super(usersService, dataService, route, httpService);
         directoryService.simulationMenuChange("Forces");
     }
@@ -100,32 +100,6 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
         this.launchCanvas();
     }
 
-    // resizeObserver: ResizeObserver;
-    // resizeElement: HTMLElement;
-    // /**
-    //  * May be able to go into the common JS with a link to it from here when complete....
-    //  */
-    // private observeSimulationSizeChange(): void {
-    //     try {
-    //         this.resizeElement =  document.getElementById('simulation');
-    
-    //         this.resizeObserver = new ResizeObserver(() => { 
-    //             this.canvas.nativeElement.width = this.resizeElement.offsetWidth-1;
-    //             this.canvas.nativeElement.height = this.resizeElement.offsetHeight-1;
-                
-    //             if(this.resizeElement.offsetHeight > window.innerHeight) {
-    //                 this.canvas.nativeElement.height = window.innerHeight-1;
-    //             }
-    
-    //             this.launchCanvas();
-    //         });
-    //         this.resizeObserver.observe(this.resizeElement);
-    //     } 
-    //     catch (error) {
-    //         // if an error is thrown the page have be unloading, so do nothing.
-    //     }
-    // }
-
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
         this.resizeObserver.unobserve(this.resizeElement);
@@ -138,188 +112,192 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
     simulationParameters = [
         {
-            id: 0, name: 'Simulation Speed', unit: '',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+            id: 0, name: 'Simulation Speed', unit: '',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
-            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
             default: 1, min: 0, max: 3, divisions: 0.01,
             controlType: 'range', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 1, name: 'Scale Density', unit: 'm/div',     
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+            id: 1, name: 'Scale Density', unit: 'm/div',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.linesQuantity = newValue; this.generateBackdrop(); this.recalculateSimulation(); this.resetQuestion(); },
-            get: () => { return this.linesQuantity; }, displayModifier: 1,  dp: 0, 
+            get: () => { return this.linesQuantity; }, displayModifier: 1,  dp: 0,
             default: 10, min: 0, max: 20, divisions: 2,
             controlType: 'range', fineControl: {available: false, value: 2 }
-        }, 
+        },
         {
-            id: 2, name: 'Zoom Value', unit: 'x',     
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+            id: 2, name: 'Zoom Value', unit: 'x',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.zoomValue = newValue; this.generateBackdrop(); },
-            get: () => { return this.zoomValue; }, displayModifier: 1,  dp: 2, 
+            get: () => { return this.zoomValue; }, displayModifier: 1,  dp: 2,
             default: 4, min: 0.1, max: 20, divisions: 0.1,
             controlType: 'range', fineControl: {available: false, value: 2 }
         },
         {
-            id: 3, name: 'Gravity', unit: 'm/s2',    
+            id: 3, name: 'Gravity', unit: 'm/s2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.gravity = newValue; },
-            get: () => { return this.gravity; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity; }, displayModifier: 1, dp: 2,
             default: 9.81, min: 0, max: 20.0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
         },
         {
-            id: 4, name: 'Initial Velocity', unit: 'm/s',    
+            id: 4, name: 'Initial Velocity', unit: 'm/s',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.initialVelocity = newValue; this.setInitialVelocity(newValue, this.velocityAngle); this.resetQuestion(); },
-            get: () => { return this.initialVelocity; }, displayModifier: 1,  dp: 2, 
+            get: () => { return this.initialVelocity; }, displayModifier: 1,  dp: 2,
             default: 0, min: 0, max: 50, divisions: 0.1,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 5, name: 'Velocity Angle', unit: 'deg',    
+            id: 5, name: 'Velocity Angle', unit: 'deg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.velocityAngle = newValue; this.setInitialVelocity(this.initialVelocity, newValue); this.resetQuestion(); },
-            get: () => { return this.velocityAngle; }, displayModifier: 1,  dp: 1, 
+            get: () => { return this.velocityAngle; }, displayModifier: 1,  dp: 1,
             default: 90, min: 0, max: 360, divisions: 0.1,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 6, name: 'Maximum Fall', unit: 'm',    
+            id: 6, name: 'Maximum Fall', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.dropHeight = newValue; this.recalculateSimulation(); this.launchCanvas();  },
-            get: () => { return this.dropHeight; }, displayModifier: 1,  dp: 0, 
+            get: () => { return this.dropHeight; }, displayModifier: 1,  dp: 0,
             default: 2000, min: 1, max: 20000, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 7, name: 'Mass', unit: 'kg',     
+            id: 7, name: 'Mass', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.mass = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); },
-            get: () => { return this.mass; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.mass; }, displayModifier: 1, dp: 2,
             default: 1, min: 0.01, max: 3, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
-        }, 
+        },
         {
-            id: 8, name: 'Fluid Density', unit: 'kg/m3',     
+            id: 8, name: 'Fluid Density', unit: 'kg/m3',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.densityOfFluid = newValue; },
-            get: () => { return this.densityOfFluid; }, displayModifier: 1, dp: 3, 
+            get: () => { return this.densityOfFluid; }, displayModifier: 1, dp: 3,
             default: 1.225, min: 0, max: 20, divisions: 0.25,
             controlType: 'range', fineControl: {available: true, value: 0.005 }
-        }, 
+        },
         {
-            id: 9, name: 'Area of Object', unit: 'm2',     
+            id: 9, name: 'Area of Object', unit: 'm2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.areaOfObject = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); },
-            get: () => { return this.areaOfObject; }, displayModifier: 1, dp: 3, 
+            get: () => { return this.areaOfObject; }, displayModifier: 1, dp: 3,
             default: 0.05, min: 0.05, max: 2.5, divisions: 0.05,
             controlType: 'range', fineControl: {available: true, value: 0.025 }
-        }, 
+        },
         {
-            id: 10, name: 'Height of Object', unit: 'm',     
+            id: 10, name: 'Height of Object', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.heightOfObject = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); this.setBlockHeight(newValue, this.simulationParameters[this.getSimulationParameterIDFromName("Height of Object")].min, this.simulationParameters[this.getSimulationParameterIDFromName("Height of Object")].max); this.frame(); },
-            get: () => { return this.heightOfObject; }, displayModifier: 1, dp: 3, 
+            get: () => { return this.heightOfObject; }, displayModifier: 1, dp: 3,
             default: 1, min: 0.001, max: 2, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.001 }
-        }, 
+        },
         {
-            id: 11, name: 'Drag Coefficient', unit: '',     
+            id: 11, name: 'Drag Coefficient', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.dragCoefficient = newValue; },
-            get: () => { return this.dragCoefficient; }, displayModifier: 1, dp: 3, 
+            get: () => { return this.dragCoefficient; }, displayModifier: 1, dp: 3,
             default: 1.05, min: 0, max: 2, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.005 }
-        },    
+        },
         {
-            id: 12,  name: 'Time Elapsed', unit: 's', 
+            id: 12,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 13,  name: 'Current Velocity (X)', unit: 'm/s', 
+            id: 13,  name: 'Current Velocity (X)', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentSpeed.x; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.currentSpeed.x; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 14,  name: 'Current Velocity (Y)', unit: 'm/s', 
+            id: 14,  name: 'Current Velocity (Y)', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentSpeed.y; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.currentSpeed.y; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
+        },
         {
-            id: 15,  name: 'Drag Force', unit: 'N', 
+            id: 15,  name: 'Drag Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.forceDueToDrag; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 16,  name: 'Distance Fallen', unit: 'm', 
+            id: 16,  name: 'Distance Fallen', unit: 'm',
             iv: false, dv: true,  dataCollectionAppropriate: true,  visible: false,
-            modify: null, get: () => { return this.currentDistance.y; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.currentDistance.y; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 17,  name: 'Range', unit: 'm', 
+            id: 17,  name: 'Range', unit: 'm',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentDistance.x; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.currentDistance.x; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
+        },
         {
-            id: 18,  name: 'Weight', unit: 'N', 
+            id: 18,  name: 'Weight', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null,
-            get: () => { return this.gravity * this.mass; }, displayModifier: 1, dp: 2, 
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
-        {
-            id: 19,  name: 'Apparent Weight', unit: 'N', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: newValue => { this.apparentWeight = newValue; }, 
-            get: () => { return this.apparentWeight; }, displayModifier: 1, dp: 2, 
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
-        {
-            id: 20,  name: 'Buoyant Force', unit: 'N', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.forceBuoyant; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity * this.mass; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 21,  name: 'Object Density', unit: 'kg/m3', 
+            id: 19,  name: 'Apparent Weight', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.objectDensity; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: newValue => { this.apparentWeight = newValue; },
+            get: () => { return this.apparentWeight; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 22,  name: 'Net X Force', unit: 'N', 
+            id: 20,  name: 'Buoyant Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.netForces.x; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: null, get: () => { return this.forceBuoyant; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 23,  name: 'Net Y Force', unit: 'N', 
+            id: 21,  name: 'Object Density', unit: 'kg/m3',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.netForces.y; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: null, get: () => { return this.objectDensity; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 24,  name: 'Acceleration (X)', unit: 'm/s2', 
+            id: 22,  name: 'Net X Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.valueAcceleration.x; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: null, get: () => { return this.netForces.x; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 25,  name: 'Acceleration (Y)', unit: 'm/s2', 
+            id: 23,  name: 'Net Y Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.valueAcceleration.y; }, displayModifier: 1, infMode: true, finMode: true, dp: 2, 
+            modify: null, get: () => { return this.netForces.y; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 24,  name: 'Acceleration (X)', unit: 'm/s2',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.valueAcceleration.x; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 25,  name: 'Acceleration (Y)', unit: 'm/s2',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.valueAcceleration.y; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
+
+    get getDisplayedControls() {
+        return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
@@ -372,7 +350,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
       // }
     }
 
-    private launchCanvas() {      
+    private launchCanvas() {
          this.generateBackdrop();
     }
 
@@ -384,7 +362,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
          this.markers_y = [];
          this.markers_x = [];
-         
+
          for(var i = 0; i < this.linesQuantity+1; i++) {
                this.markers_y.push({position: i * this.pixelsPerMeter.y, value:   (i > (this.linesQuantity / 2)    ?    this.currentDistance.y + i * this.zoomValue - (this.linesQuantity/2) * this.zoomValue    :  this.currentDistance.y - (this.linesQuantity/2)* this.zoomValue + i* this.zoomValue)});
          }
@@ -423,9 +401,9 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
                   this.ctx.lineTo(0, this.markers_y[i].position);
                this.ctx.stroke();
             this.ctx.setLineDash([]);
-                  
+
             this.ctx.lineWidth = 3;
-            
+
             this.ctx.beginPath();
                this.ctx.moveTo(this.ctx.canvas.width, this.markers_y[i].position);
                this.ctx.lineTo(this.ctx.canvas.width - (i % 5 == 0 ? 50 : 25), this.markers_y[i].position);
@@ -437,7 +415,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
         for(var i = 0; i < this.markers_x.length; i++) {
             // this.ctx.textAlign = "left";
-            
+
             this.ctx.setLineDash([2]);
                this.ctx.beginPath();
                   this.ctx.lineWidth = 1;
@@ -445,7 +423,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
                   this.ctx.lineTo(this.markers_x[i].position, 0);
                this.ctx.stroke();
             this.ctx.setLineDash([]);
-            
+
             this.ctx.beginPath();
             this.ctx.lineWidth = 3;
             this.ctx.moveTo(this.markers_x[i].position, this.ctx.canvas.height);
@@ -459,7 +437,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             this.ctx.translate(-this.markers_x[i].position - 28, -this.ctx.canvas.height + 10);
             this.ctx.shadowBlur = 0;
         }
-        
+
         // and a line to measure up to the scale...
         this.ctx.setLineDash([5]);
         this.ctx.lineWidth = 1;
@@ -513,11 +491,11 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             var yPos = this.mousePosition.y;
         }
 
-        
+
 
         this.canvas_arrow(this.ctx, this.ctx.canvas.width / 2, this.ctx.canvas.height / 2, xPos, yPos);
         this.ctx.fillText(magnitiude.toFixed(2) + " N", xPos + 5, yPos + 5);
-      
+
       }
 
       this.drawForceArrows();
@@ -525,7 +503,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
       // our block...
       this.ctx.fillStyle = '#FF9900';
       this.ctx.fillRect((this.ctx.canvas.width / 2) - 0.5 * 50, (this.ctx.canvas.height / 2) - 0.5 * this.blockHeight, 50, this.blockHeight);
-     
+
     }
 
     withinObject(x: number, y: number):boolean {
@@ -558,7 +536,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             // moving downwards, drag is acting upward
             this.canvas_arrow(this.ctx, halfWidth, halfHeight + halfBlockHeight, halfWidth, halfHeight + halfBlockHeight + gravityArrowLength);
             this.rotatedText(this.ctx, "F[w]", Math.PI*0.5, halfWidth, halfHeight + halfBlockHeight + gravityArrowLength, -10, -8);
-            
+
             if(this.densityOfFluid > 0) {
                this.canvas_arrow(this.ctx, halfWidth, halfHeight - halfBlockHeight, halfWidth,   halfHeight - halfBlockHeight - buoyancyArrowLength);
                this.rotatedText(this.ctx, "F[b]", Math.PI*0.5, halfWidth,   halfHeight - halfBlockHeight - buoyancyArrowLength, 20, -8);
@@ -566,7 +544,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
          } else {
             this.canvas_arrow(this.ctx, halfWidth,    halfHeight + halfBlockHeight, halfWidth,   halfHeight + halfBlockHeight + gravityArrowLength);
             this.rotatedText(this.ctx, "F[w]", Math.PI*0.5, halfWidth,   halfHeight + halfBlockHeight + gravityArrowLength, -10, -8);
-            
+
             if(this.densityOfFluid > 0) {
                this.canvas_arrow(this.ctx, halfWidth, halfHeight - halfBlockHeight, halfWidth, halfHeight - halfBlockHeight - buoyancyArrowLength);
                this.rotatedText(this.ctx, "F[b]", Math.PI*0.5, halfWidth, halfHeight - halfBlockHeight - buoyancyArrowLength, 20, -8);
@@ -577,7 +555,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
         var dragY = halfHeight + this.forceDueToDrag * Math.sin(this.dragAngle) * this.forceModifier;
         this.canvas_arrow(this.ctx, halfWidth, halfHeight, dragX, dragY);
         this.rotatedText(this.ctx, "F[d]", this.dragAngle, dragX, dragY, -10, -8);
-        
+
         // velocity arrow
         this.ctx.strokeStyle = "rgb(255, 0, 0)";
         this.ctx.lineWidth = 5;
@@ -597,10 +575,10 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             var xPos = halfWidth - this.forces[i].magnitude.x * this.forceModifier;
             var yPos = halfHeight - this.forces[i].magnitude.y * this.forceModifier;
            this.canvas_arrow(
-                this.ctx, 
-                halfWidth, 
-                halfHeight, 
-                xPos, 
+                this.ctx,
+                halfWidth,
+                halfHeight,
+                xPos,
                 yPos
             );
 
@@ -615,9 +593,9 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
             if(xPos < halfWidth) { adjustedPosition = 140; }
 
-            this.rotatedText( this.ctx, 
+            this.rotatedText( this.ctx,
                               this.forces[i].magnitude.total.toFixed(2) + "N at " + (this.forces[i].direction * (180/Math.PI)).toFixed(2) + " deg",
-                              adjustedRotation, xPos, yPos, 
+                              adjustedRotation, xPos, yPos,
                               adjustedPosition,  -10);
 
         }
@@ -642,9 +620,9 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
          this.dragAngle = Math.atan2(-this.currentSpeed.y, -this.currentSpeed.x);
          this.velocityAngle = Math.atan2(this.currentSpeed.y, this.currentSpeed.x) * (180 / Math.PI); // stored in deg
 
-         var netForces = { x: this.netForces.x + this.forceDueToDrag * Math.cos(this.dragAngle), 
+         var netForces = { x: this.netForces.x + this.forceDueToDrag * Math.cos(this.dragAngle),
                            y: this.netForces.y + this.forceDueToGravity - this.forceBuoyant + this.forceDueToDrag * Math.sin(this.dragAngle)};
-         
+
          this.valueAcceleration = {x: netForces.x/this.mass, y: netForces.y/this.mass};
 
          this.currentTime += (this.elapsedSinceFrame/1000) * this.simulationSpeed;
@@ -661,9 +639,9 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
          this.markersProgress(this.markers_y, 0, this.ctx.canvas.height, this.currentSpeed.y, 1, this.pixelsPerMeter.y);
          this.markersProgress(this.markers_x, 0, this.ctx.canvas.width, this.currentSpeed.x, this.ctx.canvas.width / this.ctx.canvas.height, this.pixelsPerMeter.x);
 
-         
+
      }
- 
+
      if(this.currentDistance.y > this.dropHeight) {
          this.animationEnded = true;
          this.dataCollectionEnabled = true;
@@ -676,7 +654,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
     markersProgress(markers, min: number, max: number, speed: number, linesRatio: number, ppm: number) {
         for(var i=0; i < markers.length; i++) {
-            markers[i].position = markers[i].position - speed * (this.elapsedSinceFrame / 1000) * ppm * this.simulationSpeed * (1/this.zoomValue); 
+            markers[i].position = markers[i].position - speed * (this.elapsedSinceFrame / 1000) * ppm * this.simulationSpeed * (1/this.zoomValue);
             var canavsLengths = Math.abs(Math.floor(markers[i].position / max));
 
             if(markers[i].position < min) {
@@ -686,7 +664,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             if(markers[i].position > max) {
                 markers[i].position = -canavsLengths * max + Math.abs(markers[i].position);
                 markers[i].value -= canavsLengths * this.linesQuantity * linesRatio  * this.zoomValue;
-            }         
+            }
         }
     }
 
@@ -700,14 +678,14 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
          // this.paused = true;
          this.mousePressLocation = {x: event.offsetX, y: event.offsetY};
       }
-      
+
     }
 
     onMouseUp(event: MouseEvent) {
         if(this.mouseDown === true) {
             var angle = Math.atan2((this.ctx.canvas.height / 2) - event.offsetY, (this.ctx.canvas.width / 2) - event.offsetX);
             var magnitiude = this.distanceBetweenPx(this.ctx.canvas.width / 2, event.offsetX, this.ctx.canvas.height / 2, event.offsetY) / this.forceModifier;
-   
+
             if(this.anglelock) {
                 var finalAngle: number;
                 var currentPI: number = -1.00 * Math.PI;
@@ -727,10 +705,10 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
                     x: magnitiude * Math.cos(angle),
                     y: magnitiude * Math.sin(angle),
                     total: magnitiude
-                }, 
+                },
                 direction: angle
             });
-         
+
             this.netForces = {x: 0, y: 0};
 
             for(var i = 0; i < this.forces.length; i++) {
@@ -744,7 +722,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
    }
 
-   distanceBetweenPx(x1: number, x2: number, y1: number, y2: number) { 
+   distanceBetweenPx(x1: number, x2: number, y1: number, y2: number) {
          var x = (x1 - x2) * (x1 - x2);
          var y = (y1 - y2) * (y1 - y2);
          // return Math.pow((x1 - x2), 2) + Math.pow((y1 - y2), 2);
@@ -793,6 +771,6 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
         this.recalculateSimulation();
     }
-    
+
 }
 
