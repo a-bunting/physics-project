@@ -32,7 +32,7 @@
   position: absolute;
   top: 2rem;
   left: 2rem;
-  width: 30rem;
+  width: max-content;
 
   padding: 2rem 1rem;
   text-align: center;
@@ -61,22 +61,55 @@
   &__variables {
     display: flex;
     flex-direction: column;
+    row-gap: 1rem;
     width: 100%;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(white, .5);
   }
 
   &__variable {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    &--label {
+      font-size: 1.4rem;
+      text-align: left;
+      flex-basis: 15rem;
+    }
+
+    &--value {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      column-gap: 1rem;
+      flex: 1;
+
+      &--label {
+        font-size: 1.4rem;
+        flex-basis: 10rem;
+        text-align: right;
+      }
+    }
+
+    &--control {
+      display: flex;
+      flex: 1;
+    }
+
+    input[type=range] {
+      flex: 1;
+    }
   }
 
   &__button {
       padding: .5rem 1rem;
       border-radius: 5px;
-      margin-top: .25rem;
       margin-bottom: .25rem;
       transition: background-color .2s, color .2s;
       box-shadow: .2rem 0 .4rem white;
+      font-size: 1.4rem;
 
       &:hover {
           color: white;
@@ -115,12 +148,68 @@
           cursor: pointer;
       }
   }
+
+  &__fine-button {
+    padding: .2rem;
+    border-radius: 3px;
+    text-align: center;
+
+    font-size: 1rem;
+    margin-left: .5rem;
+    margin-right: .5rem;
+  }
+
+  &__slider {
+
+    width: 16rem;
+
+      @supports(appearance: none) {
+          appearance: none;
+          height: 1.5rem;
+          background-color: white;
+          outline: none;
+          opacity: .7;
+          transition: opacity .2s;
+
+          &::-webkit-slider-thumb {
+              appearance: none;
+              width: 1.5rem;
+              height: 1.5rem;
+              background-color: black;
+              cursor: pointer;
+          }
+
+          &:hover {
+              opacity: 1;
+          }
+      }
+
+
+    &::-webkit-scrollbar {
+      width: 1.5rem;
+    }
+
+    &::-webkit-scrollbar-track {
+        background-color: white;
+        opacity: .7;
+        transition: all .2s;
+    }
+
+    &::-webkit-scrollbar-track:hover {
+        opacity: 1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba($color-gray-dark, .5);
+        cursor: pointer;
+    }
+
+  }
 }
 
 .independent-variables {
     grid-column: 2 / 3;
     grid-row: 1 / 2;
-    border-right: 2px white dashed;
 
     &__iv {
         position: relative;
@@ -183,47 +272,9 @@
         justify-content: space-between;
 
         margin-top: 1rem;
+        max-width: 100%;
     }
 
-    &__slider {
-        flex: 1;
-
-        @supports(appearance: none) {
-            appearance: none;
-            width: 100%;
-            height: 1.5rem;
-            background-color: white;
-            outline: none;
-            opacity: .7;
-            transition: opacity .2s;
-
-            &::-webkit-slider-thumb {
-                appearance: none;
-                width: 1.5rem;
-                height: 1.5rem;
-                background-color: black;
-                cursor: pointer;
-            }
-
-            &:hover {
-                opacity: 1;
-            }
-        }
-
-    }
-
-    &__fine-button {
-
-        padding: .2rem;
-        border-radius: 3px;
-
-        font-size: 1rem;
-
-        &:not(:last-child) {
-            margin-left: 1rem;
-            margin-right: .5rem;
-        }
-    }
 }
 
 .dependent-variables {
@@ -233,16 +284,20 @@
     select {
         padding: .6rem .6rem;
         margin-bottom: 2rem;
+        width: 100%;
+        text-align: center;
     }
 
     &__dv {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
         background-image: linear-gradient(to bottom right, lighten($color-juxtapose-light, 20%), $color-juxtapose-light);
         box-shadow: .1rem .1rem .4rem white;
         transition: all .2s;
-        padding: .5rem .8rem;
+        padding: .8rem 1.2rem;
         margin-bottom: 1rem;
         position: relative;
         border-radius: 1rem;
@@ -253,28 +308,19 @@
         text-align: right;
         display: flex;
         justify-content: space-between;
+        align-items: center;
     }
 
-    &__hide {
+    &__name {
+      transition: all .2s;
+      &:hover {
         cursor: pointer;
-        font-size: 2.4rem;
-        margin-top: -.7rem;
-        margin-bottom: -.7rem;
-        margin-right: .5rem;
-        transition: all .2s;
-
-        &:hover {
-            text-shadow: .2rem 0 .2rem black;
-        }
-
-        &:active {
-            text-shadow: .1rem 0 .1rem black;
-        }
+        color: black;
+      }
     }
 
     &__value {
-        margin-top: .5rem;
-        font-size: 2.4rem;
+        font-size: 1.6rem;
         text-align: right;
     }
 
@@ -294,29 +340,16 @@
     padding: .5rem 1rem;
     color: white;
     background-color: rgba($color-gray-dark, .5);
-    overflow-y: auto;
+    overflow-y: scroll;
+    border-left: 1px solid white;
 
     &__hide {
 
     }
 
-    &::-webkit-scrollbar {
-        width: 1.5rem;
-    }
-
-    &::-webkit-scrollbar-track {
-        background-color: white;
-        opacity: .7;
-        transition: all .2s;
-    }
-
-    &::-webkit-scrollbar-track:hover {
-        opacity: 1;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: rgba($color-gray-dark, .5);
-        cursor: pointer;
+    &__text {
+      padding: 1rem 1rem;
+      font-size: 1.6rem;
     }
 }
 

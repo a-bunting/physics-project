@@ -38,6 +38,9 @@ import { NuclearCoreComponent } from './simulations/nuclear-core/nuclear-core.co
 import { WelcomeComponent } from './welcome/welcome.component';
 import { WebComponent } from './structure/web/web.component';
 import { IframeComponent } from './structure/iframe/iframe.component';
+import { TooltipDirective } from './directives/tooltip.directive';
+import { TooltipComponent } from './directives/tooltip/tooltip.component';
+import { TooltipModule } from './directives/tooltip/tooltip.module';
 
 const appRoutes: Routes = [
     { path: '', component: WebComponent, children: [
@@ -123,7 +126,7 @@ const appRoutes: Routes = [
     GravityComponent,
     HeatTransferComponent,
     FrictionAndMotionComponent,
-    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe, WebComponent, IframeComponent
+    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe, WebComponent, IframeComponent, TooltipDirective, TooltipComponent
    ],
   imports: [
     BrowserModule,
@@ -132,7 +135,7 @@ const appRoutes: Routes = [
     HttpClientModule,
     RouterModule.forRoot(appRoutes, { useHash: true }),
     MathjaxModule.forRoot(),
-
+    TooltipModule
   ],
   providers: [],
   bootstrap: [AppComponent]

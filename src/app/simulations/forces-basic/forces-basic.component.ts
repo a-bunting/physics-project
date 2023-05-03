@@ -117,7 +117,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
             default: 1, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
             id: 1, name: 'Scale Density', unit: 'm/div',

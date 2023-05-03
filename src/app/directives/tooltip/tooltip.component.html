@@ -1,0 +1,11 @@
+<div class="tooltip fadeInTooltip" [ngStyle]="getStyles()">
+  {{ tooltip }}
+
+  <div class="tooltip__arrow"
+    [class.tooltip__arrow--tl]="arrow === 'tl'"
+    [class.tooltip__arrow--tr]="arrow === 'tr'"
+    [class.tooltip__arrow--bl]="arrow === 'bl'"
+    [class.tooltip__arrow--br]="arrow === 'br'"
+  >
+  </div>
+</div>

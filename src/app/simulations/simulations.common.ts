@@ -96,7 +96,7 @@ export abstract class SimCommon implements OnInit {
 
         // for on initialisation
         this.simulationParameters.forEach(simParam => {
-            if(simParam.iv === true) {
+            if(simParam.iv === true || simParam.control === true) {
                 if(simParam.controlType === 'range') {
                     this.simulationControls.addControl(simParam.id.toString()+"range", new FormControl(null, [Validators.required]));
                     this.simulationControls.get(simParam.id.toString()+"range").patchValue(simParam.get() * simParam.displayModifier);
