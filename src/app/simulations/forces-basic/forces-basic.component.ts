@@ -123,7 +123,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.linesQuantity = newValue; this.generateBackdrop(); this.recalculateSimulation(); this.resetQuestion(); },
             get: () => { return this.linesQuantity; }, displayModifier: 1,  dp: 0,
-            default: 10, min: 0, max: 20, divisions: 2,
+            default: 10, min: 0, max: 20, divisions: .5,
             controlType: 'range', fineControl: {available: false, value: 2 }
         },
         {
