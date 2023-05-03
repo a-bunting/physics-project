@@ -62,14 +62,23 @@
     <div class="controls">
       <div class="controls__buttons">
         <div class="controls__simulation">
-            <button class="controls__button" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
+
+          <img class="controls__buttons--image" src="../../../assets/icons/play3.png" alt="Start Simulation" (click)="startAnimation()" *ngIf="!animationStarted" [tooltip]="'Start'">
+          <img class="controls__buttons--image" src="../../../assets/icons/stop2.png" alt="Stop Simulation" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded" [tooltip]="'Stop'">
+          <img class="controls__buttons--image controls__buttons--image--shrink" src="../../../assets/icons/spinner11.png" alt="Reset Simulation" (click)="resetQuestion()" *ngIf="animationEnded || paused" [tooltip]="'Reset'">
+          <!-- <img class="controls__button--image" src="../../../assets/icons/play3.png" alt="Start Simulation" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled' [tooltip]="'Turn on Data Collection'"> -->
+
+          <!-- <button class="controls__button" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
             <button class="controls__button" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
-            <button class="controls__button" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart</button>
-            <button class="controls__button" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button>
-        </div>
-        <div class="controls__specific">
-            <button class="controls__button" (click)="angleLockToggle()">{{ anglelock ? 'Angles Locked' : 'Lock Angles' }}</button>
-            <button class="controls__button" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()">{{ !setupMode ? 'Setup Mode' : 'Close Setup Mode' }}</button>
+            <button class="controls__button" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart</button> -->
+            <!-- <button class="controls__button" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button> -->
+          </div>
+          <div class="controls__specific">
+            <img class="controls__buttons--image" src="../../../assets/icons/unlocked.png" (click)="angleLockToggle()" *ngIf="!anglelock" alt="Lock Angles" [tooltip]="'Lock Angles to 45 degree increments'">
+            <img class="controls__buttons--image" src="../../../assets/icons/lock.png" (click)="angleLockToggle()"*ngIf="anglelock" alt="Unlock Angles" [tooltip]="'Unlock Angle Snapping (allows for any angle forces to be applied)'">
+            <img class="controls__buttons--image" src="../../../assets/icons/cog.png" alt="Setup Mode" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()" [tooltip]="'Enter setup mode to create your own version of this simulation'">
+            <!-- <button class="controls__button" (click)="angleLockToggle()">{{ anglelock ? 'Angles Locked' : 'Lock Angles' }}</button>
+            <button class="controls__button" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()">{{ !setupMode ? 'Setup Mode' : 'Close Setup Mode' }}</button> -->
         </div>
       </div>
 

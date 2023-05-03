@@ -56,6 +56,26 @@
     justify-content: space-between;
     align-items: baseline;
     column-span: 1rem;
+
+    &--image {
+
+      width: 3rem;
+      height: 3rem;
+      transition: all .2s;
+      filter: invert(18%) sepia(64%) saturate(3112%) hue-rotate(200deg) brightness(95%) contrast(84%);
+
+      &:hover {
+        cursor: pointer;
+        transform: scale(1.01);
+        filter: invert(100%) sepia(100%) saturate(0%) hue-rotate(288deg) brightness(102%) contrast(102%);
+      }
+
+      &--shrink {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+
+    }
   }
 
   &__variables {
@@ -131,6 +151,11 @@
       & > :not(:last-child) {
           margin-right: .5rem;
       }
+  }
+
+  &__simulation, &__specific {
+    display: flex;
+    align-items: center;
   }
 
   select {
@@ -213,8 +238,8 @@
         display: flex;
 
         display: grid;
-        grid-template-rows: 1fr max-content;
-        grid-template-columns: 1fr 1fr;
+        // grid-template-rows: 1fr max-content;
+        grid-template-columns: 1fr max-content;
         align-items: center;
 
         background-image: linear-gradient(to bottom right, lighten($color-main, 20%), $color-main);
@@ -365,7 +390,7 @@
 // setup window
 .setup {
   &__overlay {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     z-index: 100;
