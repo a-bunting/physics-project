@@ -4,17 +4,9 @@ import { UsersService } from '../../services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from '../../services/simulations.service';
-import { SimCommon } from './../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { HttpService } from '../../services/http.service';
 import { DirectoryService } from 'src/app/services/directory.service';
-
-export interface simParamArray {
-   id: number; name: string; unit: string;
-   iv: boolean, dv: boolean, dataCollectionAppropriate: boolean; visible: boolean;
-   modify: Function; get: Function;  displayModifier: number;dp: number;
-   default: number; min: number; max: number; divisions: number;
-   controlType: string; fineControl: {available: boolean, value: number}
-}
 
 export interface setupVariableItem {
    id: number | string; iv: boolean; display: string; value: number;
@@ -27,7 +19,7 @@ export interface point {
 @Component({
    selector: 'app-circular-motion',
    templateUrl: './circular-motion2.component.html',
-   styleUrls: ['./circular-motion.component.scss', './../common-style2.scss']
+   styleUrls: ['./circular-motion.component.scss', './../common-style2-iframe.scss']
 })
 
 export class CircularMotionComponent extends SimCommon implements OnInit, OnDestroy {
@@ -48,14 +40,14 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
     fullpath = '#/simulations/circular-motion';
     componentId: string = 'circular-motion_sim';
     simulationId: string = 'Circular Motion';
-  
+
     // values
     valueTime: number; valueAcceleration: number;
-    currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;    
-    
+    currentTime: number = 0.00; currentDistance: number = 0; currentSpeed: number = 0;
+
     netAppliedForce: number = 0;
     gravity: number = 7.5; mass: number = 10;
-    simulationSpeed: number = 1; forceDueToGravity: number = 0; 
+    simulationSpeed: number = 1; forceDueToGravity: number = 0;
 
     // simulation data collection setup
     parametersDisplayed = {};
@@ -74,7 +66,7 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
         this.commonSimulationFunctionality();
         this.launchCanvas();
         this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters
-        
+
         this.buildRope(280, 200, 100, 20); // new method.
         this.addBoxToRope();
         this.animate();
@@ -93,43 +85,47 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
     }
 
     simulationParameters: Array<simParamArray> = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-            default: 1.00, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            default: 1, min: 0, max: 3, divisions: 0.01,
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Gravity', unit: 'm/s2',    
+            id: 1, name: 'Gravity', unit: 'm/s2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.gravity = newValue; },
-            get: () => { return this.gravity; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity; }, displayModifier: 1, dp: 2,
             default: 9.81, min: 0, max: 20.0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
-        },  
+        },
         {
-            id: 2, name: 'Mass', unit: 'kg',     
+            id: 2, name: 'Mass', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.mass = newValue; },
             get: () => { return this.mass; }, displayModifier: 1, dp: 2,
             default: 10, min: 1, max: 100, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 0.50 }
-        }, 
+        },
         {
-            id: 3,  name: 'Time Elapsed', unit: 's', 
+            id: 3,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 4,  name: 'Current Velocity', unit: 'm/s', 
+            id: 4,  name: 'Current Velocity', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentSpeed; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
+
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
@@ -174,7 +170,7 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
         this.points.push({x: xStart, y: yStart+boxWidth, vx: 0, vy: 0, ax: 0, ay: this.gravity, monitor: false, fixed: false});
 
         var firstIndex = this.points.length - 4;
-        
+
         var dist = this.distanceBetweenPx(this.points[firstIndex].x, this.points[firstIndex+1].x, this.points[firstIndex].y, this.points[firstIndex+1].y);
         this.sticks.push({p0: this.points[firstIndex], p1: this.points[firstIndex+1], length: dist, hidden: false});
 
@@ -202,7 +198,7 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
                p.vy += p.ay * timeSimSpeed;
                p.x += p.vx * this.pixelsPerMeter * timeSimSpeed;
                p.y += p.vy * this.pixelsPerMeter * timeSimSpeed;
-            }          
+            }
         }
     }
 
@@ -212,7 +208,7 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
             var s = this.sticks[i];
             var dx = s.p1.x - s.p0.x;
             var dy = s.p1.y - s.p0.y;
-            var distance = Math.sqrt(dx * dx + dy * dy); 
+            var distance = Math.sqrt(dx * dx + dy * dy);
             var difference = s.length - distance;
             var percent = difference / distance / 2;
             var offsetX = dx * percent;
@@ -284,10 +280,10 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
             for(var s = 10; s > 0; s--) {
                 this.processSticks2();
             }
-        }            
+        }
         this.frame();
         this.requestId = requestAnimationFrame(() => this.animate());
-            
+
     }
 
     resetQuestion() {
@@ -310,5 +306,5 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
          this.animationStarted = false;
          this.animationEnded = false;
     }
-    
+
 }

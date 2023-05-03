@@ -1,6 +1,4 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { setupVariableItem, simParamArray } from '../simulations/motion-ramp/motion-ramp.component';
 
 export interface simulationDocument {
    path: string; type: string; simulation: string;

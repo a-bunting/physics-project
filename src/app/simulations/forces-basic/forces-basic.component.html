@@ -1,17 +1,17 @@
 <div class="simulation">
 
-    
+
    <div class="grid-container">
 
        <div class="question-image-container">
-           
+
            <div class="question-image">
-               
+
                <div class="setup-overlay" *ngIf="setupMode">
 
                    <form [formGroup]="simulationSetup">
                        <div class="setup-box">
-                           
+
                            <div class="setup-independent-variables setup-variables-box">
                                <div class="setup-variables-label">Independent Variables</div>
                                <div class="setup-variable">
@@ -69,18 +69,18 @@
            <div class="simulation-data">
 
                 <div class="simulation-data-controls">
-        
+
                     <select class="simulation-variables-selector" (change)="visibilityVariable($event.target.value)">
                         <option selected disabled hidden>Dependent Variables Select</option>
                         <option *ngFor="let dv of getDisplayedDependentProperties; let i = index" value="{{ dv.id }}">{{ dv.name }}</option>
                     </select>
-        
+
                     <div class="simulation-buttons">
                         <button class="simulation-button-control" (click)="startAnimation()" *ngIf="!animationStarted">Start</button>
                         <button class="simulation-button-control" (click)="stopAnimation()" *ngIf="animationStarted && !animationEnded">{{ paused === true ? 'Un-Pause' : 'Pause' }}</button>
                         <button class="simulation-button-control" (click)="resetQuestion()" *ngIf="animationEnded || paused">Restart</button>
                         <button class="simulation-button-control" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button>
-                    </div>        
+                    </div>
                 </div>
 
                 <hr>
@@ -88,13 +88,13 @@
                 <span *ngFor="let dv of getVisibleDependentProperties; let i = index">
 
                     <div class="simulation-dv-view" *ngIf="parametersDisplayed[dv.id]" [class.simulation-dv]="variablesDV===dv.id">
-                        <div class="simulation-dv-closevisibility" (click)="unVisibilityVariable(dv.id)">X</div> 
+                        <div class="simulation-dv-closevisibility" (click)="unVisibilityVariable(dv.id)">X</div>
                         <div class="simulation-dv-name">{{ dv.name }}</div>
-                        <div class="simulation-select-button" *ngIf="dataCollectionMode" (click)="setIDVariable(dv.id)"> [DV] </div> 
+                        <div class="simulation-select-button" *ngIf="dataCollectionMode" (click)="setIDVariable(dv.id)"> [DV] </div>
                         <div class="simulation-dv-value">{{ dv.get() | number:'1.'+dv.dp+'-'+dv.dp }}</div>
                         <div class="simulation-dv-unit">{{ dv.unit }}</div>
                     </div>
-                    
+
                 </span>
             </div>
 
@@ -114,15 +114,15 @@
            </div>
 
            <form [formGroup]="simulationControls">
-                                                
+
                <div class="simulation-control" *ngFor="let control of getDisplayedIndependentProperties; let i = index" [class.hidden-control]='!parametersDisplayed[control.id]' [class.simulation-iv]='variablesIV===control.id&&dataCollectionMode' [class.simulation-dv]='variablesDV===control.id&&dataCollectionMode'>
-                   
+
                    <div class="simulation-label">
 
                        <span class="simulation-iv-closevisibility" (click)="toggleIVVisibility(control.id)">
                           <i class="arrowdown"></i>
-                       </span> 
-                       {{ control.name }} 
+                       </span>
+                       {{ control.name }}
                        <span *ngIf="dataCollectionMode && control.dataCollectionAppropriate">
                            (<span class="variable-select-button" (click)="setIDVariable(control.id)">IV</span>)
                        </span>
@@ -130,19 +130,19 @@
                    <div class="simulation-value">{{ control.displayModifier * control.get() | number:'1.'+control.dp+'-'+control.dp }} {{ control.unit }}</div>
 
                    <div class="simulation-con" *ngIf="(!dataCollectionMode || (variablesIV === control.id || variablesDV === control.id)) && control.visible">
-                       
-                       <input 
-                          *ngIf="control.controlType==='range'" 
-                          formControlName="{{ control.id }}range" 
-                          type="range" 
-                          [class.range-slider]="control.fineControl.available" [class.range-slider-full]="!control.fineControl.available" 
-                          min="{{ control.min * control.displayModifier > control.max * control.displayModifier ? control.max * control.displayModifier : control.min*control.displayModifier }}" 
-                          max="{{ control.max * control.displayModifier < control.min * control.displayModifier ? control.min * control.displayModifier : control.max * control.displayModifier }}" 
-                          step="{{ control.divisions }}" 
+
+                       <input
+                          *ngIf="control.controlType==='range'"
+                          formControlName="{{ control.id }}range"
+                          type="range"
+                          [class.range-slider]="control.fineControl.available" [class.range-slider-full]="!control.fineControl.available"
+                          min="{{ control.min * control.displayModifier > control.max * control.displayModifier ? control.max * control.displayModifier : control.min*control.displayModifier }}"
+                          max="{{ control.max * control.displayModifier < control.min * control.displayModifier ? control.min * control.displayModifier : control.max * control.displayModifier }}"
+                          step="{{ control.divisions }}"
                           value="{{ control.displayModifier * control.get() }}">
                        <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finel" type="button" class="fine-button button-left" (click)="simulationControlsParameterModification(control.id, -control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
                        <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finer" type="button" class="fine-button button-right" (click)="simulationControlsParameterModification(control.id, control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
-                   
+
                    </div>
                </div>
 

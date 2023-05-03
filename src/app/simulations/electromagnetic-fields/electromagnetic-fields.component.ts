@@ -6,7 +6,7 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from '../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 export interface ChargedParticle {
@@ -22,7 +22,7 @@ export interface ChargedParticle {
 @Component({
    selector: 'app-electromagnetic-fields',
    templateUrl: './electromagnetic-fields2.component.html',
-   styleUrls: ['./electromagnetic-fields.component.scss', './../common-style2.scss']
+   styleUrls: ['./electromagnetic-fields.component.scss', './../common-style2-iframe.scss']
 })
 
 export class ElectromagneticFieldsComponent extends SimCommon implements OnInit, OnDestroy {
@@ -46,20 +46,20 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
     assetsDirectory = 'assets/simulations/electromagnetic-fields/';
     fullpath = '#/simulations/electromagnetic-fields';
     componentId: string = 'emfields_sim';
-    
+
     // sim specific
     instructions: boolean = true; intPass = 0;
     tempCharge: ChargedParticle; newParticleAdded: boolean = false;
     currentMouseX: number = 0;  currentMouseY: number = 0;
     greenValue: number = 184;
- 
+
     simulationScale: number = 0.000001;  simulationResolution: number = 100;
     chargeMap = []; charges = []; simulationSpeed: number = 0.001; fieldStrengthAtPoint: number = 0;
     timeElapsed: number = 0; fps: number = 0; timeEnd: number = 0; timeStart: number = 0;
 
     simulationDocuments: simulationDocument[] = [];
 
-    constructor(protected simulationsService: SimulationsService, protected directoryService: DirectoryService, protected http: HttpClient, protected httpService: HttpService, protected usersService: UsersService, protected route: ActivatedRoute, protected dataService: DataService) { 
+    constructor(protected simulationsService: SimulationsService, protected directoryService: DirectoryService, protected http: HttpClient, protected httpService: HttpService, protected usersService: UsersService, protected route: ActivatedRoute, protected dataService: DataService) {
          super(usersService, dataService, route, httpService);
         directoryService.simulationMenuChange("Electric Fields");
     }
@@ -94,62 +94,66 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
             {x: this.ctx.canvas.width * 0.75, y: this.ctx.canvas.height * 0.50, vx: -0, vy: 0, ax: 0, ay: 0, charge: -1, mass: 1}
         ];
     }
-     
+
     simulationParameters = [
       {
-          id: 0, name: 'Resolution', unit: 'particles',    
-          iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
-          modify: newValue => { this.simulationResolution = newValue; this.generateChargeParticles(newValue); },
-          get: () => { return this.simulationResolution; }, displayModifier: 1, dp: 2, 
-          default: 6500, min: 100, max: 20000, divisions: 100,
-          controlType: 'range', fineControl: {available: false, value: null }
-      }, {
-          id: 1, name: 'Simulation Speed', unit: '% of 1s',    
-          iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+        id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+        iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
+        modify: newValue => { this.simulationSpeed = newValue; },
+        get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
+        default: 1, min: 0, max: 3, divisions: 0.01,
+        controlType: 'range', fineControl: {available: true, value: 0.1 }
+    },{
+          id: 1, name: 'Simulation Speed', unit: '% of 1s',
+          iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
           modify: newValue => { this.simulationSpeed = newValue; },
-          get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 5, 
+          get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 5,
           default: 0.00015, min: 0.000001, max: 0.001, divisions: 0.000001,
           controlType: 'range', fineControl: {available: true, value: 0.00001 }
       }, {
-          id: 2, name: 'Colouration', unit: '',    
-          iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          id: 2, name: 'Colouration', unit: '',
+          iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
           modify: newValue => { this.greenValue = newValue; },
-          get: () => { return this.greenValue; }, displayModifier: 1, dp: 0, 
+          get: () => { return this.greenValue; }, displayModifier: 1, dp: 0,
           default: 184, min: 0, max: 255, divisions: 1,
           controlType: 'range', fineControl: {available: true, value: 1}
       }, {
-           id: 3, name: 'Scale', unit: '',    
-           iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+           id: 3, name: 'Scale', unit: '',
+           iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
            modify: newValue => { this.simulationScale = newValue; },
-           get: () => { return this.simulationScale; }, displayModifier: 1, dp: 6, 
+           get: () => { return this.simulationScale; }, displayModifier: 1, dp: 6,
            default: 0.000001, min: 0.000001, max: 0.00001, divisions: 0.0000001,
            controlType: 'range', fineControl: {available: false, value: null}
      }, {
-          id: 4, name: 'Field Strength at Point', unit: 'V/m',    
+          id: 4, name: 'Field Strength at Point', unit: 'V/m',
           iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
-          modify: null, get: () => { return this.fieldStrengthAtPoint; }, displayModifier: 1, dp: 3, 
+          modify: null, get: () => { return this.fieldStrengthAtPoint; }, displayModifier: 1, dp: 3,
           default: null, min: null, max: null, divisions: null,
           controlType: 'none', fineControl: {available: false, value: null }
       }, {
-          id: 5, name: 'Time Elapsed', unit: 's',    
+          id: 5, name: 'Time Elapsed', unit: 's',
           iv: false, dv: true, dataCollectionAppropriate: true, visible: false,
-          modify: null, get: () => { return this.timeElapsed; }, displayModifier: 1, dp: 4, 
+          modify: null, get: () => { return this.timeElapsed; }, displayModifier: 1, dp: 4,
           default: null, min: null, max: null, divisions: null,
           controlType: 'none', fineControl: {available: false, value: null }
     }
   ]
 
-    get getDisplayedIndependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
-    }
+  get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+  }
 
-    get getDisplayedDependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.dv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
-    }
+  get getDisplayedIndependentProperties() {
+      return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+  }
 
-    get getVisibleDependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
-    }
+  get getDisplayedDependentProperties() {
+      return this.simulationParameters.filter(simParam => simParam.dv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  get getVisibleDependentProperties() {
+      return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
+  }
 
    generateChargeParticles(particles: number) {
       var aspect = this.ctx.canvas.width / this.ctx.canvas.height;
@@ -172,18 +176,18 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
             var x = i * cellWidth;
             var chargeForce = this.calculateForceStrength(x, y);
 
-            this.chargeMap.push({x: x, y: y, 
-               width: x - previousX, 
-               height: y - previousY, 
+            this.chargeMap.push({x: x, y: y,
+               width: x - previousX,
+               height: y - previousY,
                charge: chargeForce, color: ""
             });
 
             previousX = x;
-         } 
+         }
          previousY = y;
       }
-      
-      for(var t = 0; t < this.chargeMap.length; t++) {            
+
+      for(var t = 0; t < this.chargeMap.length; t++) {
         this.chargeMap[t].color = this.forceToRGB(this.chargeMap[t].charge);
       }
     }
@@ -225,12 +229,12 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
         this.fieldStrengthAtPoint = this.calculateForceStrength(event.offsetX, event.offsetY);
     }
 
-    
+
     onMouseDown(event) {
         this.paused = true;
         this.newParticleAdded = true;
         this.tempCharge = null;
-        this.tempCharge = {x: event.offsetX, y: event.offsetY, vx: null, vy: null, ax: 0, ay: 0, 
+        this.tempCharge = {x: event.offsetX, y: event.offsetY, vx: null, vy: null, ax: 0, ay: 0,
                           charge: (event.button === 0 ? -1 : 1)}
     }
 
@@ -273,7 +277,7 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
         }
     }
 
-   
+
     frame() {
         this.ctx.globalCompositeOperation = 'source-over';
 
@@ -288,7 +292,7 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
                 this.ctx.fillRect(this.chargeMap[i].x, this.chargeMap[i].y, this.chargeMap[i].width, this.chargeMap[i].height);
             }
         }
-        
+
         this.ctx.fillStyle = "red";
         this.ctx.font = "16px Bitter";
 
@@ -313,18 +317,18 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
 
             var distance = Math.sqrt(this.distanceBetweenPx(this.tempCharge.x, this.currentMouseX, this.tempCharge.y, this.currentMouseY));
             var velocity = 0;
-            
+
             if(distance > 20) {
                velocity = 100 * (distance/10);
             }
-           
+
             this.ctx.fillText(velocity.toFixed(2) + " km/s", this.currentMouseX + 5, this.currentMouseY);
         }
 
-        this.ctx.beginPath()    
-        this.ctx.moveTo(80,this.ctx.canvas.height - 15); 
+        this.ctx.beginPath()
+        this.ctx.moveTo(80,this.ctx.canvas.height - 15);
         this.ctx.lineTo(80, this.ctx.canvas.height - 35);
-        this.ctx.moveTo(80,this.ctx.canvas.height - 25); 
+        this.ctx.moveTo(80,this.ctx.canvas.height - 25);
         this.ctx.lineTo(170, this.ctx.canvas.height - 25);
         this.ctx.moveTo(170,this.ctx.canvas.height - 15);
         this.ctx.lineTo(170,this.ctx.canvas.height - 35);
@@ -333,12 +337,12 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
         this.ctx.font = "12px Bitter";
         this.ctx.fillStyle = 'white';
         this.ctx.fillText((this.simulationScale * 90).toFixed(7) + "m", 88, this.ctx.canvas.height - 30);
-        this.ctx.fillText("FPS: " + this.fps, 20, this.ctx.canvas.height - 20);                
+        this.ctx.fillText("FPS: " + this.fps, 20, this.ctx.canvas.height - 20);
 
         this.intPass++;
     }
 
-    
+
     showInstructions() {
         (this.instructions ? this.instructions = false : this.instructions = true);
     }
@@ -347,7 +351,7 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
        this.charges.splice(this.charges.length-1, 1);
     }
 
-    
+
 
     animate() {
 
@@ -397,9 +401,9 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
 
         // fps
         this.timeEnd = performance.now();
-        
+
         if(this.intPass % 5 === 0) {
-         this.fps = Math.round(1/((this.timeEnd - this.timeStart)/1000));  
+         this.fps = Math.round(1/((this.timeEnd - this.timeStart)/1000));
         }
 
         // reanimate
@@ -453,6 +457,6 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
         this.animationStarted = false;
         this.animationEnded = false;
     }
-    
+
 }
 

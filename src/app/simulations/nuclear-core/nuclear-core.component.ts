@@ -6,7 +6,7 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from '../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 export interface ChargedParticle {
@@ -24,7 +24,7 @@ export interface ChargedParticle {
 @Component({
    selector: 'app-nuclear-core',
    templateUrl: './nuclear-core2.component.html',
-   styleUrls: ['./nuclear-core.component.scss', './../common-style2.scss']
+   styleUrls: ['./nuclear-core.component.scss', './../common-style2-iframe.scss']
 })
 
 export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy {
@@ -90,15 +90,15 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
     simulationParameters = [
       {
-          id: 0, name: 'Simulation Speed', unit: '% of 1s',
-          iv: false, dv: false, dataCollectionAppropriate: false, visible: false,
-          modify: newValue => { this.simulationSpeed = newValue; },
-          get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 5,
-          default: 0.00000001, min: 0.00000001, max: 0.000001, divisions: 0.0000001,
-          controlType: 'range', fineControl: {available: true, value: 0.000000001 }
-      }, {
+        id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+        iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
+        modify: newValue => { this.simulationSpeed = newValue; },
+        get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
+        default: 1, min: 0, max: 3, divisions: 0.01,
+        controlType: 'range', fineControl: {available: true, value: 0.1 }
+    },{
            id: 1, name: 'Scale', unit: 'm',
-           iv: false, dv: false, dataCollectionAppropriate: false, visible: false,
+           iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
            modify: newValue => { this.simulationScale = newValue; },
            get: () => { return this.simulationScale; }, displayModifier: 1, dp: 15,
            default: 0.00000001, min: 0.000000001, max: 0.0000001, divisions: 0.000000001,
@@ -167,17 +167,21 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
     return ek;
   }
 
-    get getDisplayedIndependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
-    }
+  get getDisplayedControls() {
+    return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+  }
 
-    get getDisplayedDependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.dv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
-    }
+  get getDisplayedIndependentProperties() {
+      return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+  }
 
-    get getVisibleDependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
-    }
+  get getDisplayedDependentProperties() {
+      return this.simulationParameters.filter(simParam => simParam.dv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  get getVisibleDependentProperties() {
+      return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
+  }
 
     generateChargeParticles(density: number, temperature: number) {
       // should give in the 30-180 particle range!

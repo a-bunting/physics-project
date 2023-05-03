@@ -1,4 +1,4 @@
-import { Directive, HostListener, ViewContainerRef, Input, ComponentRef, Renderer2 } from '@angular/core';
+import { Directive, HostListener, ViewContainerRef, Input, ComponentRef } from '@angular/core';
 import { TooltipComponent } from './tooltip/tooltip.component';
 
 @Directive({
@@ -16,7 +16,6 @@ export class TooltipDirective {
   private componentRef: ComponentRef<any> = null!;
 
   @HostListener('mouseenter', ['$event']) onMouseEnter(e: MouseEvent): void { this.showToolTip(e) };
-  // @HostListener('touch', ['$event']) mouseEnter(e: MouseEvent): void { this.showToolTip(e) };
   @HostListener('mouseleave') onMouseLeave(): void { this.hideToolTip() };
   @HostListener('mousedown') mouseLeave(): void { this.hideToolTip() };
 
@@ -30,7 +29,6 @@ export class TooltipDirective {
     }
 
   showToolTip(e: MouseEvent): void {
-    console.log(e);
     if(this.componentRef === null) {
       this.componentRef = this.viewContainerRef.createComponent(TooltipComponent);
       const ele: HTMLElement = e.target as HTMLElement;

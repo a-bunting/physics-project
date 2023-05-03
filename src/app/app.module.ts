@@ -38,7 +38,6 @@ import { NuclearCoreComponent } from './simulations/nuclear-core/nuclear-core.co
 import { WelcomeComponent } from './welcome/welcome.component';
 import { WebComponent } from './structure/web/web.component';
 import { IframeComponent } from './structure/iframe/iframe.component';
-import { TooltipDirective } from './directives/tooltip.directive';
 import { TooltipComponent } from './directives/tooltip/tooltip.component';
 import { TooltipModule } from './directives/tooltip/tooltip.module';
 
@@ -126,7 +125,7 @@ const appRoutes: Routes = [
     GravityComponent,
     HeatTransferComponent,
     FrictionAndMotionComponent,
-    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe, WebComponent, IframeComponent, TooltipDirective, TooltipComponent
+    ProblemsComponent, CarsComponent, DataGenComponent, MazesComponent, SelfDriveComponent, SigFigPipePipe, WebComponent, IframeComponent, TooltipComponent
    ],
   imports: [
     BrowserModule,

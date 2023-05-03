@@ -6,7 +6,7 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from '../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 export interface force {
@@ -14,7 +14,7 @@ export interface force {
        x: number;
        y: number;
        total: number;
-   }, 
+   },
    direction: number;
 }
 
@@ -36,7 +36,7 @@ export interface movingObject {
 @Component({
     selector: 'app-kinematics',
     templateUrl: './kinematics2.component.html',
-    styleUrls: ['./kinematics.component.scss', './../common-style2.scss']
+    styleUrls: ['./kinematics.component.scss', './../common-style2-iframe.scss']
 })
 
 export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy {
@@ -140,116 +140,120 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
         this.setDefaultValues();
         this.setControls();
     }
-   
+
     simulationParameters = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
-            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2, 
-            default: 3, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
+            default: 1, min: 0, max: 3, divisions: 0.01,
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Gravity', unit: 'm/s2',    
+            id: 1, name: 'Gravity', unit: 'm/s2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.gravity = newValue; },
-            get: () => { return this.gravity; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity; }, displayModifier: 1, dp: 2,
             default: 9.81, min: 0, max: 20.0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
         },
         {
-            id: 2, name: 'Mass', unit: 'kg',     
+            id: 2, name: 'Mass', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.particle.mass = newValue; },
-            get: () => { return this.particle.mass; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.particle.mass; }, displayModifier: 1, dp: 2,
             default: 1, min: 0.01, max: 3, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 3, name: 'Elasticity', unit: '%',     
+            id: 3, name: 'Elasticity', unit: '%',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.elasticity = newValue; },
-            get: () => { return this.elasticity; }, displayModifier: 1, dp: 0, 
+            get: () => { return this.elasticity; }, displayModifier: 1, dp: 0,
             default: 100, min: 0, max: 100, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 4, name: 'Initial X Velocity', unit: 'm/s',     
+            id: 4, name: 'Initial X Velocity', unit: 'm/s',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.initialVelocity.x = newValue; },
-            get: () => { return this.initialVelocity.x; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.initialVelocity.x; }, displayModifier: 1, dp: 2,
             default: 0, min: -100, max: 100, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 5, name: 'Initial Y Velocity', unit: 'm/s',     
+            id: 5, name: 'Initial Y Velocity', unit: 'm/s',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.initialVelocity.y = newValue; },
-            get: () => { return this.initialVelocity.y; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.initialVelocity.y; }, displayModifier: 1, dp: 2,
             default: 0, min: -100, max: 100, divisions: 1,
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 6,  name: 'Time Elapsed', unit: 's', 
+            id: 6,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 7,  name: 'Current Velocity (Y)', unit: 'm/s', 
+            id: 7,  name: 'Current Velocity (Y)', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true,  visible: false,
-            modify: null, get: () => { return this.particle.v.y; }, displayModifier: 1, dp: 2, 
-            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
-        {
-            id: 8,  name: 'Current Velocity (X)', unit: 'm/s', 
-            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.particle.v.x; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.particle.v.y; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 9,  name: 'Distance Fallen', unit: 'm', 
+            id: 8,  name: 'Current Velocity (X)', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentDistance.y; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.particle.v.x; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 10,  name: 'Range', unit: 'm', 
+            id: 9,  name: 'Distance Fallen', unit: 'm',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
-            modify: null, get: () => { return this.currentDistance.x; }, displayModifier: 1, dp: 2, 
+            modify: null, get: () => { return this.currentDistance.y; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
+        },
         {
-            id: 11,  name: 'Weight', unit: 'N', 
+            id: 10,  name: 'Range', unit: 'm',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.currentDistance.x; }, displayModifier: 1, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 11,  name: 'Weight', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null,
-            get: () => { return this.gravity * this.particle.mass; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity * this.particle.mass; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
+        },
         {
-            id: 12,  name: 'Kinetic Energy', unit: 'J', 
+            id: 12,  name: 'Kinetic Energy', unit: 'J',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null,
-            get: () => { return this.kineticEnergy; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.kineticEnergy; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
+        },
         {
-            id: 13,  name: 'Potential Energy', unit: 'J', 
+            id: 13,  name: 'Potential Energy', unit: 'J',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null,
-            get: () => { return this.potentialEnergy; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.potentialEnergy; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },  
+        },
         {
-            id: 14,  name: 'Total Energy', unit: 'J', 
+            id: 14,  name: 'Total Energy', unit: 'J',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null,
-            get: () => { return this.potentialEnergy + this.kineticEnergy; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.potentialEnergy + this.kineticEnergy; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
 
     ]
+
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
@@ -275,7 +279,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
         this.forceDueToGravity = this.gravity * this.particle.mass;
     }
 
-    private launchCanvas() {      
+    private launchCanvas() {
          this.generateBackdrop();
     }
 
@@ -348,7 +352,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
       // our circle...
       ctx.fillStyle = '#FF9900';
       ctx.beginPath();
-      
+
       if(this.particleFreed) {
           ctx.arc(this.particle.pos.x, this.particle.pos.y, this.objectRadius, 0, 2*Math.PI);
       } else {
@@ -358,7 +362,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
       ctx.fill();
     }
 
-    objectRadius: number = 15;    
+    objectRadius: number = 15;
     falling: boolean = true;
     elasticity: number = 100;
 
@@ -389,12 +393,12 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
                      var dx = this.path[collided].xfrom - this.path[collided].xto;
                      var dy = this.path[collided].yfrom - this.path[collided].yto;
                      var spd = Math.sqrt(this.particle.v.x * this.particle.v.x + this.particle.v.y * this.particle.v.y);
-                     
+
                      var angleOfRamp = Math.atan2(dy, dx);
                      var angleOfvelocity = Math.atan2(this.particle.v.y, this.particle.v.x);
                      var angleBetween =  angleOfRamp * 2 - angleOfvelocity;
                      if (angleBetween < 0) { angleBetween += 2*Math.PI; }
-                     
+
                      const restitution = this.elasticity / 100;
 
                      this.particle.v.x = restitution * spd * Math.cos(angleBetween);
@@ -426,7 +430,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
                 this.particle.v.y += this.particle.a.y * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
 
             }
-            
+
 
             if(this.particle.pos.y + this.objectRadius < this.ctx.canvas.height) {
                 // keep going...
@@ -435,7 +439,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
                 this.animationEnded = true;
                 this.dataCollectionEnabled = true;
             }
-            
+
         }
 
 
@@ -446,7 +450,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
     }
 
     collisionBreak: boolean = false;
-    collisionBreakTimer: number;
+    collisionBreakTimer: any;
 
     startCollisionBreak() {
       this.collisionBreak = true;
@@ -459,11 +463,11 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
     collisionDetection(): number {
          if(this.collisionBreak === false) {
             for(var i = 0; i < this.path.length; i++) {
-    
+
                 var bottomOfObject =    {x: this.particle.pos.x, y: this.particle.pos.y + this.objectRadius};
                 var topOfObject =       {x: this.particle.pos.x, y: this.particle.pos.y - this.objectRadius};
                 var pathRange =         {start: this.path[i].xfrom, end: this.path[i].xto};
-                
+
                 // check if its in the x range
                 if((bottomOfObject.x > pathRange.start && bottomOfObject.x < pathRange.end) || (bottomOfObject.x < pathRange.start && bottomOfObject.x > pathRange.end)) {
 
@@ -498,7 +502,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
                      }
 
                      var yHeightAtPoint = yHeight + ydx - xDistanceAlongPath * Math.tan(angle);
-                                    
+
                     if(bottomOfObject.y >= yHeightAtPoint && topOfObject.y <= yHeightAtPoint) {
                         this.collisionPoints.push({x: this.particle.pos.x, y: this.particle.pos.y});
                         return i;
@@ -527,7 +531,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
         if(this.particleFreed === false) {
             this.potentialEnergy = this.particle.mass * this.gravity * (this.ctx.canvas.height - event.offsetY - this.objectRadius);
         }
-        
+
         if(this.mouseDown === true) {
             this.pathTemp.xto = event.offsetX;
             this.pathTemp.yto = event.offsetY;
@@ -584,10 +588,10 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
                         var closestPathPiece = {x: 0, y: 0};
                         var foundInRange: boolean = false;
                         for(var i = 0; i < this.path.length; i++) {
-    
+
                             var distTo      = this.distanceBetweenPx(event.offsetX, this.path[i].xto, event.offsetY, this.path[i].yto);
                             var distFrom    = this.distanceBetweenPx(event.offsetX, this.path[i].xfrom, event.offsetY, this.path[i].yfrom);
-                            
+
                             if(distTo < 10) {
                                 foundInRange = true;
                                 closestPathPiece.x = this.path[i].xto;
@@ -598,7 +602,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
                                 closestPathPiece.x = this.path[i].xfrom;
                                 closestPathPiece.y = this.path[i].yfrom;
                             }
-    
+
                         }
                         if(foundInRange == true) {
                             this.pathTemp.xto = closestPathPiece.x;
@@ -630,7 +634,7 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
         this.snapLock = !this.snapLock;
     }
 
-   distanceBetweenPx(x1: number, x2: number, y1: number, y2: number) { 
+   distanceBetweenPx(x1: number, x2: number, y1: number, y2: number) {
          var x = (x1 - x2) * (x1 - x2);
          var y = (y1 - y2) * (y1 - y2);
          return Math.sqrt(x + y);
@@ -654,6 +658,6 @@ export class KinematicsComponent extends SimCommon implements OnInit, OnDestroy 
 
         this.recalculateSimulation();
     }
-    
+
 }
 

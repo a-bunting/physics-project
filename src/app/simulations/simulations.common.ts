@@ -6,8 +6,19 @@ import { DataService } from '../services/data.service';
 import { HttpService } from '../services/http.service';
 import { simulationDocument } from '../services/simulations.service';
 import { UsersService } from '../services/users.service';
-import { setupVariableItem } from '../simulations/motion-ramp/motion-ramp.component';
 import { ResizeObserver } from 'resize-observer';
+
+export interface setupVariableItem {
+  id: number | string; iv: boolean; display: string; value: number;
+}
+
+export interface simParamArray {
+  id: number; name: string; unit: string; desc?: string, style?: string,
+  iv: boolean, dv: boolean, control?: boolean, dataCollectionAppropriate: boolean; visible: boolean;
+  modify: Function; get: Function;  displayModifier: number;dp: number;
+  default: number; min: number; max: number; divisions: number;
+  controlType: string; fineControl: {available: boolean, value: number}
+}
 
 @Component({
     template: ''
@@ -122,7 +133,10 @@ export abstract class SimCommon implements OnInit {
         this.simulationParameters.forEach(param => {
             this.setupVariableList.push({id: param.id, iv: param.iv, display: 'f', value: param.get()});
         });
+
         this.setupVariableList.push({id: 'ds', iv: null, display: 't', value: null});
+        this.setupVariableList.push({id: 'lb', iv: null, display: 't', value: null});
+        this.setupVariableList.push({id: 'if', iv: null, display: 't', value: null});
     }
 
     simulationControlsParameterModification(id: number, quantity?: number) {
@@ -215,9 +229,17 @@ export abstract class SimCommon implements OnInit {
             }
         })
         this.parametersDisplayed = {...this.parametersDisplayed, 'ds': true};
+        this.parametersDisplayed = {...this.parametersDisplayed, 'lb': true};
+        this.parametersDisplayed = {...this.parametersDisplayed, 'if': false};
 
         if(this.route.snapshot.queryParams['ds'] !== undefined) {
-            this.parametersDisplayed['ds'] = (this.route.snapshot.queryParams['ds'] == 't');
+            this.parametersDisplayed['ds'] = (this.route.snapshot.queryParams['ds'] === 't');
+        }
+        if(this.route.snapshot.queryParams['lb'] !== undefined) {
+            this.parametersDisplayed['lb'] = (this.route.snapshot.queryParams['lb'] === 't');
+        }
+        if(this.route.snapshot.queryParams['if'] !== undefined) {
+            this.parametersDisplayed['if'] = (this.route.snapshot.queryParams['if'] === 't');
         }
     }
 
@@ -298,8 +320,8 @@ export abstract class SimCommon implements OnInit {
         this.generateCustomUrl();
     }
 
-    toggleShowSetupButton() {
-       var indx = this.setupVariableList.length-1;
+    toggleSpecialButton(index: number) {
+       let indx: number = this.setupVariableList.length - index;
        if(this.setupVariableList[indx].display === 'f') {
             this.setupVariableList[indx].display = 't';
        } else {
@@ -309,15 +331,20 @@ export abstract class SimCommon implements OnInit {
     }
 
     generateCustomUrl() {
-        var parameterUrl: string = location.protocol + '//' + location.host + location.pathname + this.fullpath;
-        var parameters: string = "?";
+        let parameterUrl: string = location.protocol + '//' + location.host + location.pathname + this.fullpath;
+        let parameters: string = "?";
 
-        this.setupVariableList.forEach(param => {
+        if(this.setupVariableList[this.setupVariableList.length - 1].display === 't') {
+          parameterUrl = parameterUrl.replace(/\bsimulations\b/g, 'iframe');
+        }
+
+        this.setupVariableList.forEach((param, index) => {
             parameters += param.id + "=" + param.display.toString().slice(0,1);
+
             if(param.iv === true) {
                 parameters += "!" + param.value;
             }
-            if(this.setupVariableList.length-1 > param.id) {
+            if(this.setupVariableList.length-1 > index) {
                parameters += "&";
             }
         });

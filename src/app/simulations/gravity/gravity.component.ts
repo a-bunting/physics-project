@@ -5,19 +5,11 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from './../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
-export interface simParamArray {
-   id: number; name: string; unit: string;
-   iv: boolean, dv: boolean, dataCollectionAppropriate: boolean; visible: boolean;
-   modify: Function; get: Function;  displayModifier: number;dp: number;
-   default: number; min: number; max: number; divisions: number;
-   controlType: string; fineControl: {available: boolean, value: number}
-}
-
 export interface motionParameters {
-    x: number; y: number, vx: number; vy: number; ax: number; ay: number 
+    x: number; y: number, vx: number; vy: number; ax: number; ay: number
 }
 
 export interface gravitationalObject {
@@ -31,7 +23,7 @@ export interface gravitationalSystem {
 @Component({
   selector: 'app-gravity',
   templateUrl: './gravity2.component.html',
-  styleUrls: ['./gravity.component.scss', './../common-style2.scss']
+  styleUrls: ['./gravity.component.scss', './../common-style2-iframe.scss']
 })
 
 /**
@@ -40,26 +32,26 @@ export interface gravitationalSystem {
  */
 
 export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
-   
+
     // imagevalues
     @ViewChild('ImageCanvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
     ctx: CanvasRenderingContext2D; requestId;
-    
+
     // abstractions
     startTime; elapsed = 0; elapsedSinceFrame = 0;
     paused: boolean = false; animationStarted: boolean = false; animationEnded: boolean = false;
-    
+
     // display parameters
     private pixelsPerMeter: number;
-    
+
     // pathing for files etc
     assetsDirectory = 'assets/simulators/gravity/';
     fullpath = '#/simulations/gravity';
     componentId: string = 'gravity_sim';
     simulationId: string = 'Gravitational Simulator';
-    
+
     // values
-    currentTime: number = 0.00; 
+    currentTime: number = 0.00;
     simulationSpeed: number = 1;
     simulationScale: number = 1;
 
@@ -69,24 +61,24 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
             name: "Earth and Moon",
             scale: 10, scalemin: 1.7, scalemax: 20, scaledivisions: 0.1,
             objects: [
-                {name: 'Earth', mass: 1, radius: 1,                 distance: 0, locus: { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0}, path: []}, 
-                {name: 'Moon',  mass: 0.0123031469, radius: 0.2727, distance: 384402000, locus: { x: 0, y: 0, vx: 1022, vy: 0, ax: 0, ay: 0}, path: []}, 
+                {name: 'Earth', mass: 1, radius: 1,                 distance: 0, locus: { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0}, path: []},
+                {name: 'Moon',  mass: 0.0123031469, radius: 0.2727, distance: 384402000, locus: { x: 0, y: 0, vx: 1022, vy: 0, ax: 0, ay: 0}, path: []},
             ]
-        }, 
+        },
         {
             id: 1,
-            name: "Solar System", 
+            name: "Solar System",
             scale: 2000, scalemin: 1000, scalemax: 20000, scaledivisions: 100,
             objects: [
-               {name: 'Sun', mass: 333030, radius: 109.2, distance: 0, locus: { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Mercury', mass: 0.0553, radius: 0.3829, distance: 57900000000, locus: { x: 0, y: 0, vx: 47400, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Venus', mass: 0.815, radius: 0.9499, distance: 108200000000, locus: { x: 0, y: 0, vx: 35000, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Earth', mass: 1, radius: 1, distance: 149600000000, locus: { x: 0, y: 0, vx: 29800, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Mars', mass: 0.1075, radius: 0.5320, distance: 227900000000, locus: { x: 0, y: 0, vx: 24100, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Jupiter', mass: 317.8, radius: 10.97, distance: 778600000000, locus: { x: 0, y: 0, vx: 13100, vy: 0, ax: 0, ay: 0}, path: []},  
-               {name: 'Saturn', mass: 95.2, radius: 9.14, distance: 1433500000000, locus: { x: 0, y: 0, vx: 9700, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Uranus', mass: 14.6, radius: 3.981, distance: 2872500000000, locus: { x: 0, y: 0, vx: 6800, vy: 0, ax: 0, ay: 0}, path: []}, 
-               {name: 'Neptune', mass: 17.2, radius: 3.865, distance: 4495100000000, locus: { x: 0, y: 0, vx: 5400, vy: 0, ax: 0, ay: 0}, path: []},  
+               {name: 'Sun', mass: 333030, radius: 109.2, distance: 0, locus: { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Mercury', mass: 0.0553, radius: 0.3829, distance: 57900000000, locus: { x: 0, y: 0, vx: 47400, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Venus', mass: 0.815, radius: 0.9499, distance: 108200000000, locus: { x: 0, y: 0, vx: 35000, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Earth', mass: 1, radius: 1, distance: 149600000000, locus: { x: 0, y: 0, vx: 29800, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Mars', mass: 0.1075, radius: 0.5320, distance: 227900000000, locus: { x: 0, y: 0, vx: 24100, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Jupiter', mass: 317.8, radius: 10.97, distance: 778600000000, locus: { x: 0, y: 0, vx: 13100, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Saturn', mass: 95.2, radius: 9.14, distance: 1433500000000, locus: { x: 0, y: 0, vx: 9700, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Uranus', mass: 14.6, radius: 3.981, distance: 2872500000000, locus: { x: 0, y: 0, vx: 6800, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Neptune', mass: 17.2, radius: 3.865, distance: 4495100000000, locus: { x: 0, y: 0, vx: 5400, vy: 0, ax: 0, ay: 0}, path: []},
             ]
      }
     ]
@@ -110,17 +102,17 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
 
         // change canvas size based upon size of the simulation div
         this.observeSimulationSizeChange();
-        
+
         this.commonSimulationFunctionality();
         this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters
-        
+
         this.loadGravitationalSystem(this.systemDisplayedId); // solar system as default for now.
         this.changeSystemDisplayed(this.systemDisplayedId);
-        
+
         this.animationStarted = true; // the sim just starts to account for the difficulty in making the canvas resize automatically... hot fix, not great!
         this.animate();
     }
-        
+
     onCanvasResize(): void {
         this.center = {x: this.ctx.canvas.width / 2, y: this.ctx.canvas.height / 2};
     }
@@ -136,55 +128,59 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     simulationParameters: Array<simParamArray> = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-            default: 500000, min: 0, max: 10000000, divisions: 100,
-            controlType: 'range', fineControl: {available: false, value: null }
+            default: 1, min: 0, max: 3, divisions: 0.01,
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Simulation Scale', unit: 'x',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+            id: 1, name: 'Simulation Scale', unit: 'x',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationScale = newValue; },
             get: () => { return this.simulationScale; }, displayModifier: 1, dp: 2,
             default: 2, min: 0.5, max: 4, divisions: 0.1,
             controlType: 'range', fineControl: {available: false, value: null }
          },
          {
-            id: 2, name: 'Canvas Scale', unit: 'Mm/px',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+            id: 2, name: 'Canvas Scale', unit: 'Mm/px',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => {this.dynamicScaleChange(newValue); },
             get: () => { return this.canvasScale; }, displayModifier: 1, dp: 0,
             default: 2000, min: 0.5, max: 10000, divisions: 1,
             controlType: 'range', fineControl: {available: false, value: null }
           },
         {
-            id: 3,  name: 'Time', unit: 's', 
+            id: 3,  name: 'Time', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: true,
             modify: null, get: () => { return this.getAppropriateTimeFormat("Time", this.currentTime); }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 4,  name: 'Name', unit: '', 
+            id: 4,  name: 'Name', unit: '',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: true,
             modify: null, get: () => { return this.followData.name; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 5,  name: 'Velocity', unit: 'm/s', 
+            id: 5,  name: 'Velocity', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: true,
             modify: null, get: () => { return this.followData.v.current; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         },
         {
-            id: 6,  name: 'Distance', unit: 'Mm', 
+            id: 6,  name: 'Distance', unit: 'Mm',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: true,
             modify: null, get: () => { return this.followData.d.current / 1000000; }, displayModifier: 1, dp: 0,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
+
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
@@ -214,8 +210,8 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
             this.projectiles[i].path.forEach(pathItem => {
                var px = pathItem.x - this.center.x;
                var py = pathItem.y - this.center.y;
-               pathItem.x = this.center.x + ratio * px; 
-               pathItem.y = this.center.y + ratio * py; 
+               pathItem.x = this.center.x + ratio * px;
+               pathItem.y = this.center.y + ratio * py;
 
             })
          }
@@ -230,14 +226,14 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
             var vy2 = this.projectiles[this.followId].locus.vy * this.projectiles[this.followId].locus.vy;
             var v = Math.sqrt(vx2 + vy2);
             var d = this.projectiles[this.followId].distance;
-            
+
             this.followData.name = this.projectiles[this.followId].name;
             this.followData.v.current = v;
             this.followData.d.current = d;
-            
+
             if(v < this.followData.v.min) { this.followData.v.min = v; }
             if(v > this.followData.v.max) { this.followData.v.max = v; }
-            
+
             if(v < this.followData.d.min) { this.followData.d.min = d; }
             if(v > this.followData.d.max) { this.followData.d.max = d; }
          } else {
@@ -257,7 +253,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
         // draw our gravitational objects
         for(var i = 0 ; i < this.projectiles.length ; i++) {
            var radiusInPx = Math.floor((this.projectiles[i].radius * this.radiusUnit) / ((this.canvasScale * 1000000) * this.simulationScale)) + 3;
-           
+
            this.ctx.fillStyle = '#ff0000';
            this.ctx.beginPath();
            this.ctx.arc(this.projectiles[i].locus.x, this.projectiles[i].locus.y, radiusInPx, 0, 2 * Math.PI);
@@ -284,7 +280,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
 
            if(this.mouseDown === true) {
 
-               var lengthOfDrag = Math.sqrt(this.distanceBetween(this.placedMousePosition.x, this.currentMousePosition.x, this.placedMousePosition.y, this.currentMousePosition.y));      
+               var lengthOfDrag = Math.sqrt(this.distanceBetween(this.placedMousePosition.x, this.currentMousePosition.x, this.placedMousePosition.y, this.currentMousePosition.y));
                var v = lengthOfDrag * this.velocityDistanceScaleFactor * this.canvasScale;
 
                this.canvas_arrow(this.ctx, this.placedMousePosition.x, this.placedMousePosition.y, this.currentMousePosition.x, this.currentMousePosition.y);
@@ -309,14 +305,14 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     refactorCoordinates(centralObjectID: number) {
-         if(centralObjectID >= 0) { 
-            var dx = this.center.x - this.projectiles[centralObjectID].locus.x; 
+         if(centralObjectID >= 0) {
+            var dx = this.center.x - this.projectiles[centralObjectID].locus.x;
             var dy = this.center.y - this.projectiles[centralObjectID].locus.y;
 
             this.projectiles.forEach(projectile => {
                projectile.locus.x += dx;
                projectile.locus.y += dy;
-               
+
                if(this.paths) {
                   projectile.path.forEach(path => {
                      path.x += dx;
@@ -325,7 +321,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
                }
             })
 
-         }       
+         }
     }
 
     radiusUnit: number = 6.371 * Math.pow(10, 6);
@@ -338,35 +334,35 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
          return new_object;
        }},
        {id: 1, name: 'RK4', accuracy: 'Very High', speed: 'Slow', process: (elapsed: number, simSpeed: number, grav_obj: gravitationalObject) => {
-         
+
         //     // components of the rk4 algorithm
         //     point f1, f2, f3, f4;
-            
+
         //     // stepsize variables
         //     double h = stepsize;
         //     double h6 = h / 6.0;
-            
+
         //     iteration:
         //     for(int i=0;i<bodies.size();i++) {
-                
+
         //         if(!bodies.get(i).getLabel().equals("Sun")) {
-                    
+
         //             mdpoint y0 = (mdpoint) bodies.get(i).toPoint(); // initial state for this body
         //             point y;
-    
+
         //             // get the differant components...
         //             f1 = dffn(y0, i);
         //             f2 = dffn(point.add(y0, point.multiply(f1, h / 2.0)), i);
         //             f3 = dffn(point.add(y0, point.multiply(f2, h / 2.0)), i);
         //             f4 = dffn(point.add(y0, point.multiply(f3, h)) ,i);
-    
-        //             y = point.multiply(point.add(f1, point.multiply(f2, 2.0), point.multiply(f3, 2.0), f4), h6);  
-        //             y = point.add(y0, y);     
+
+        //             y = point.multiply(point.add(f1, point.multiply(f2, 2.0), point.multiply(f3, 2.0), f4), h6);
+        //             y = point.add(y0, y);
 
         //             bodies.get(i).setCoordinatesFromPoint(y, null);
 
-                        
-        //         }               
+
+        //         }
 
         var speedScale = simSpeed * (elapsed / 1000);
         var init_object = grav_obj;
@@ -375,9 +371,9 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
         var f2: gravitationalObject = this.reCalculatePoint(this.objAdd([init_object, this.objMultiply(f1, speedScale * 0.5)]), speedScale)
         var f3: gravitationalObject = this.reCalculatePoint(this.objAdd([init_object, this.objMultiply(f2, speedScale * 0.5)]), speedScale)
         var f4: gravitationalObject = this.reCalculatePoint(this.objAdd([init_object, this.objMultiply(f3, speedScale)]), speedScale)
-        
+
         var f: gravitationalObject = this.objMultiply(this.objAdd([f1, this.objMultiply(f2, 2), this.objMultiply(f3, 2), f4]), speedScale / 6);
-        
+
         return this.objAdd([init_object, f]);
        }}
     ]
@@ -402,7 +398,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
         return gravObjects[0];
     }
 
-    
+
 
     animate() {
 
@@ -418,18 +414,18 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
 
          if(this.paused === false && this.animationStarted === true && this.animationEnded === false && this.mouseDown === false) {
                 this.currentTime += (this.elapsedSinceFrame/1000)  * this.simulationSpeed;
-                
+
                 for(var i = 0 ; i < this.projectiles.length ; i++) {
                     this.projectiles[i] = this.algorithms[this.algorithmSelected].process(this.elapsedSinceFrame, this.simulationSpeed, this.projectiles[i]);
                 }
 
                 if(this.paths) {
                    var timePerPoint = 400 / (this.simulationSpeed / 500000);
-   
+
                    if(this.pathTimer > timePerPoint) {
                      for(var i = 0 ; i < this.projectiles.length ; i++) {
                         var pathItems = this.projectiles[i].path.length;
-   
+
                         if(pathItems >= this.pathItems) {
                            this.projectiles[i].path.splice(0, 1);
                            this.projectiles[i].path.push({x: this.projectiles[i].locus.x, y: this.projectiles[i].locus.y});
@@ -439,14 +435,14 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
                      }
                      this.pathTimer = 0;
                    }
-   
+
                    this.pathTimer += this.elapsedSinceFrame;
                 }
 
                 this.focussedPlanetaryData();
                 this.refactorCoordinates(this.followId);
          }
-        
+
          this.frame();
          this.requestId = requestAnimationFrame(() => this.animate());
     }
@@ -470,8 +466,8 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
 
                   if(angle < 0) { angle += 2 * Math.PI; }
 
-                  totalAccelerationDueToGravity.x += (mass / distanceToObject) * Math.cos(angle); 
-                  totalAccelerationDueToGravity.y += (mass / distanceToObject) * Math.sin(angle); 
+                  totalAccelerationDueToGravity.x += (mass / distanceToObject) * Math.cos(angle);
+                  totalAccelerationDueToGravity.y += (mass / distanceToObject) * Math.sin(angle);
                } else {
                   // crash so amalgamate projectiles
 
@@ -547,7 +543,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
          var vy = lengthOfDrag * Math.sin(angle) * this.velocityDistanceScaleFactor * this.canvasScale;
 
          var newObject: gravitationalObject = {
-               name: this.randomWords[Math.floor(Math.random() * this.randomWords.length)] + " " + this.randomWords[Math.floor(Math.random() * this.randomWords.length)], 
+               name: this.randomWords[Math.floor(Math.random() * this.randomWords.length)] + " " + this.randomWords[Math.floor(Math.random() * this.randomWords.length)],
                mass: 0,  radius: 0.1, distance: distanceTo,
                locus: { x: this.placedMousePosition.x,  y: this.placedMousePosition.y, vx: vx,  vy: vy,  ax: 0,  ay: 0 },
                path: []
@@ -558,7 +554,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
 
     }
 
-    
+
     selectPlanet(id: number) {
       if(this.planetSelected === id) {
          this.planetSelected = -1; // deselect
@@ -567,13 +563,13 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
       }
     }
 
-    
-    
+
+
     followProjectile(id: number) {
       this.followId = id;
     }
 
-    
+
     removeProjectile(id: number) {
        // check, do we need to set the first to 0 distance in the case of removing the first entry?
        // I think not...
@@ -632,7 +628,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
                    mass: projectile_copy.mass,
                    radius: projectile_copy.radius,
                    distance: projectile_copy.distance,
-                   locus: { x: x, y: y, ax: 0, ay: 0, vx: projectile_copy.locus.vx, vy: projectile_copy.locus.vy }, 
+                   locus: { x: x, y: y, ax: 0, ay: 0, vx: projectile_copy.locus.vx, vy: projectile_copy.locus.vy },
                    path: []
                };
 
@@ -679,5 +675,5 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
     isNumber(value: any): boolean {
       return typeof(value) === 'number';
    }
-    
+
 }

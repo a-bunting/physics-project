@@ -6,13 +6,13 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from '../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 @Component({
   selector: 'app-freefall',
   templateUrl: './freefall2.component.html',
-  styleUrls: ['./freefall.component.scss', './../common-style2.scss']
+  styleUrls: ['./freefall.component.scss', './../common-style2-iframe.scss']
 })
 
 export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
@@ -110,33 +110,6 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
         this.launchCanvas();
     }
 
-    // resizeObserver: ResizeObserver;
-    // resizeElement: HTMLElement;
-    /**
-     * May be able to go into the common JS with a link to it from here when complete....
-     */
-
-    // private observeSimulationSizeChange(): void {
-    //     try {
-    //         this.resizeElement =  document.getElementById('simulation');
-
-    //         this.resizeObserver = new ResizeObserver(() => {
-    //             this.canvas.nativeElement.width = this.resizeElement.offsetWidth;
-    //             this.canvas.nativeElement.height = this.resizeElement.offsetHeight;
-
-    //             if(this.resizeElement.offsetHeight > window.innerHeight) {
-    //                 this.canvas.nativeElement.height = window.innerHeight;
-    //             }
-
-    //             this.launchCanvas(); // needs changing for this as it relaunches the values.
-    //         });
-    //         this.resizeObserver.observe(this.resizeElement);
-    //     }
-    //     catch (error) {
-    //         // if an error is thrown the page have be unloading, so do nothing.
-    //     }
-    // }
-
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
         this.resizeObserver.unobserve(this.resizeElement);
@@ -149,17 +122,17 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
 
 
     simulationParameters = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
-            get: () => { return this.simulationSpeed; }, displayModifier: 1, infMode: true, finMode: true, dp: 2,
+            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
             default: 1, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
             id: 1, name: 'Scale Density', unit: 'm/div',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.linesQuantity = newValue; this.infiniteBackdropCalculations(); this.recalculateSimulation(); this.resetQuestion(); },
             get: () => { return this.linesQuantity; }, displayModifier: 1, infMode: true, finMode: false, dp: 0,
             default: 10, min: 0, max: 20, divisions: 2,
@@ -266,16 +239,20 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
         }
     ]
 
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
+
     get getDisplayedIndependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.iv === true && (this.simulationInfinite ? simParam.infMode : simParam.finMode) === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+        return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
     }
 
     get getDisplayedDependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.dv === true && (this.simulationInfinite ? simParam.infMode : simParam.finMode) === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
+        return this.simulationParameters.filter(simParam => simParam.dv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
     }
 
     get getVisibleDependentProperties() {
-        return this.simulationParameters.filter(simParam => simParam.dv === true && (this.simulationInfinite ? simParam.infMode : simParam.finMode) === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
+        return this.simulationParameters.filter(simParam => simParam.dv === true && simParam.visible === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode)).sort((a, b) => a.name.localeCompare(b.name));
     }
 
     recalculateSimulation() {

@@ -5,16 +5,8 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from './../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
-
-export interface simParamArray {
-   id: number; name: string; unit: string;
-   iv: boolean, dv: boolean, dataCollectionAppropriate: boolean; visible: boolean; style: string,
-   modify: Function; get: Function; displayModifier: number; dp: number;
-   default: number; min: number; max: number; divisions: number;
-   controlType: string; fineControl: {available: boolean, value: number}
-}
 
 export interface setupVariableItem {
    id: number | string; iv: boolean; display: string; value: number;
@@ -23,7 +15,7 @@ export interface setupVariableItem {
 @Component({
    selector: 'app-momentum',
    templateUrl: './momentum2.component.html',
-   styleUrls: ['./momentum.component.scss', './../common-style2.scss']
+   styleUrls: ['./momentum.component.scss', './../common-style2-iframe.scss']
  })
 
 export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
@@ -44,10 +36,10 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
     fullpath = '#/simulations/momentum';
     componentId: string = 'momentum_sim';
     simulationId: string = 'Momentum';
-  
+
     // values
     valueTime: number; valueAcceleration = {a: 0, b: 0};
-    currentTime: number = 0.00; currentDistance = {a: 0, b: 0}; currentSpeed = {a: 0, b: 0};    
+    currentTime: number = 0.00; currentDistance = {a: 0, b: 0}; currentSpeed = {a: 0, b: 0};
     frictionKineticCoefficient = 0; frictionStaticCoefficient = 0; frictionValue: number = 0;
     mass = {a: 10, b: 10};
     simulationSpeed: number = 1; forceDueToFriction: number = 0;
@@ -105,24 +97,24 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     simulationParameters: Array<simParamArray> = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',    
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false, style: "",
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
             default: 1, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Gravity', unit: 'm/s2',    
+            id: 1, name: 'Gravity', unit: 'm/s2',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "",
             modify: newValue => { this.gravity = newValue; },
-            get: () => { return this.gravity; }, displayModifier: 1, dp: 2, 
+            get: () => { return this.gravity; }, displayModifier: 1, dp: 2,
             default: 9.81, min: 0, max: 20.0, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.01 }
-         }, 
+         },
         {
-            id: 2, name: 'Track Length', unit: 'm',     
+            id: 2, name: 'Track Length', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "",
             modify: newValue => { this.tracklength = newValue; this.changeTracklength(newValue); },
             get: () => { return this.tracklength; }, displayModifier: 1, dp: 2,
@@ -130,7 +122,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.5 }
         },
         {
-            id: 3, name: 'Initial Velocity (A)', unit: 'm/s',     
+            id: 3, name: 'Initial Velocity (A)', unit: 'm/s',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "objectA",
             modify: newValue => { this.initialVelocity.a = newValue; (!this.started ? this.setInitialValues() : null); },
             get: () => { return this.initialVelocity.a; }, displayModifier: 1, dp: 2,
@@ -138,7 +130,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.05 }
         },
         {
-            id: 4, name: 'Initial Velocity (B)', unit: 'm/s',     
+            id: 4, name: 'Initial Velocity (B)', unit: 'm/s',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "objectB",
             modify: newValue => { this.initialVelocity.b = newValue; (!this.started ? this.setInitialValues() : null); },
             get: () => { return this.initialVelocity.b; }, displayModifier: 1, dp: 2,
@@ -146,7 +138,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.05 }
         },
         {
-            id: 5, name: 'Mass (A)', unit: 'kg',     
+            id: 5, name: 'Mass (A)', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "objectA",
             modify: newValue => { this.mass.a = newValue; },
             get: () => { return this.mass.a; }, displayModifier: 1, dp: 2,
@@ -154,7 +146,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.50 }
         },
         {
-            id: 6, name: 'Mass (B)', unit: 'kg',     
+            id: 6, name: 'Mass (B)', unit: 'kg',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "objectB",
             modify: newValue => { this.mass.b = newValue; },
             get: () => { return this.mass.b; }, displayModifier: 1, dp: 2,
@@ -162,7 +154,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.50 }
         },
         {
-            id: 7, name: 'Initial Position (A)', unit: 'm',     
+            id: 7, name: 'Initial Position (A)', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "objectA",
             modify: newValue => { this.initialPosition.a = newValue; (!this.started ? this.setInitialValues() : null); },
             get: () => { return this.initialPosition.a; }, displayModifier: 1, dp: 2,
@@ -170,7 +162,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.05 }
         },
         {
-            id: 8, name: 'Initial Position (B)', unit: 'm',     
+            id: 8, name: 'Initial Position (B)', unit: 'm',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "objectB",
             modify: newValue => { this.initialPosition.b = newValue; (!this.started ? this.setInitialValues() : null); },
             get: () => { return this.initialPosition.b; }, displayModifier: 1, dp: 2,
@@ -178,7 +170,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.05 }
         },
         {
-            id: 9, name: 'Elasticity', unit: '%',     
+            id: 9, name: 'Elasticity', unit: '%',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false, style: "",
             modify: newValue => { this.elasticity = newValue; },
             get: () => { return this.elasticity; }, displayModifier: 1, dp: 2,
@@ -186,7 +178,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 1 }
         },
         {
-            id: 10, name: 'Kinetic Frictional Coefficient', unit: '',    
+            id: 10, name: 'Kinetic Frictional Coefficient', unit: '',
             iv: true, dv: false, dataCollectionAppropriate: true,  visible: false, style: "",
             modify: newValue => { this.frictionKineticCoefficient = newValue; },
             get: () => { return this.frictionKineticCoefficient; }, displayModifier: 1, dp: 3,
@@ -194,7 +186,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.01 }
         },
         {
-            id: 11, name: 'Explosive Click Force', unit: 'N',    
+            id: 11, name: 'Explosive Click Force', unit: 'N',
             iv: true, dv: false, dataCollectionAppropriate: false,  visible: false, style: "",
             modify: newValue => { this.explosiveForce = newValue; },
             get: () => { return this.explosiveForce; }, displayModifier: 1, dp: 2,
@@ -202,72 +194,76 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 12,  name: 'Time Elapsed', unit: 's', 
+            id: 12,  name: 'Time Elapsed', unit: 's',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "",
             modify: null, get: () => { return this.currentTime; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 13,  name: 'Velocity (A)', unit: 'm/s', 
+            id: 13,  name: 'Velocity (A)', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectAdv",
             modify: null, get: () => { return this.currentSpeed.a; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 14,  name: 'Velocity (B)', unit: 'm/s', 
+            id: 14,  name: 'Velocity (B)', unit: 'm/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectBdv",
             modify: null, get: () => { return this.currentSpeed.b; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 15,  name: 'Position (A)', unit: 'm', 
+            id: 15,  name: 'Position (A)', unit: 'm',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectAdv",
             modify: null, get: () => { return this.motionPosition.a; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 16,  name: 'Position (B)', unit: 'm', 
+            id: 16,  name: 'Position (B)', unit: 'm',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectBdv",
             modify: null, get: () => { return this.motionPosition.b; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 17,  name: 'Momentum (A)', unit: 'kg m/s', 
+            id: 17,  name: 'Momentum (A)', unit: 'kg m/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectAdv",
             modify: null, get: () => { return this.mass.a * this.currentSpeed.a; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 18,  name: 'Momentum (B)', unit: 'kg m/s', 
+            id: 18,  name: 'Momentum (B)', unit: 'kg m/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectBdv",
             modify: null, get: () => { return this.mass.b * this.currentSpeed.b; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 19,  name: 'Kinetic Energy (A)', unit: 'J', 
+            id: 19,  name: 'Kinetic Energy (A)', unit: 'J',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectAdv",
             modify: null, get: () => { return 0.5 * this.mass.a * this.currentSpeed.a * this.currentSpeed.a; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        }, 
+        },
         {
-            id: 20,  name: 'Kinetic Energy (B)', unit: 'J', 
+            id: 20,  name: 'Kinetic Energy (B)', unit: 'J',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "objectBdv",
             modify: null, get: () => {  return 0.5 * this.mass.b * this.currentSpeed.b * this.currentSpeed.b; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },     
+        },
         {
-            id: 21, name: 'Frictional Force', unit: 'N', 
+            id: 21, name: 'Frictional Force', unit: 'N',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "",
             modify: null, get: () => { return this.forceDueToFriction; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
-        },     
+        },
         {
-            id: 22, name: 'Total Momentum (Blocks)', unit: 'kg m/s', 
+            id: 22, name: 'Total Momentum (Blocks)', unit: 'kg m/s',
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false, style: "",
             modify: null, get: () => { return this.mass.a * this.currentSpeed.a + this.mass.b * this.currentSpeed.b; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
+
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
@@ -282,14 +278,14 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     private trackLengthPixels: number = 0;
-   
+
     private changeTracklength(newValue) {
         this.launchCanvas();
-        var initPos = this.getSimulationParameterIDFromName("Initial Position (A)"); 
-        this.simulationParameters[initPos].max = newValue; 
+        var initPos = this.getSimulationParameterIDFromName("Initial Position (A)");
+        this.simulationParameters[initPos].max = newValue;
         (this.simulationParameters[initPos].get() > newValue ? this.simulationParameters[initPos].modify(newValue) : '')
-        var initPos = this.getSimulationParameterIDFromName("Initial Position (B)"); 
-        this.simulationParameters[initPos].max = newValue; 
+        var initPos = this.getSimulationParameterIDFromName("Initial Position (B)");
+        this.simulationParameters[initPos].max = newValue;
         (this.simulationParameters[initPos].get() > newValue ? this.simulationParameters[initPos].modify(newValue) : '')
     }
 
@@ -300,7 +296,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
 
 
     gravity: number = 9.81;
-   
+
    private setInitialValues() {
       this.launchCanvas(); // must happen first!
 
@@ -327,10 +323,10 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
         this.ctx.fillRect(25, this.ctx.canvas.height - 90, this.trackLengthPixels, 60);
         this.ctx.fillRect(10, this.ctx.canvas.height - 150, 15, 120);
         this.ctx.fillRect(this.trackLengthPixels + 25, this.ctx.canvas.height - 150, 15, 120);
-        
+
         // draw on the moving parts
         this.ctx.globalCompositeOperation = 'source-over';
-        
+
         // the explosive dot
         if(this.explosiveClicks) {
          this.ctx.fillStyle = '#FF0000';
@@ -344,7 +340,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
         this.ctx.fillRect(this.motionPosition.a, this.ctx.canvas.height - 140, 50, 50);
         // B
         this.ctx.fillStyle = '#0066FF';
-        this.ctx.fillRect(this.motionPosition.b, this.ctx.canvas.height - 140, 50, 50); 
+        this.ctx.fillRect(this.motionPosition.b, this.ctx.canvas.height - 140, 50, 50);
     }
 
     animate() {
@@ -388,25 +384,25 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
                     this.currentSpeed.b = 0;
                 }
             }
-   
+
             this.checkCollisions();
-            
+
             this.motionPosition.a += this.currentSpeed.a * (this.elapsedSinceFrame / 1000) * this.pixelsPerMeter * this.simulationSpeed;
             this.motionPosition.b += this.currentSpeed.b * (this.elapsedSinceFrame / 1000) * this.pixelsPerMeter * this.simulationSpeed;
 
          }
-         
+
          if(this.explosiveLock) {
             this.mousePosition = Math.abs(this.motionPosition.a + this.motionPosition.b) * 0.5 + 25;
          }
-         
+
         this.frame();
         this.requestId = requestAnimationFrame(() => this.animate());
-        
+
     }
 
     collisionBreak: boolean = false;
-    collisionBreakTimer: number;
+    collisionBreakTimer: any;
     coliisionBreakTime: number = 0.4;
 
     checkCollisions() {
@@ -477,7 +473,7 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
           this.mousePosition = event.offsetX;
        }
     }
-    
+
     mousedown(event: MouseEvent) {
        if(this.explosiveClicks) {
             this.currentSpeed.a = this.applyExplosiveForce(this.motionPosition.a, this.mass.a, this.currentSpeed.a);
@@ -492,14 +488,14 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
         var accBox: number = (this.explosiveForce / (distance * distance)) / mass;
 
         if(this.mousePosition >= position) {
-            if(speed >= 0) 
-            { return speed - accBox;} 
-            else 
+            if(speed >= 0)
+            { return speed - accBox;}
+            else
             { return speed + accBox; }
         } else {
-            if(speed >= 0) 
-            { return speed + accBox; } 
-            else 
+            if(speed >= 0)
+            { return speed + accBox; }
+            else
             { return speed - accBox; }
          }
     }
@@ -522,5 +518,5 @@ export class MomentumComponent extends SimCommon implements OnInit, OnDestroy {
 
         this.frame();
     }
-    
+
 }

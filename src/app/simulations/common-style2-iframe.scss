@@ -3,7 +3,7 @@
 .simulation-container {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(max-content, 1fr) max-content;
+    grid-template-columns: minmax(max-content, 1fr) minmax(30rem, max-content);
     grid-template-rows: max-content 1fr;
     width: 100%;
     min-height: 100vh;
@@ -32,9 +32,9 @@
   position: absolute;
   top: 2rem;
   left: 2rem;
-  width: max-content;
+  width: 45rem;
 
-  padding: 2rem 1rem;
+  padding: 1rem 1rem;
   text-align: center;
 
   background-color: rgba(gray, .5);
@@ -128,9 +128,6 @@
   &__specific {
       text-align: center;
 
-      & > :nth-last-child(1) {
-        display: none; // gets rid of the setup button
-      }
       & > :not(:last-child) {
           margin-right: .5rem;
       }
@@ -343,6 +340,8 @@
     overflow-y: scroll;
     border-left: 1px solid white;
 
+    min-width: 30rem;
+
     &__hide {
 
     }
@@ -353,6 +352,148 @@
     }
 }
 
-.setup, .labs {
-  display: none;
+.labs {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed rgba(white, .5);
+
+  &__hide {
+    display: none;
+  }
+}
+
+// setup window
+.setup {
+  &__overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 100;
+    transform: translate(-50%, -50%);
+
+    background-color: $color-juxtapose-light;
+    border-radius: 1rem;
+    box-shadow: .3rem 0 .6rem rgba(black, .5);
+    padding: 1rem 2rem;
+
+    font-size: 1.4rem;
+
+    form {
+      display: grid;
+      grid-template: auto min-content / 1fr 1fr 1fr;
+    }
+  }
+
+  &__independent-variables {
+    grid-row: 1 / 2;
+    grid-column: 1 / 2;
+    width: 25rem;
+  }
+
+  &__dependent-variables {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+    width: 25rem;
+    margin-right: 2rem;
+
+    border-left: .1rem dashed rgba(black, .5);
+    border-right: .1rem dashed rgba(black, .5);
+    padding-right: 1rem;
+    padding-left: 2rem;
+  }
+
+  &__information {
+    grid-row: 1 / 2;
+    grid-column: 3 / 4;
+    width: 25rem;
+    align-self: center;
+
+    & > * {
+      margin-bottom: 1rem;
+      letter-spacing: .1rem;
+      line-height: 2rem;
+      margin-right: -2rem;
+    }
+  }
+
+  &__urloutput {
+    grid-row: 2 / 3;
+    grid-column: 1 / -1;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: .1rem dashed rgba(black, .5);
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__error {
+    font-weight: bold;
+    color: red;
+    margin-bottom: 1rem;
+  }
+
+  &__notice {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__variable {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 1rem;
+
+    &--name { flex: 1; }
+    &--header { font-weight: bold; }
+
+    &--name, &--value {
+      margin-right: 1rem;
+    }
+
+    &--checkbox, &--value {
+      justify-self: flex-end;
+      width: 4rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    &--label {
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    &--margintop {
+      margin-top: 2rem;
+    }
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: column;
+    white-space: wrap;
+    row-gap: .5rem;
+    max-width: 60rem;
+  }
+
+  &__textbox {
+    padding: .2rem .5rem;
+    border-radius: .5rem;
+    width: 5rem
+  }
+
+  &__checkbox {
+    border-radius: .2rem;
+    padding: .2rem;
+  }
+
+  &__button {
+    padding: .5rem 1rem;
+    border-radius: .5rem;
+    font-size: 1.4rem;
+  }
+
 }

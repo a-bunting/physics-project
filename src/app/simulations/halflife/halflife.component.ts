@@ -5,7 +5,7 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from '../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 
@@ -17,15 +17,6 @@ import { DirectoryService } from 'src/app/services/directory.service';
  * make controls smoother
  *
  */
-
-
-export interface simParamArray {
-    id: number; name: string; unit: string;
-    iv: boolean, dv: boolean, dataCollectionAppropriate: boolean; visible: boolean; displayModifier: number;
-    modify: Function; get: Function; dp: number;
-    default: number; min: number; max: number; divisions: number;
-    controlType: string; fineControl: {available: boolean, value: number}
- }
 
  export interface radioactiveBunch {
      nucleiQuantityInitial: number;
@@ -47,7 +38,7 @@ export interface simParamArray {
 @Component({
   selector: 'app-halflife',
   templateUrl: './halflife2.component.html',
-  styleUrls: ['./halflife.component.scss', './../common-style2.scss']
+  styleUrls: ['./halflife.component.scss', './../common-style2-iframe.scss']
 })
 export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
 
@@ -168,17 +159,17 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     simulationParameters: Array<simParamArray> = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
-            get: () => { return this.simulationSpeed; }, dp: 2,
-            default: 1, min: 0, max: 1, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
+            default: 1, min: 0, max: 3, divisions: 0.01,
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
             id: 1, name: 'Speed Multiplier', unit: 'power 10',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: newValue => { this.simulationSpeedMultiplier = newValue; },
             get: () => { return this.simulationSpeedMultiplier; }, dp: 0,
             default: 0, min: -15, max: 15, divisions: 1,
@@ -186,7 +177,7 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
         },
         {
             id: 2, name: 'Simulation Speed', unit: 'x',
-            iv: false, dv: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false, displayModifier: 1,
             modify: null, get: () => { return this.simulationSpeed * Math.pow(10, this.simulationSpeedMultiplier); }, dp: 8,
             default: null, min: null, max: null, divisions: null, controlType: 'no', fineControl: {available: false, value: null }
         },
@@ -270,6 +261,10 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
         }
 
     ]
+
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));

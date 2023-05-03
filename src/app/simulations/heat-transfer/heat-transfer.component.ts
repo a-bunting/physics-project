@@ -5,16 +5,8 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from './../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
-
-export interface simParamArray {
-   id: number; name: string; unit: string;
-   iv: boolean, dv: boolean, dataCollectionAppropriate: boolean; visible: boolean;
-   modify: Function; get: Function;  displayModifier: number;dp: number;
-   default: number; min: number; max: number; divisions: number;
-   controlType: string; fineControl: {available: boolean, value: number}
-}
 
 export interface setupVariableItem {
    id: number | string; iv: boolean; display: string; value: number;
@@ -23,7 +15,7 @@ export interface setupVariableItem {
 @Component({
    selector: 'app-heat-transfer',
    templateUrl: './heat-transfer2.component.html',
-   styleUrls: ['./heat-transfer.component.scss', './../common-style2.scss']
+   styleUrls: ['./heat-transfer.component.scss', './../common-style2-iframe.scss']
  })
 
 export class HeatTransferComponent extends SimCommon implements OnInit, OnDestroy {
@@ -88,17 +80,17 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
     }
 
     simulationParameters: Array<simParamArray> = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-            default: 1, min: 0, max: 100, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            default: 1, min: 0, max: 3, divisions: 0.01,
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
             id: 1, name: 'Resolution', unit: 'px',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.granularity = newValue; this.generateHeatMap(); },
             get: () => { return this.granularity; }, displayModifier: 1, dp: 0,
             default: 10, min: 3, max: 40, divisions: 1,
@@ -106,7 +98,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
          },
          {
             id: 2, name: 'Scale', unit: 'm',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.canvasScale = newValue; this.pixelsPerMeter = this.ctx.canvas.height / this.canvasScale; },
             get: () => { return this.canvasScale; }, displayModifier: 1, dp: 1,
             default: 1, min: 0.1, max: 10, divisions: 0.1,
@@ -114,7 +106,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
          },
          {
             id: 3, name: 'Contrast', unit: '',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: true,
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.contrast = newValue; },
             get: () => { return this.contrast; }, displayModifier: 1, dp: 1,
             default: 1000, min: 100, max: 10000, divisions: 100,
@@ -135,6 +127,10 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
+
+    get getDisplayedControls() {
+        return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));

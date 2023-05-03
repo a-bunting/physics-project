@@ -5,25 +5,13 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from './../simulations.common';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
-
-export interface simParamArray {
-   id: number; name: string; unit: string;
-   iv: boolean, dv: boolean, dataCollectionAppropriate: boolean; visible: boolean;
-   modify: Function; get: Function;  displayModifier: number;dp: number;
-   default: number; min: number; max: number; divisions: number;
-   controlType: string; fineControl: {available: boolean, value: number}
-}
-
-export interface setupVariableItem {
-   id: number | string; iv: boolean; display: string; value: number;
-}
 
 @Component({
     selector: 'app-motion-ramp',
     templateUrl: './motion-ramp2.component.html',
-    styleUrls: ['./motion-ramp.component.scss', './../common-style2.scss']
+    styleUrls: ['./motion-ramp.component.scss', './../common-style2-iframe.scss']
 })
 
 export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy {
@@ -100,13 +88,13 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
     }
 
     simulationParameters: Array<simParamArray> = [
-        {
-            id: 0, name: 'Simulation Speed', unit: '',
-            iv: true, dv: false, dataCollectionAppropriate: false, visible: false,
+          {
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
             default: 1, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: false, value: null }
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
             id: 1, name: 'Angle of Slope', unit: 'deg',
@@ -195,6 +183,10 @@ export class MotionRampComponent extends SimCommon implements OnInit, OnDestroy 
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
+
+    get getDisplayedControls() {
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+    }
 
     get getDisplayedIndependentProperties() {
         return this.simulationParameters.filter(simParam => simParam.iv === true && (this.parametersDisplayed[simParam.id] === true || this.setupMode));

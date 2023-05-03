@@ -6,8 +6,7 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon } from '../simulations.common';
-import { ResizeObserver } from 'resize-observer';
+import { SimCommon, simParamArray } from './../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 export interface force {
@@ -112,7 +111,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
     simulationParameters = [
         {
-            id: 0, name: 'Simulation Speed', unit: '',
+            id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
@@ -120,7 +119,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Scale Density', unit: 'm/div',
+            id: 1, name: 'Scale Density', unit: 'm/div', desc: 'Changes the density of the grid lines. Does not impact quality of data collection.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.linesQuantity = newValue; this.generateBackdrop(); this.recalculateSimulation(); this.resetQuestion(); },
             get: () => { return this.linesQuantity; }, displayModifier: 1,  dp: 0,
@@ -128,7 +127,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: false, value: 2 }
         },
         {
-            id: 2, name: 'Zoom Value', unit: 'x',
+            id: 2, name: 'Zoom Value', unit: 'x', desc: 'Zooms in on the object. Makes grid lines moves faster but does not impact data collection.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.zoomValue = newValue; this.generateBackdrop(); },
             get: () => { return this.zoomValue; }, displayModifier: 1,  dp: 2,
@@ -136,7 +135,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: false, value: 2 }
         },
         {
-            id: 3, name: 'Gravity', unit: 'm/s2',
+            id: 3, name: 'Gravity', unit: '$m/s^2$',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.gravity = newValue; },
             get: () => { return this.gravity; }, displayModifier: 1, dp: 2,
@@ -144,7 +143,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: true, value: 0.01 }
         },
         {
-            id: 4, name: 'Initial Velocity', unit: 'm/s',
+            id: 4, name: 'Initial Velocity', unit: '$m/s$',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.initialVelocity = newValue; this.setInitialVelocity(newValue, this.velocityAngle); this.resetQuestion(); },
             get: () => { return this.initialVelocity; }, displayModifier: 1,  dp: 2,
@@ -152,7 +151,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 5, name: 'Velocity Angle', unit: 'deg',
+            id: 5, name: 'Velocity Angle', unit: '$^o$',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.velocityAngle = newValue; this.setInitialVelocity(this.initialVelocity, newValue); this.resetQuestion(); },
             get: () => { return this.velocityAngle; }, displayModifier: 1,  dp: 1,
@@ -176,7 +175,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 8, name: 'Fluid Density', unit: 'kg/m3',
+            id: 8, name: 'Fluid Density', unit: '$m/s^2$',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.densityOfFluid = newValue; },
             get: () => { return this.densityOfFluid; }, displayModifier: 1, dp: 3,
@@ -184,7 +183,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             controlType: 'range', fineControl: {available: true, value: 0.005 }
         },
         {
-            id: 9, name: 'Area of Object', unit: 'm2',
+            id: 9, name: 'Area of Object', unit: '$m^2$',
             iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
             modify: newValue => { this.areaOfObject = newValue; this.objectDensity = this.mass / ( this.heightOfObject * this.areaOfObject ); },
             get: () => { return this.areaOfObject; }, displayModifier: 1, dp: 3,
@@ -296,7 +295,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
     ]
 
     get getDisplayedControls() {
-        return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
+      return this.simulationParameters.filter(simParam => simParam.control && (this.parametersDisplayed[simParam.id] === true || this.setupMode));
     }
 
     get getDisplayedIndependentProperties() {
