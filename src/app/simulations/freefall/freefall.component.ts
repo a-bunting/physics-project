@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { HttpService } from 'src/app/services/http.service';
 import { DataService } from 'src/app/services/data.service';
 import { UsersService } from 'src/app/services/users.service';
@@ -17,7 +17,7 @@ import { DirectoryService } from 'src/app/services/directory.service';
 
 export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
       // form details
-      simulationControls: FormGroup;
+      simulationControls: UntypedFormGroup;
       // imagevalues
       @ViewChild('ImageCanvas', {static: true}) canvas: ElementRef<HTMLCanvasElement>;
       ctx: CanvasRenderingContext2D; requestId;

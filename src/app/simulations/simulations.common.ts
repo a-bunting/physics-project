@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataService } from '../services/data.service';
@@ -37,8 +37,8 @@ export abstract class SimCommon implements OnInit {
 
     // setup mode
     setupMode: boolean = false; setupVariableList: Array<setupVariableItem> = [];
-    simulationSetup: FormGroup; notice_minmax: boolean = false; customUrl: string;
-    simulationControls: FormGroup;
+    simulationSetup: UntypedFormGroup; notice_minmax: boolean = false; customUrl: string;
+    simulationControls: UntypedFormGroup;
 
     // data collection module information
     abstract simulationId: string;
@@ -91,14 +91,14 @@ export abstract class SimCommon implements OnInit {
         }
     }
     setControls() {
-        this.simulationControls = new FormGroup({});
-        this.simulationSetup = new FormGroup({});
+        this.simulationControls = new UntypedFormGroup({});
+        this.simulationSetup = new UntypedFormGroup({});
 
         // for on initialisation
         this.simulationParameters.forEach(simParam => {
             if(simParam.iv === true || simParam.control === true) {
                 if(simParam.controlType === 'range') {
-                    this.simulationControls.addControl(simParam.id.toString()+"range", new FormControl(null, [Validators.required]));
+                    this.simulationControls.addControl(simParam.id.toString()+"range", new UntypedFormControl(null, [Validators.required]));
                     this.simulationControls.get(simParam.id.toString()+"range").patchValue(simParam.get() * simParam.displayModifier);
 
                     this.subscriptions.add(this.simulationControls.get(simParam.id.toString()+"range").valueChanges.subscribe(newVal => {
@@ -107,16 +107,16 @@ export abstract class SimCommon implements OnInit {
                 }
                 if(simParam.fineControl.available === true) {
                     var text = simParam.fineControl.value;
-                    this.simulationControls.addControl(simParam.id.toString()+"finer", new FormControl("+ " + text));
-                    this.simulationControls.addControl(simParam.id.toString()+"finel", new FormControl("- " + text));
+                    this.simulationControls.addControl(simParam.id.toString()+"finer", new UntypedFormControl("+ " + text));
+                    this.simulationControls.addControl(simParam.id.toString()+"finel", new UntypedFormControl("- " + text));
                 }
             }
         });
 
         this.simulationParameters.forEach(parameter => {
-            this.simulationSetup.addControl(parameter.id.toString() + "checkbox", new FormControl(null, [Validators.required]));
+            this.simulationSetup.addControl(parameter.id.toString() + "checkbox", new UntypedFormControl(null, [Validators.required]));
             if(parameter.iv === true) {
-                this.simulationSetup.addControl(parameter.id.toString() + "value", new FormControl(parameter.get(), [Validators.required]));
+                this.simulationSetup.addControl(parameter.id.toString() + "value", new UntypedFormControl(parameter.get(), [Validators.required]));
             }
         });
         this.simulationParameters.forEach(param => {

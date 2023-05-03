@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { HttpService } from 'src/app/services/http.service';
 import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
@@ -33,7 +33,7 @@ export class ProjectileMotionComponent implements OnInit{
     difficulty: number = 1;
     questionId: number;
     // form details
-    formAnswers: FormGroup;
+    formAnswers: UntypedFormGroup;
 
     private tolerance: number = 2;
     showhint: boolean = false;
@@ -175,7 +175,7 @@ export class ProjectileMotionComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this.formAnswers = new FormGroup({});
+        this.formAnswers = new UntypedFormGroup({});
         this.setNewValues();
         this.launchCanvas();
     }
@@ -195,7 +195,7 @@ export class ProjectileMotionComponent implements OnInit{
 
     loadNewQuestion(id: number) {
         this.stopAnimation();
-        this.formAnswers = new FormGroup({});
+        this.formAnswers = new UntypedFormGroup({});
         this.resetValues();
         this.setQuestion(id);
         this.launchCanvas();
@@ -222,7 +222,7 @@ export class ProjectileMotionComponent implements OnInit{
         this.calculateFromGravity(this.questionBank[i].gravity);
 
         this.questionBank[i].questions.forEach(question => {
-            this.formAnswers.addControl(question.id, new FormControl(null, [Validators.required]));
+            this.formAnswers.addControl(question.id, new UntypedFormControl(null, [Validators.required]));
         });
 
     }
@@ -512,7 +512,7 @@ export class ProjectileMotionComponent implements OnInit{
     }
     
     newQuestion() {
-        this.formAnswers = new FormGroup({});
+        this.formAnswers = new UntypedFormGroup({});
         window.cancelAnimationFrame(this.requestId);
         this.resetValues();
         this.setNewValues();

@@ -128,7 +128,6 @@
       }
     }
   },
-  "defaultProject": "Questions-Generator",
   "schematics": {
     "@schematics/angular:component": {
     }
