@@ -94,8 +94,8 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
         modify: newValue => { this.simulationSpeed = newValue; },
         get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-        default: 1, min: 0, max: 3, divisions: 0.01,
-        controlType: 'range', fineControl: {available: true, value: 0.1 }
+        default: 0.00000001, min: 0.00000001, max: 0.000001, divisions: 0.0000001,
+        controlType: 'range', fineControl: {available: false, value: null }
     },{
            id: 1, name: 'Scale', unit: 'm',
            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
@@ -209,7 +209,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
       // if initial positions are given then its coming in on an edge, so point it inwards
       if(xinit !== undefined && yinit !== undefined) {
-        if(xinit === 0) { direction = Math.random() * Math.PI; console.log(direction); }
+        if(xinit === 0) { direction = Math.random() * Math.PI; }//console.log(direction); }
         if(xinit === 1) { direction = Math.PI + Math.random() * Math.PI; }
         if(yinit === 0) { direction = (Math.random() - 0.5) * Math.PI }
         if(yinit === 1) { direction = (Math.random() + 0.5) * Math.PI; }
@@ -267,7 +267,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         }
       }
 
-      console.log(temperatureArray);
+      // console.log(temperatureArray);
       return temperatureArray;
     }
 

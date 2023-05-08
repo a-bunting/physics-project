@@ -67,7 +67,7 @@
               <!-- <button class="controls__button" (click)="dataCollection()" *ngIf="animationEnded && dataCollectionMode" [disabled]='!dataCollectionEnabled'>{{ !dataCollectionEnabled ? "Data Collected" : "Collect Data" }}</button> -->
             </div>
             <div class="controls__specific">
-            <img class="controls__buttons--image" src="../../../assets/icons/onedrive.png" alt="Toggle Atmospheric Mode" *ngIf="parametersDisplayed['ds']" (click)="infiniteModeToggle()" tooltip="{{ simulationInfinite ? 'Switch to Atmosphere Mode' : 'Switch to Infinite Mode' }}">
+            <img class="controls__buttons--image" src="../../../assets/icons/onedrive.png" alt="Toggle Atmospheric Mode" *ngIf="parametersDisplayed['ds']" (click)="infiniteModeToggle()" tooltip="{{ simulationInfinite ? 'Switch to Atmosphere Mode. Same motion, just with a picture and with atmospheric conditions auto enabled and a set height.' : 'Switch to Infinite Mode. Sandbox versions with infinite distance enabled.' }}">
             <img class="controls__buttons--image" src="../../../assets/icons/cog.png" alt="Setup Mode" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()" [tooltip]="'Enter setup mode to create your own version of this simulation'">
           </div>
         </div>

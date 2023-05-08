@@ -90,7 +90,7 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-            default: 1, min: 0, max: 3, divisions: 0.01,
+            default: 1, min: 0, max: 5, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {

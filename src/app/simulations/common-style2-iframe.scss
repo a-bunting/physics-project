@@ -75,6 +75,10 @@
         height: 2.5rem;
       }
 
+      &--orange {
+        filter: invert(58%) sepia(29%) saturate(2424%) hue-rotate(6deg) brightness(108%) contrast(110%);
+      }
+
     }
   }
 

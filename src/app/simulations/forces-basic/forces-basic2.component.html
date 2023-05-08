@@ -93,7 +93,7 @@
                   step="{{ control.divisions }}"
                   value="{{ control.displayModifier * control.get() }}">
 
-                  <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finel" type="button" class="controls__fine-button" (click)="simulationControlsParameterModification(control.id, control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
+                  <input *ngIf="control.fineControl.available" formControlName="{{ control.id }}finer" type="button" class="controls__fine-button" (click)="simulationControlsParameterModification(control.id, control.fineControl.value)" value="{{ control.fineControl.value }} {{ control.unit }}">
               </div>
               <div class="controls__variable--value--label">
                 {{ control.displayModifier * control.get() | number:'1.'+control.dp+'-'+control.dp }} {{ control.unit }}

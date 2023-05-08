@@ -70,10 +70,8 @@
             <!-- FINISH ICONS HERE -->
 
             <div class="controls__specific">
-            <button class="controls__button" (click)="enableExplosiveLock()" *ngIf="explosiveClicks">{{ !explosiveLock ? 'Enable Explosive Lock' : 'Disable Explosive Lock' }}</button>
-            <button class="controls__button" (click)="enableExplosiveClick()">{{ !explosiveClicks ? 'Enable Explosive Clicks' : 'Disable Explosive Clicks' }}</button>
-            <img class="controls__buttons--image" src="../../../assets/icons/cog.png" alt="Setup Mode" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()" [tooltip]="'Enter setup mode to create your own version of this simulation'">
-            <img class="controls__buttons--image" src="../../../assets/icons/cog.png" alt="Setup Mode" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()" [tooltip]="'Enter setup mode to create your own version of this simulation'">
+            <img class="controls__buttons--image" src="../../../assets/icons/bomb-blast-icon.png" alt="Explosive Lock Button" (click)="enableExplosiveLock()" *ngIf="explosiveClicks" tooltip="{{ explosiveLock ? 'Disable Explosive Lock' : 'Enable Explosivre Lock' }}. Explosve lock with make sure explosions always happen exactly between the two blocks, irrespective of where you click.">
+            <img class="controls__buttons--image" src="../../../assets/icons/right-click-icon.png" alt="Explosive Clicks Button" (click)="enableExplosiveClick()" tooltip="{{ explosiveClicks ? 'Disable Explosive Clicks' : 'Enable Explosive Clicks' }}. Generates an explosion {{ explosiveLock ? 'exactly between the two blocks (to make the explosion at your mouse cursors location, disable explosive lock)' : 'at the position of your cursor (to make it exactly between the two blocks enable explosive lock)'}}. This exerts a force of {{ explosiveForce }}N which can be changes in the variables list.">
             <img class="controls__buttons--image" src="../../../assets/icons/cog.png" alt="Setup Mode" *ngIf="parametersDisplayed['ds']" (click)="enableSetupMode()" [tooltip]="'Enter setup mode to create your own version of this simulation'">
           </div>
         </div>

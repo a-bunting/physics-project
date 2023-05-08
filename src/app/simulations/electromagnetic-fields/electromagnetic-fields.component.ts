@@ -6,7 +6,7 @@ import { UsersService } from 'src/app/services/users.service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { simulationDocument, SimulationsService } from 'src/app/services/simulations.service';
-import { SimCommon, simParamArray } from './../simulations.common';
+import { SimCommon } from '../simulations.common';
 import { DirectoryService } from 'src/app/services/directory.service';
 
 export interface ChargedParticle {
@@ -97,29 +97,29 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
 
     simulationParameters = [
       {
-        id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
-        iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
-        modify: newValue => { this.simulationSpeed = newValue; },
-        get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-        default: 1, min: 0, max: 3, divisions: 0.01,
-        controlType: 'range', fineControl: {available: true, value: 0.1 }
-    },{
-          id: 1, name: 'Simulation Speed', unit: '% of 1s',
+          id: 0, name: 'Resolution', unit: 'particles',
           iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
-          modify: newValue => { this.simulationSpeed = newValue; },
-          get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 5,
-          default: 0.00015, min: 0.000001, max: 0.001, divisions: 0.000001,
-          controlType: 'range', fineControl: {available: true, value: 0.00001 }
-      }, {
+          modify: newValue => { this.simulationResolution = newValue; this.generateChargeParticles(newValue); },
+          get: () => { return this.simulationResolution; }, displayModifier: 1, dp: 2,
+          default: 6500, min: 100, max: 20000, divisions: 100,
+          controlType: 'range', fineControl: {available: false, value: null }
+        },  {
+            id: 1, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
+            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
+            modify: newValue => { this.simulationSpeed = newValue; },
+            get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
+            default: 1, min: 0, max: 3, divisions: 0.01,
+            controlType: 'range', fineControl: {available: true, value: 0.1 }
+        }, {
           id: 2, name: 'Colouration', unit: '',
-          iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
+          iv: false, dv: false,control: true,  dataCollectionAppropriate: false, visible: false,
           modify: newValue => { this.greenValue = newValue; },
           get: () => { return this.greenValue; }, displayModifier: 1, dp: 0,
           default: 184, min: 0, max: 255, divisions: 1,
           controlType: 'range', fineControl: {available: true, value: 1}
       }, {
            id: 3, name: 'Scale', unit: '',
-           iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
+           iv: false, dv: false,control: true,  dataCollectionAppropriate: false, visible: false,
            modify: newValue => { this.simulationScale = newValue; },
            get: () => { return this.simulationScale; }, displayModifier: 1, dp: 6,
            default: 0.000001, min: 0.000001, max: 0.00001, divisions: 0.0000001,

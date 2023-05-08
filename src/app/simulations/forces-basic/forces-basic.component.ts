@@ -115,7 +115,7 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-            default: 1, min: 0, max: 3, divisions: 0.01,
+            default: 1, min: 0, max: 5, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
@@ -562,10 +562,12 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
         var totalVelocity = Math.abs(Math.sqrt(this.currentSpeed.x * this.currentSpeed.x + this.currentSpeed.y * this.currentSpeed.y)) * 3;
         var velArrowLen = totalVelocity > 150 ? 150 : totalVelocity;
 
-        var velocityX = halfWidth + velArrowLen * Math.cos(this.velocityAngle * (Math.PI/180));
-        var velocityY = halfHeight + velArrowLen * Math.sin(this.velocityAngle * (Math.PI/180));
+        let velocityAngle: number = this.velocityAngle * (Math.PI/180);
+
+        var velocityX = halfWidth + velArrowLen * Math.cos(velocityAngle);
+        var velocityY = halfHeight + velArrowLen * Math.sin(velocityAngle);
         this.canvas_arrow(this.ctx, halfWidth, halfHeight, velocityX, velocityY);
-        this.rotatedText(this.ctx, "v", (this.velocityAngle * (Math.PI/180)) + Math.PI, velocityX, velocityY, -10, -8);
+        this.rotatedText(this.ctx, "v", velocityAngle + Math.PI, velocityX, velocityY, -10, -8);
         this.ctx.strokeStyle = "rgb(0, 0, 0)";
         this.ctx.lineWidth = 1;
 
@@ -614,9 +616,20 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
       if(this.paused === false && this.animationStarted === true && this.animationEnded === false) {
 
          this.forceDueToGravity = this.gravity * this.mass;
-         this.forceBuoyant = this.gravity * this.densityOfFluid * this.areaOfObject * this.heightOfObject;
-         this.forceDueToDrag = 0.5 * this.densityOfFluid * this.areaOfObject * Math.sqrt(this.currentSpeed.y * this.currentSpeed.y + this.currentSpeed.x * this.currentSpeed.x) * this.dragCoefficient;
-         this.dragAngle = Math.atan2(-this.currentSpeed.y, -this.currentSpeed.x);
+
+        if(this.dragCoefficient === 0 || this.areaOfObject === 0 || this.densityOfFluid === 0) {
+          // if any of these are 0, no need to calculate buoyant force, dragforce and drag angle
+          this.forceDueToDrag = 0;
+          this.dragAngle = 0;
+          this.forceBuoyant = 0;
+          console.log(`no calc`);
+        } else {
+          // they all have a value so calculate.
+          this.forceBuoyant = this.gravity * this.densityOfFluid * this.areaOfObject * this.heightOfObject;
+          this.forceDueToDrag = 0.5 * this.densityOfFluid * this.areaOfObject * Math.sqrt(this.currentSpeed.y * this.currentSpeed.y + this.currentSpeed.x * this.currentSpeed.x) * this.dragCoefficient;
+          this.dragAngle = Math.atan2(-this.currentSpeed.y, -this.currentSpeed.x);
+        }
+
          this.velocityAngle = Math.atan2(this.currentSpeed.y, this.currentSpeed.x) * (180 / Math.PI); // stored in deg
 
          var netForces = { x: this.netForces.x + this.forceDueToDrag * Math.cos(this.dragAngle),
@@ -624,19 +637,19 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
 
          this.valueAcceleration = {x: netForces.x/this.mass, y: netForces.y/this.mass};
 
-         this.currentTime += (this.elapsedSinceFrame/1000) * this.simulationSpeed;
+         let timeRatio: number = (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
 
-         this.currentDistance.x += this.currentSpeed.x * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
-         this.currentDistance.y += this.currentSpeed.y * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
-
-         this.currentSpeed.x += this.valueAcceleration.x * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
-         this.currentSpeed.y += this.valueAcceleration.y * (this.elapsedSinceFrame / 1000) * this.simulationSpeed;
+         this.currentTime += timeRatio;
+         this.currentDistance.x += this.currentSpeed.x * timeRatio;
+         this.currentDistance.y += this.currentSpeed.y * timeRatio;
+         this.currentSpeed.x += this.valueAcceleration.x * timeRatio;
+         this.currentSpeed.y += this.valueAcceleration.y * timeRatio;
 
          this.apparentWeight = this.forceDueToGravity - this.forceDueToDrag - this.forceBuoyant;
 
-         //this.markersProgress(this.markers_x);
-         this.markersProgress(this.markers_y, 0, this.ctx.canvas.height, this.currentSpeed.y, 1, this.pixelsPerMeter.y);
-         this.markersProgress(this.markers_x, 0, this.ctx.canvas.width, this.currentSpeed.x, this.ctx.canvas.width / this.ctx.canvas.height, this.pixelsPerMeter.x);
+         // only do the marker lines if there is motion in that diretion.
+         if(Math.abs(this.currentSpeed.y) > 1e-10) { this.markersProgress(this.markers_y, 0, this.ctx.canvas.height, this.currentSpeed.y, 1, this.pixelsPerMeter.y); }
+         if(Math.abs(this.currentSpeed.x) > 1e-10) { this.markersProgress(this.markers_x, 0, this.ctx.canvas.width, this.currentSpeed.x, this.ctx.canvas.width / this.ctx.canvas.height, this.pixelsPerMeter.x); }
 
 
      }
@@ -652,17 +665,21 @@ export class ForcesBasicComponent extends SimCommon implements OnInit, OnDestroy
     }
 
     markersProgress(markers, min: number, max: number, speed: number, linesRatio: number, ppm: number) {
-        for(var i=0; i < markers.length; i++) {
-            markers[i].position = markers[i].position - speed * (this.elapsedSinceFrame / 1000) * ppm * this.simulationSpeed * (1/this.zoomValue);
+      // big calculations first
+      let ratio: number = this.linesQuantity * linesRatio  * this.zoomValue;
+      let posRatio: number =  speed * (this.elapsedSinceFrame / 1000) * ppm * this.simulationSpeed * (1/this.zoomValue);
+
+        for(var i = 0; i < markers.length; i++) {
+            markers[i].position = markers[i].position - posRatio;
             var canavsLengths = Math.abs(Math.floor(markers[i].position / max));
 
             if(markers[i].position < min) {
                 markers[i].position = canavsLengths * max - Math.abs(markers[i].position);
-                markers[i].value += canavsLengths * this.linesQuantity * linesRatio  * this.zoomValue;
+                markers[i].value += canavsLengths * ratio
             }
             if(markers[i].position > max) {
                 markers[i].position = -canavsLengths * max + Math.abs(markers[i].position);
-                markers[i].value -= canavsLengths * this.linesQuantity * linesRatio  * this.zoomValue;
+                markers[i].value -= canavsLengths * ratio
             }
         }
     }

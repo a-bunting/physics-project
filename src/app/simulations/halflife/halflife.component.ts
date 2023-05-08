@@ -159,13 +159,14 @@ export class HalflifeComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     simulationParameters: Array<simParamArray> = [
+      // spee dmultiplyer is all thats needed
           {
             id: 0, name: 'Simulation Speed', unit: '', desc: 'Modifies the speed of the simulation. Increases error in data with increased speed.',
-            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
+            iv: false, dv: false, control: false, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationSpeed = newValue; },
             get: () => { return this.simulationSpeed; }, displayModifier: 1, dp: 2,
-            default: 1, min: 0, max: 3, divisions: 0.01,
-            controlType: 'range', fineControl: {available: true, value: 0.1 }
+            default: 1, min: 1, max: 1, divisions: 0,
+            controlType: 'range', fineControl: {available: false, value: null }
         },
         {
             id: 1, name: 'Speed Multiplier', unit: 'power 10',

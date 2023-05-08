@@ -1,10 +1,10 @@
 @import '../../styles/variables';
 
 .lab-container {
-    display: grid;
-    grid-auto-rows: 1fr;
-    justify-content: center;
-    row-gap: .5rem;
+    // display: grid;
+    // grid-auto-rows: 1fr;
+    // justify-content: center;
+    // row-gap: .5rem;
 }
 
 .lab {
@@ -18,7 +18,7 @@
     &:not(:nth-child(even)) {
         margin-right: .5rem;
     }
-    margin-bottom: .5rem;
+    margin-bottom: 1rem;
 
     background-image: linear-gradient(to bottom right, lighten($color-main, 20%), $color-main);
     background-size: cover;
