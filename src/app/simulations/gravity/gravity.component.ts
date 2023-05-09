@@ -73,7 +73,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
                {name: 'Sun', mass: 333030, radius: 109.2, distance: 0, locus: { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0}, path: []},
                {name: 'Mercury', mass: 0.0553, radius: 0.3829, distance: 57900000000, locus: { x: 0, y: 0, vx: 47400, vy: 0, ax: 0, ay: 0}, path: []},
                {name: 'Venus', mass: 0.815, radius: 0.9499, distance: 108200000000, locus: { x: 0, y: 0, vx: 35000, vy: 0, ax: 0, ay: 0}, path: []},
-               {name: 'Earth', mass: 1, radius: 1, distance: 149600000000, locus: { x: 0, y: 0, vx: 29800, vy: 0, ax: 0, ay: 0}, path: []},
+               {name: 'Earth', mass: 1, radius: 1, distance: 151010000000, locus: { x: 0, y: 0, vx: 29800, vy: 0, ax: 0, ay: 0}, path: []},
                {name: 'Mars', mass: 0.1075, radius: 0.5320, distance: 227900000000, locus: { x: 0, y: 0, vx: 24100, vy: 0, ax: 0, ay: 0}, path: []},
                {name: 'Jupiter', mass: 317.8, radius: 10.97, distance: 778600000000, locus: { x: 0, y: 0, vx: 13100, vy: 0, ax: 0, ay: 0}, path: []},
                {name: 'Saturn', mass: 95.2, radius: 9.14, distance: 1433500000000, locus: { x: 0, y: 0, vx: 9700, vy: 0, ax: 0, ay: 0}, path: []},
@@ -137,15 +137,15 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: false, value: null }
         },
         {
-            id: 1, name: 'Simulation Scale', unit: 'x',
+            id: 1, name: 'Simulation Scale', unit: 'x', desc: 'Modifies the relative scale of the objects on the simulations. Not useful unless you have radically differently sized objects.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.simulationScale = newValue; },
             get: () => { return this.simulationScale; }, displayModifier: 1, dp: 2,
-            default: 2, min: 0.5, max: 4, divisions: 0.1,
+            default: 2, min: 0.5, max: 10, divisions: 0.1,
             controlType: 'range', fineControl: {available: false, value: null }
          },
          {
-            id: 2, name: 'Canvas Scale', unit: 'Mm/px',
+            id: 2, name: 'Zoom', unit: 'Mm/px', desc: 'Zoom in and out of the system.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => {this.dynamicScaleChange(newValue); },
             get: () => { return this.canvasScale; }, displayModifier: 1, dp: 0,
@@ -644,7 +644,7 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
     }
 
     setScaleParameter(id: number) {
-      var scaleParameter = this.getSimulationParameterIDFromName("Canvas Scale");
+      var scaleParameter = this.getSimulationParameterIDFromName("Zoom");
 
       this.simulationParameters[scaleParameter].min = this.gravitationalSystems[id].scalemin;
       this.simulationParameters[scaleParameter].max = this.gravitationalSystems[id].scalemax;

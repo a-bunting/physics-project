@@ -89,7 +89,7 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Resolution', unit: 'px',
+            id: 1, name: 'Resolution', unit: 'px', desc: 'Greater resoltuions create more detailed simulations but come at the cost of speed.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.granularity = newValue; this.generateHeatMap(); },
             get: () => { return this.granularity; }, displayModifier: 1, dp: 0,
@@ -98,14 +98,14 @@ export class HeatTransferComponent extends SimCommon implements OnInit, OnDestro
          },
          {
             id: 2, name: 'Scale', unit: 'm',
-            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: true,
+            iv: false, dv: false, control: false, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.canvasScale = newValue; this.pixelsPerMeter = this.ctx.canvas.height / this.canvasScale; },
             get: () => { return this.canvasScale; }, displayModifier: 1, dp: 1,
             default: 1, min: 0.1, max: 10, divisions: 0.1,
             controlType: 'range', fineControl: {available: false, value: null }
          },
          {
-            id: 3, name: 'Contrast', unit: '',
+            id: 3, name: 'Contrast', unit: '', desc: 'Change the contrast between the objects and the atmosphere.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: true,
             modify: newValue => { this.contrast = newValue; },
             get: () => { return this.contrast; }, displayModifier: 1, dp: 1,

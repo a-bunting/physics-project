@@ -97,7 +97,7 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
 
     simulationParameters = [
       {
-          id: 0, name: 'Resolution', unit: 'particles',
+          id: 0, name: 'Resolution', unit: 'particles', desc: 'Greater resoltuions create more detailed simulations but come at the cost of speed.',
           iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
           modify: newValue => { this.simulationResolution = newValue; this.generateChargeParticles(newValue); },
           get: () => { return this.simulationResolution; }, displayModifier: 1, dp: 2,
@@ -111,7 +111,7 @@ export class ElectromagneticFieldsComponent extends SimCommon implements OnInit,
             default: 1, min: 0, max: 3, divisions: 0.01,
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         }, {
-          id: 2, name: 'Colouration', unit: '',
+          id: 2, name: 'Colouration', unit: '', desc: 'Colouration between the positive and negative charges.',
           iv: false, dv: false,control: true,  dataCollectionAppropriate: false, visible: false,
           modify: newValue => { this.greenValue = newValue; },
           get: () => { return this.greenValue; }, displayModifier: 1, dp: 0,

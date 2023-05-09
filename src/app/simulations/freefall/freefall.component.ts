@@ -131,7 +131,7 @@ export class FreefallComponent extends SimCommon implements OnInit, OnDestroy {
             controlType: 'range', fineControl: {available: true, value: 0.1 }
         },
         {
-            id: 1, name: 'Scale Density', unit: 'm/div',
+            id: 1, name: 'Scale Density', unit: 'm/div', desc: 'Changes the density of the grid lines. Does not impact quality of data collection.',
             iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
             modify: newValue => { this.linesQuantity = newValue; this.infiniteBackdropCalculations(); this.recalculateSimulation(); this.resetQuestion(); },
             get: () => { return this.linesQuantity; }, displayModifier: 1, infMode: true, finMode: false, dp: 0,

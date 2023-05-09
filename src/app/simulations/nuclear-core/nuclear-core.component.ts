@@ -97,7 +97,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         default: 0.00000001, min: 0.00000001, max: 0.000001, divisions: 0.0000001,
         controlType: 'range', fineControl: {available: false, value: null }
     },{
-           id: 1, name: 'Scale', unit: 'm',
+           id: 1, name: 'Scale', unit: 'm', desc: 'The size of the viewing area. Defaulted to 10 nanometers increasing this significantly can create performance issues.',
            iv: false, dv: false, control: true, dataCollectionAppropriate: false, visible: false,
            modify: newValue => { this.simulationScale = newValue; },
            get: () => { return this.simulationScale; }, displayModifier: 1, dp: 15,
