@@ -49,6 +49,8 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
     gravity: number = 7.5; mass: number = 10;
     simulationSpeed: number = 1; forceDueToGravity: number = 0;
 
+    ropeStressMax: number; ropeRadius: number; springConstant: number;
+
     // simulation data collection setup
     parametersDisplayed = {};
     simulationDocuments: simulationDocument[] = [];
@@ -67,7 +69,8 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
         this.launchCanvas();
         this.route.queryParams.subscribe(() => { this.setQueryParameters(); }); // subscribe to parameters
 
-        this.buildRope(280, 200, 100, 20); // new method.
+        this.calculateMaximumExtension();
+        this.buildRope(280, 200, 100, 10); // new method.
         this.addBoxToRope();
         this.animate();
     }
@@ -120,6 +123,36 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
             iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
             modify: null, get: () => { return this.currentSpeed; }, displayModifier: 1, dp: 2,
             default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
+        },
+        {
+            id: 5, name: 'Rope Stress', unit: 'Pa',
+            iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
+            modify: newValue => { this.ropeStressMax = newValue; this.calculateMaximumExtension(); },
+            get: () => { return this.ropeStressMax; }, displayModifier: 1, dp: 0,
+            default: 100000000, min: 700000, max: 700000000, divisions: 10000,
+            controlType: 'range', fineControl: {available: false, value: null }
+        },
+        {
+            id: 6, name: 'Radius of Rope', unit: 'cm',
+            iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
+            modify: newValue => { this.ropeRadius = newValue; this.calculateMaximumExtension(); },
+            get: () => { return this.ropeRadius; }, displayModifier: 1, dp: 2,
+            default: 1, min: 0.01, max: 10, divisions: 0.01,
+            controlType: 'range', fineControl: {available: false, value: null }
+        },
+        {
+            id: 7, name: 'Spring Constant', unit: 'N/m',
+            iv: true, dv: false, dataCollectionAppropriate: true, visible: false,
+            modify: newValue => { this.springConstant = newValue; this.calculateMaximumExtension(); },
+            get: () => { return this.springConstant; }, displayModifier: 1, dp: 2,
+            default: 80000, min: 100, max: 100000, divisions: 100,
+            controlType: 'range', fineControl: {available: false, value: null }
+        },
+        {
+            id: 8,  name: 'Rope Max Extension', unit: 'm',
+            iv: false, dv: true,  dataCollectionAppropriate: true, visible: false,
+            modify: null, get: () => { return this.ropeMaximumExtension; }, displayModifier: 1, dp: 2,
+            default: null, min: null, max: null, divisions: null, controlType: 'none', fineControl: {available: false, value: null }
         }
     ]
 
@@ -155,11 +188,18 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
             y += 0;
             if(i > 0) {
                 var distance = this.distanceBetweenPx(this.points[i-1].x, this.points[i].x, this.points[i-1].y, this.points[i].y);
-                this.sticks.push({p0: this.points[i-1], p1: this.points[i], length: distance, hidden: false});
+                this.sticks.push({p0: this.points[i-1], p1: this.points[i], length: distance, maxLength: this.ropeMaximumExtension, hidden: false});
             }
         }
     }
 
+    ropeMaximumExtension: number;
+
+    calculateMaximumExtension(): void {
+      this.ropeMaximumExtension = ((this.ropeRadius * this.ropeRadius * 1e-4 * Math.PI) * this.ropeStressMax)/this.springConstant;
+    }
+
+    // this is fine just commenting to debug
     addBoxToRope() {
         var xStart = this.points[this.points.length-1].x;
         var yStart = this.points[this.points.length-1].y;
@@ -210,7 +250,8 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
             var dy = s.p1.y - s.p0.y;
             var distance = Math.sqrt(dx * dx + dy * dy);
             var difference = s.length - distance;
-            var percent = difference / distance / 2;
+            var percent = (difference / distance) * 0.5;
+
             var offsetX = dx * percent;
             var offsetY = dy * percent;
 
@@ -229,16 +270,20 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
         }
     }
 
+    // refine when complete
     drawSticks2() {
-        this.ctx.beginPath();
-        for(var i = 0; i < this.sticks.length; i++) {
-            var s = this.sticks[i];
-            if(!s.hidden) {
-                this.ctx.moveTo(s.p0.x, s.p0.y);
-                this.ctx.lineTo(s.p1.x, s.p1.y);
-            }
+      // this.ctx.strokeStyle = 'red';
+      for(var i = 0; i < this.sticks.length; i++) {
+        if(i === 0 || i === this.sticks.length - 1) this.ctx.strokeStyle = 'red';
+          this.ctx.beginPath();
+          var s = this.sticks[i];
+          if(!s.hidden) {
+            this.ctx.moveTo(s.p0.x, s.p0.y);
+            this.ctx.lineTo(s.p1.x, s.p1.y);
+          }
+          this.ctx.stroke();
+          this.ctx.strokeStyle = 'black';
         }
-        this.ctx.stroke();
     }
 
    distanceBetweenPx(x1: number, x2: number, y1: number, y2: number) { // returns the square of the number...
@@ -277,7 +322,7 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
         if(this.paused === false && this.animationStarted === true && this.animationEnded === false) {
             this.currentTime += (this.elapsedSinceFrame/1000)  * this.simulationSpeed;
             this.processPoints2();
-            for(var s = 10; s > 0; s--) {
+            for(var s = 2000; s > 0; s--) {
                 this.processSticks2();
             }
         }
@@ -292,8 +337,8 @@ export class CircularMotionComponent extends SimCommon implements OnInit, OnDest
          this.previousElapsedSinceFrame = 0;
          this.points = [];
          this.sticks = [];
-         this.buildRope(280, 200, 100, 20); // new method.
-         this.addBoxToRope();
+         this.buildRope(280, 200, 200, 40); // new method.
+        //  this.addBoxToRope();
 
          this.elapsed = 0;
          this.requestId = null;

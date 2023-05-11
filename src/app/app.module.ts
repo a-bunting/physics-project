@@ -70,7 +70,7 @@ const appRoutes: Routes = [
         { path: 'momentum', component: MomentumComponent},
         { path: 'circular-motion', component: CircularMotionComponent},
         { path: 'gravity', component: GravityComponent},
-        { path: 'heat-transfer', component: HeatTransferComponent}
+        { path: 'heat-transfer', component: HeatTransferComponent},
     ]},
       { path: 'display-all-feedback', component: DisplayAllFeedbackComponent},
       { path: 'search/:searchTags', component: SearchComponent}

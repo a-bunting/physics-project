@@ -247,7 +247,8 @@ export class GravityComponent extends SimCommon implements OnInit, OnDestroy {
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
 
         // draw a background
-        this.ctx.fillStyle = '#6599FF';
+        // this.ctx.fillStyle = '#6599FF';
+        this.ctx.fillStyle = '#000000';
         this.ctx.fillRect(0,0,this.ctx.canvas.width, this.ctx.canvas.height);
 
         // draw our gravitational objects
