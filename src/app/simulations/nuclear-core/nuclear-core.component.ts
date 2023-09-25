@@ -209,6 +209,7 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
       // if initial positions are given then its coming in on an edge, so point it inwards
       if(xinit !== undefined && yinit !== undefined) {
+<<<<<<< Updated upstream
         if(xinit === 0) { direction = Math.random() * Math.PI; }//console.log(direction); }
         if(xinit === 1) { direction = Math.PI + Math.random() * Math.PI; }
         if(yinit === 0) { direction = (Math.random() - 0.5) * Math.PI }
@@ -217,14 +218,23 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
         // if(xinit === 1) { direction = -1 * (Math.random() - 0.5) * Math.PI; }
         // if(yinit === 0) { direction = Math.random() * Math.PI; }
         // if(yinit === 1) { direction = -Math.random() * Math.PI; }
+=======
+        if(xinit === 0) { direction = Math.random() * Math.PI; }
+        if(xinit === 1) { direction = Math.PI * (1 + Math.random()); }
+        if(yinit === 1) { direction = (Math.random() - 0.5) * Math.PI }
+        if(yinit === 0) { direction = (Math.random() + 0.5) * Math.PI; }
+>>>>>>> Stashed changes
       } else {
         direction = Math.random() * 2 * Math.PI;
       }
 
       const vx: number =  v * Math.cos(direction);
       const vy: number =  v * Math.sin(direction);
-      let x: number = xinit ?? Math.random();
-      let y: number = yinit ?? Math.random();
+
+      console.log(xinit, vx);
+
+      let x: number = xinit === 0 ? 0.01 : xinit === 1 ? 0.99 : Math.random();
+      let y: number = yinit === 0 ? 0.01 : yinit === 1 ? 0.99 : Math.random();
 
       const newParticle: ChargedParticle = { x, y, vx, vy, ax:  0, ay: 0, angle: direction, temperature: temp, charge: 1 };
       this.charges.push(newParticle);
