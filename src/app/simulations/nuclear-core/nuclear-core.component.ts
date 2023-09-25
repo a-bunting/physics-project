@@ -209,21 +209,10 @@ export class NuclearCoreComponent extends SimCommon implements OnInit, OnDestroy
 
       // if initial positions are given then its coming in on an edge, so point it inwards
       if(xinit !== undefined && yinit !== undefined) {
-<<<<<<< Updated upstream
-        if(xinit === 0) { direction = Math.random() * Math.PI; }//console.log(direction); }
-        if(xinit === 1) { direction = Math.PI + Math.random() * Math.PI; }
-        if(yinit === 0) { direction = (Math.random() - 0.5) * Math.PI }
-        if(yinit === 1) { direction = (Math.random() + 0.5) * Math.PI; }
-        // if(xinit === 0) { direction = (Math.random() - 0.5) * Math.PI; }
-        // if(xinit === 1) { direction = -1 * (Math.random() - 0.5) * Math.PI; }
-        // if(yinit === 0) { direction = Math.random() * Math.PI; }
-        // if(yinit === 1) { direction = -Math.random() * Math.PI; }
-=======
         if(xinit === 0) { direction = Math.random() * Math.PI; }
         if(xinit === 1) { direction = Math.PI * (1 + Math.random()); }
         if(yinit === 1) { direction = (Math.random() - 0.5) * Math.PI }
         if(yinit === 0) { direction = (Math.random() + 0.5) * Math.PI; }
->>>>>>> Stashed changes
       } else {
         direction = Math.random() * 2 * Math.PI;
       }
